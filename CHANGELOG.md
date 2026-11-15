@@ -61,6 +61,7 @@ The first public release is planned as **0.1.0 (public beta)**. It includes ever
 - **Touch players saw keyboard keys in the tutorial and hints,** and the skill-move lesson had no touch button. Instructions now name only controls your device has, and the skill lesson is left out on touch.
 - **Most players looked bald.** Only one of the hairstyles was ever loaded, and the others were bound to the wrong bones, standing at the centre spot. Every hairstyle now appears, including a short cut modelled for the women's body.
 - **Robotic celebration arms.** Arms used to lock straight towards points out of reach. Gestures now bend the elbows, blend in and out, involve the torso and head, and pump or clap in a natural rhythm (still under reduce motion).
+- **White glare at the sides of the stadium in daylight.** The physically based sky drew near-white haze at and below the horizon, visible through the gaps between stands, and bright enough to bloom. The sky is now capped below the bloom threshold, and a hazy landscape replaces the haze below the horizon.
 - **Glare and washed-out lighting.** Night advertising boards glowed with halos and daytime views had a milky veil, because bloom caught everything brighter than nearly-white. Only lamps and floodlight flares glow now, boards are dimmer, and daytime flares are gone.
 - **Blurry player names.** The name above the controlled player is now sharp HTML text instead of a glowing, upscaled sprite.
 - You could walk or run with the ball before taking a throw-in (and dribble at other restarts).

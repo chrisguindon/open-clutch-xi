@@ -59,18 +59,36 @@ const SUN: Record<TimeOfDay, { elevation: number; azimuth: number }> = {
 };
 
 /**
- * The Sky addon outputs physical radiance meant for a much lower exposure; scale it to our tone-mapping
- * range and cap the sun's glow so bloom doesn't wash out the frame when the camera faces it.
+ * The Sky addon outputs physical radiance meant for a much lower exposure: scale it into our tone-mapping
+ * range (`gain`) and soft-cap its brightness (`cap`, in HDR units where white is 1.0).
+ *
+ * Optionally (`ground`), replace what the sky draws *below* the horizon with a muted distant-landscape
+ * colour. The addon renders bright, almost white haze there and at the horizon. Wherever the camera saw
+ * past the stands (the corner gaps, the outer edges in wide shots), that haze showed as large washed-out
+ * white areas in daylight, and, being far above the bloom threshold, it glowed too. Capping the visible
+ * sky just under the bloom threshold keeps it a bright blue instead of a white glare.
  */
-function tameSky(sky: Sky, gain: number, cap: number): void {
+function tameSky(sky: Sky, gain: number, cap: number, ground?: THREE.Color): void {
   const m = sky.material as THREE.ShaderMaterial;
+  const g = ground ? `vec3(${ground.r.toFixed(3)}, ${ground.g.toFixed(3)}, ${ground.b.toFixed(3)})` : '';
   m.fragmentShader = m.fragmentShader.replace(
     'gl_FragColor = vec4( texColor, 1.0 );',
-    `texColor *= ${gain.toFixed(3)}; texColor = texColor / (1.0 + max(max(texColor.r, texColor.g), texColor.b) / ${cap.toFixed(2)});
+    `texColor *= ${gain.toFixed(3)};
+     ${ground ? `texColor = mix(texColor, ${g}, smoothstep(0.03, -0.05, direction.y));` : ''}
+     texColor = texColor / (1.0 + max(max(texColor.r, texColor.g), texColor.b) / ${cap.toFixed(2)});
      gl_FragColor = vec4( texColor, 1.0 );`,
   );
   m.needsUpdate = true;
 }
+
+/** Brightest the visible sky may get (HDR, white = 1.0): kept under BLOOM_THRESHOLD so the sky never glows. */
+export const SKY_CAP: Record<'day' | 'dusk', number> = { day: 1.3, dusk: 1.0 };
+
+/** Distant surroundings seen past the stands (linear HDR): hazy green land by day, dark at dusk. */
+const SKY_GROUND: Record<'day' | 'dusk', THREE.Color> = {
+  day: new THREE.Color(0.11, 0.14, 0.1),
+  dusk: new THREE.Color(0.05, 0.045, 0.05),
+};
 
 /**
  * Build the lighting environment for a time of day: sky, sun or key-floodlight direction and an
@@ -124,7 +142,8 @@ export function buildEnvironment(renderer: THREE.WebGLRenderer, tod: TimeOfDay, 
     const sun = SUN[tod];
     keyDir.setFromSphericalCoords(1, THREE.MathUtils.degToRad(90 - sun.elevation), THREE.MathUtils.degToRad(sun.azimuth));
     u.sunPosition.value.copy(keyDir);
-    tameSky(s, tod === 'day' ? 0.6 : 0.45, tod === 'day' ? 6 : 3);
+    // Visible sky: capped below BLOOM_THRESHOLD (1.6) so it never glows; land below the horizon.
+    tameSky(s, tod === 'day' ? 0.6 : 0.45, SKY_CAP[tod], SKY_GROUND[tod]);
     sky = s;
     // Environment: the same sky plus a green ground plane for bounce light.
     const envSky = new Sky();

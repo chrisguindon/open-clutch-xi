@@ -34,7 +34,7 @@ The scene is rendered in **high dynamic range** (values above 1.0 allowed) into 
 - **Tone mapping** (ACES) squeezes the high range into what a screen can show.
 - **Colour grading** gives each time of day its look.
 
-Order matters. Bloom runs *before* tone mapping, on HDR values, where a sunlit pitch and lit advertising boards are well above 1.0. So the threshold must be above white (1.6 here), or everything bright glows and the picture looks washed out. Text that must stay crisp, such as the player name, isn't drawn in the 3D scene at all: it's HTML on top.
+Order matters. Bloom runs *before* tone mapping, on HDR values, where a sunlit pitch and lit advertising boards are well above 1.0. So the threshold must be above white (1.6 here), or everything bright glows and the picture looks washed out. The same goes for the sky: Three.js's physically based sky is very bright at and below the horizon, so `tameSky` in `environment.ts` caps it under the threshold (`SKY_CAP`) and draws a hazy landscape below the horizon. Otherwise every gap between the stands shows a white glare. Text that must stay crisp, such as the player name, isn't drawn in the 3D scene at all: it's HTML on top.
 
 ## Drawing a lot, cheaply
 
