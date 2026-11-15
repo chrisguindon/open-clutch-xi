@@ -96,7 +96,10 @@ describe.skipIf(process.platform === 'win32')('release tool end to end (local co
         join(work, 'CHANGELOG.md'),
         `# Changelog\n\n## [Unreleased]\n\n### Added\n\n- Something new.\n\n[Unreleased]: https://github.com/chrisguindon/open-clutch-xi/commits/main\n`,
       );
-      writeFileSync(join(work, 'docs/releases/v9.9.9.md'), '# Open Clutch XI 9.9.9: draft release notes\n\n> **Draft.** Not released yet.\n\nThe notes.\n');
+      writeFileSync(
+        join(work, 'docs/releases/v9.9.9.md'),
+        '# Open Clutch XI 9.9.9: draft release notes\n\n> **Draft.** Not released yet.\n\nThe notes. See the [README](../../README.md) and [known issues](../development/known-issues.md#presentation).\n',
+      );
       run('git', ['init', '-q', '-b', 'main']);
       run('git', ['config', 'user.name', 'Release Test']);
       run('git', ['config', 'user.email', 'release-test@localhost']);
@@ -162,6 +165,12 @@ describe.skipIf(process.platform === 'win32')('release tool end to end (local co
       }
       const sha = readFileSync(join(work, 'release/SHA256SUMS'), 'utf8').match(/^([0-9a-f]{64}) {2}open-clutch-xi-v9\.9\.9-web\.tar\.gz$/m)![1];
       expect(pub.stdout).toContain(`"sha256": "${sha}"`);
+      // The published notes link to the files at the tag, not relative paths (broken on the release page).
+      expect(log).toContain('--notes-file release/release-notes-v9.9.9.md');
+      const published = readFileSync(join(work, 'release/release-notes-v9.9.9.md'), 'utf8');
+      expect(published).toContain('(https://github.com/chrisguindon/open-clutch-xi/blob/v9.9.9/README.md)');
+      expect(published).toContain('(https://github.com/chrisguindon/open-clutch-xi/blob/v9.9.9/docs/development/known-issues.md#presentation)');
+      expect(published).not.toMatch(/\]\(\.\.\//);
       expect(log).not.toMatch(/--draft=false/); // --yes never publishes: that stays a human decision
 
       // Publishing the same version again is refused.
