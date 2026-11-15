@@ -25,6 +25,10 @@ The player you control has a ring at their feet, and the player card in the corn
 
 On a big screen with a mouse or keyboard, their name also stays above them. On touch screens and small windows (shorter side under 500 px) it appears only briefly, for 1.6 s when you switch players or play restarts, then fades. On a phone a player is only about a dozen pixels wide, while a name is about a hundred: a permanent name hid the players further up the pitch and repeated the card. The rule is in `src/ui/playerLabel.ts`, and `npm run check:mobile-hud` checks it in phone, tablet and desktop layouts.
 
+## Phones: landscape only
+
+Phones play in landscape. Held upright, a phone shows a full-screen *Turn your phone sideways* screen that covers the game and blocks it. A match in progress pauses, and carries on by itself when you turn the phone back, unless you had paused it yourself. Tablets have room to play upright and are never blocked. Neither are desktop windows, whatever their shape. The rules are in `src/ui/orientation.ts`, and `npm run check:orientation` checks them in a browser.
+
 ## Customisation
 - **Keyboard** and **keyboard & mouse** are separate layouts. Keys are bound by physical position, so WASD stays put on AZERTY and QWERTZ keyboards.
 - **Mouse buttons** (`Mouse0`–`Mouse4`) bind like keys and act only on the pitch, never on menus. The right-click menu and middle-click autoscroll are suppressed there. The middle button is never the only way to do something.

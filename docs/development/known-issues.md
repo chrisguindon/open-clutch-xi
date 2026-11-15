@@ -23,7 +23,12 @@
 Found while improving player visibility on phones; worth tracking as issues:
 - **Camera framing ignores the touch buttons.** The camera centres the play, while the touch buttons take the bottom-right corner. When play moves into that corner, the buttons can sit over players. Biasing the framing up and left on touch layouts would help.
 - **The scoreboard is wide on small phones.** It takes over half the width of a 667 px landscape screen. A compact touch version (team codes and score only) would free space.
-- **Portrait isn't supported on phones.** The game asks you to rotate. A portrait layout would need a different camera and HUD.
+- **Portrait isn't supported on phones.** A full-screen rotate screen blocks play and pauses a match until the phone is turned sideways. A portrait layout would need a different camera and HUD.
+- **Rotation is checked in emulation only.** Real phones still need checking:
+  - iOS Safari, including versions without `screen.orientation`, where the game falls back to the window's shape;
+  - Android Chrome with gesture navigation;
+  - an orientation lock;
+  - split-screen and foldable phones.
 - **Safe areas:** the HUD now keeps clear of notches and rounded corners via `env(safe-area-inset-*)`, but browser emulation can't produce real insets, so this is unverified on devices with a notch.
 
 ## Platforms and verification
