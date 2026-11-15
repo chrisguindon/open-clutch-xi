@@ -78,7 +78,7 @@ Use the **Bug report** form. You don't need to know the cause. Tell us:
    - documentation links
    - GitHub configuration
 
-   `npm run format` fixes formatting. Browser checks (`npm run test:browser`, `check:controls` and others) need Chrome or Chromium; set `CHROME_PATH` if it isn't found.
+   `npm run format` fixes formatting. Browser checks (`npm run test:browser`, `check:controls` and others) need a browser: run `npm run browsers:install` once (a pinned Chrome for Testing in `.cache/browsers/`), or set `CHROME_PATH` to an installed Chrome or Chromium.
 6. **Update docs.** Docs are organised by subject in [docs/](docs/README.md). Update the page that describes the behaviour you changed. For football rules that's [the rules matrix](docs/gameplay/FOOTBALL_RULES.md); significant architecture choices get a short [ADR](docs/architecture/decisions/README.md). Add a line under *Unreleased* in [CHANGELOG.md](CHANGELOG.md) for anything players would notice.
 7. **Open a pull request.** The template guides you. Describe how you verified the change. If something could only be checked in emulation (touch, controllers, slow devices), say so.
 

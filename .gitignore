@@ -56,3 +56,6 @@ release
 
 # Personal Claude Code settings (the shared project settings in .claude/settings.json are committed)
 .claude/settings.local.json
+
+# Project-local tools downloaded on demand (the pinned browser for the browser checks: npm run browsers:install)
+.cache/

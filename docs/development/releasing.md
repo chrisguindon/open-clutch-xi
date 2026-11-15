@@ -37,6 +37,7 @@ The release tool (`scripts/release.mjs`) automates the checklist below. It fits 
 
 **Before you start:**
 - `gh auth login` once (the [GitHub CLI](https://cli.github.com/));
+- a browser for the browser checks: `npm run browsers:install` once (see [testing](testing.md));
 - on an up-to-date, clean `main`;
 - with the release notes written in `docs/releases/v<version>.md` (copy the previous ones; a "Draft" notice at the top is removed for you);
 - with the changes listed under *Unreleased* in `CHANGELOG.md`.
@@ -51,11 +52,11 @@ make release-publish VERSION=0.2.0     # step 2
 
 | Step | What it does |
 |---|---|
-| `release-prepare` | Checks the repository (on `main`, clean, in sync with GitHub, tag free, notes exist). Sets the version in `package.json` and `package-lock.json`, moves *Unreleased* in the changelog under `[0.2.0] - <today>` with compare links, and finalises the release notes. Runs `npm run release:check` (stops if it fails, leaving the changes for you to fix). Commits `chore(release): 0.2.0` on `release/v0.2.0`, then **asks**, pushes it and opens a pull request. |
+| `release-prepare` | Checks the repository (on `main`, clean, in sync with GitHub, tag free, notes exist, a browser available). Prepares the release files **in a temporary copy**: the version in `package.json` and `package-lock.json`, *Unreleased* moved under `[0.2.0] - <today>` with compare links, and the final release notes. Runs the full release check on that copy. Only if it passes does it write those exact files into your working tree and commit `chore(release): 0.2.0` on `release/v0.2.0`. Then it **asks**, pushes and opens a pull request. If anything fails, your working tree is unchanged and no branch is created. |
 | `release-publish` | Checks `main` is the merged release (version, dated changelog section, final notes). **Asks**, then creates and pushes the annotated tag `v0.2.0`. Builds the artefacts from the tag and verifies them (checksums, and a manifest naming the tagged, clean commit). Creates a **draft** GitHub release with the web archive, source archive, `SHA256SUMS` and SBOM. **Asks** whether to publish it now. Prints the `release.json` lines for sites that host the game. |
 
 **Options:**
-- `DRY_RUN=1` shows every step and changes nothing.
+- `DRY_RUN=1` runs everything a real `release-prepare` runs, including the full release check on the prepared files, then stops before writing, committing, pushing or opening the pull request. A passing dry run means the real run will pass validation. What it can't prove: that GitHub accepts the push and the pull request (it checks that you're logged in, and warns if not), and that nothing changes on `main` or in your environment between the two runs. For `release-publish`, a dry run checks the preconditions and lists the steps; the build and upload only happen for real.
 - `YES=1` answers the questions before pushing and tagging, but never publishes the release: publishing always needs a human, on GitHub or at the prompt.
 - Without `make`: `npm run release -- prepare 0.2.0` and `npm run release -- publish 0.2.0`.
 

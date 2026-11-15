@@ -35,7 +35,18 @@ Use `npm test` for the tests alone.
 | `npm run check:mobile` | Phone emulation |
 | `npm run check:prod` | The production build and CSP |
 
-They need Chrome, Chromium or Edge (`CHROME_PATH` overrides the location).
+They need a browser. The browser is chosen in this order (`scripts/lib/chrome.mjs`):
+1. `CHROME_PATH`, if set;
+2. the project's pinned **Chrome for Testing**;
+3. an installed Chrome, Chromium or Edge.
+
+The reproducible option is the pinned browser:
+
+```bash
+npm run browsers:install   # once: downloads Chrome for Testing into .cache/browsers/ (ignored by Git)
+```
+
+It's the exact build the locked `puppeteer-core` version is made for, the same in every environment, and nothing is installed system-wide. Run it again after updating `puppeteer-core`; it picks up the new build. On a minimal Linux system Chrome may also need shared libraries (on Debian or Ubuntu, for example `libnss3` and `libgbm1`); install them with your package manager. `npm run release:check` locates the browser before it starts and fails at once, with these instructions, if there is none.
 
 ## Determinism and noise
 

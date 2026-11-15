@@ -14,22 +14,27 @@
 //   node scripts/release.mjs prepare 0.2.0    (make release-prepare VERSION=0.2.0)
 //   node scripts/release.mjs publish 0.2.0    (make release-publish VERSION=0.2.0)
 //
-// prepare: checks the repository; sets the version; moves the changelog's Unreleased section under the
-//   new version; finalises docs/releases/v<version>.md; runs the full release check; commits on a
-//   release/v<version> branch; pushes it and opens a pull request ("chore(release): <version>").
+// prepare: checks the repository (and that a browser is available for the browser checks); prepares the
+//   release files in a temporary copy (version, the changelog's Unreleased section moved under the new
+//   version, final docs/releases/v<version>.md) and runs the full release check on that copy. Only if it
+//   passes does it write those exact files into the working tree, commit on a release/v<version>
+//   branch, push it and open a pull request ("chore(release): <version>"). A failure changes nothing.
+//   A dry run does everything up to and including the release check, then stops before writing.
 // publish (after that pull request is merged): checks main is the merged release; creates and pushes the
 //   annotated tag; builds the reproducible artefacts from the tag; creates a draft GitHub release with
 //   them; offers to publish it; prints the release.json lines for a site that hosts the game.
 //
-// Options: --dry-run (show every step, change nothing), --yes (don't ask before each remote or
+// Options: --dry-run (run every check, including the full release check, but change nothing), --yes (don't ask before each remote or
 // irreversible step), --skip-check (prepare without the full release check; not recommended).
 // It never force-pushes, never moves or deletes a tag, and stops at the first problem.
 // Needs: git, npm, and the GitHub CLI (gh) logged in (`gh auth login`).
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
+import { NO_BROWSER_HELP, locateChrome } from './lib/chrome.mjs';
 import { compareVersions, finaliseNotes, isDraftNotes, parseVersion, releaseJsonSnippet, rollChangelog } from './lib/release-lib.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
@@ -88,7 +93,10 @@ function requireVersion() {
 function preflight({ wantVersionAtLeast = true, resumeTagAtHead = false } = {}) {
   step('Checking the repository');
   if (!sh('gh', ['--version'], { allowFail: true }).ok) fail('the GitHub CLI (gh) is needed: https://cli.github.com/');
-  if (!dryRun && !sh('gh', ['auth', 'status'], { allowFail: true }).ok) fail('log in to GitHub first: gh auth login');
+  if (!sh('gh', ['auth', 'status'], { allowFail: true }).ok) {
+    if (dryRun) console.log('! gh is not logged in (gh auth login): the real run would stop here, before changing anything.');
+    else fail('log in to GitHub first: gh auth login');
+  }
   if (!repoUrl.startsWith('https://github.com/')) fail('package.json has no GitHub repository URL');
   if (!sh('git', ['remote', 'get-url', 'origin'], { allowFail: true }).ok)
     fail('this repository has no "origin" remote (see docs/development/github-setup.md)');
@@ -96,7 +104,13 @@ function preflight({ wantVersionAtLeast = true, resumeTagAtHead = false } = {}) 
   if (branch !== 'main') fail(`switch to main first (you're on ${branch})`);
   if (git('status', '--porcelain')) fail('commit or stash your changes first: the working tree must be clean');
   sh('git', ['fetch', '--quiet', '--tags', 'origin']);
-  if (git('rev-parse', 'HEAD') !== git('rev-parse', 'origin/main')) fail('main differs from origin/main: pull (or push) first');
+  const [behind, ahead] = git('rev-list', '--left-right', '--count', 'origin/main...HEAD').split(/\s+/).map(Number);
+  if (behind > 0) fail(`main is ${behind} commit(s) behind origin/main${ahead ? ` and ${ahead} ahead` : ''}: pull first`);
+  if (ahead > 0) {
+    // Unpushed commits are a normal state before a release; a dry run checks them, a real run needs them on GitHub.
+    if (dryRun) console.log(`! main has ${ahead} commit(s) not yet on GitHub: the real run needs them pushed first (git push).`);
+    else fail(`main has ${ahead} commit(s) not yet on GitHub: push them first, so the release branch and tag build on what GitHub has`);
+  }
   const localTag = sh('git', ['rev-parse', '-q', '--verify', `refs/tags/v${version}^{commit}`], { allowFail: true });
   const remoteTag = sh('git', ['ls-remote', '--exit-code', '--tags', 'origin', `refs/tags/v${version}`], { allowFail: true }).ok;
   if (localTag.ok || remoteTag) {
@@ -113,6 +127,33 @@ function preflight({ wantVersionAtLeast = true, resumeTagAtHead = false } = {}) 
   return false;
 }
 
+/**
+ * Prepares the release files in a temporary copy of the working tree, so nothing in the real working
+ * tree changes until they are validated. Returns the copy's path and the formatted contents to write.
+ */
+function prepareCopy(date) {
+  const tmp = mkdtempSync(join(tmpdir(), 'open-clutch-xi-release-'));
+  const files = git('ls-files', '--cached', '--others', '--exclude-standard').split('\n').filter(Boolean);
+  for (const f of files) if (existsSync(join(root, f))) cpSync(join(root, f), join(tmp, f), { recursive: true });
+  // The same edits the release commit will contain.
+  const notesRel = join('docs', 'releases', `v${version}.md`);
+  writeFileSync(join(tmp, 'CHANGELOG.md'), rollChangelog(readFileSync(join(root, 'CHANGELOG.md'), 'utf8'), version, date, repoUrl));
+  writeFileSync(join(tmp, notesRel), finaliseNotes(readFileSync(join(root, notesRel), 'utf8')));
+  for (const f of ['package.json', 'package-lock.json']) {
+    const json = JSON.parse(readFileSync(join(root, f), 'utf8'));
+    json.version = version;
+    if (f === 'package-lock.json' && json.packages?.['']) json.packages[''].version = version;
+    writeFileSync(join(tmp, f), JSON.stringify(json, null, 2) + '\n');
+  }
+  // Format exactly as the project's checks expect (using this repository's tools and the copy's config).
+  const prettier = join(root, 'node_modules', '.bin', process.platform === 'win32' ? 'prettier.cmd' : 'prettier');
+  const r = spawnSync(prettier, ['--write', 'CHANGELOG.md', notesRel, 'package.json'], { cwd: tmp, encoding: 'utf8', shell: process.platform === 'win32' });
+  if (r.status !== 0) fail(`formatting the release files failed:\n${r.stderr}`);
+  spawnSync('git', ['init', '-q'], { cwd: tmp }); // release:check lists the copy's files with git
+  const changed = ['package.json', 'package-lock.json', 'CHANGELOG.md', notesRel];
+  return { tmp, changed, contents: new Map(changed.map((f) => [f, readFileSync(join(tmp, f))])) };
+}
+
 async function prepare() {
   requireVersion();
   preflight();
@@ -120,45 +161,44 @@ async function prepare() {
   if (!existsSync(notesPath)) fail(`write the release notes first: docs/releases/v${version}.md (copy an earlier one)`);
   const branch = `release/v${version}`;
   if (sh('git', ['rev-parse', '-q', '--verify', `refs/heads/${branch}`], { allowFail: true }).ok) fail(`branch ${branch} already exists`);
+  if (!skipCheck && !locateChrome()) fail(`${NO_BROWSER_HELP}\n  Nothing was changed.`);
 
-  step(`Preparing ${version} (local changes only)`);
+  // The same steps run in a dry run and a real run, up to and including the full release check: only
+  // writing the validated files into the working tree, committing, pushing and the pull request differ.
+  step(`Preparing ${version} in a temporary copy (your working tree is not touched yet)`);
   const date = new Date().toISOString().slice(0, 10);
-  const changelog = rollChangelog(readFileSync(join(root, 'CHANGELOG.md'), 'utf8'), version, date, repoUrl);
-  const notes = finaliseNotes(readFileSync(notesPath, 'utf8'));
-  if (dryRun) {
-    console.log(`  (dry run) set the version to ${version} in package.json and package-lock.json`);
-    console.log(`  (dry run) CHANGELOG.md: Unreleased → [${version}] - ${date}`);
-    console.log(`  (dry run) docs/releases/v${version}.md: draft notice removed`);
-  } else {
-    if (pkg().version !== version) sh(npm, ['version', version, '--no-git-tag-version', '--allow-same-version']);
-    writeFileSync(join(root, 'CHANGELOG.md'), changelog);
-    writeFileSync(notesPath, notes);
-    sh(npm, ['exec', '--', 'prettier', '--write', 'CHANGELOG.md', `docs/releases/v${version}.md`, 'package.json']);
-  }
-  ok('version, changelog and release notes updated');
-
-  if (skipCheck) console.log('\n! Skipping the release check (--skip-check).');
+  const prepared = prepareCopy(date);
+  ok(`version ${version}, changelog [${version}] - ${date}, final release notes`);
+  let passed = true;
+  if (skipCheck) console.log('\n! Skipping the release check (--skip-check): the release files are not validated.');
   else {
-    step('Running the full release check (clean copy, every check, browser flows, reproducible artefacts)');
-    if (!dryRun && !sh(npm, ['run', 'release:check'], { inherit: true, allowFail: true }).ok) {
-      fail('the release check failed. Your changes are left in the working tree: fix the problem, or undo them with `git checkout -- .`');
-    }
-    ok('release check passed');
+    step('Running the full release check on the prepared files (clean copy, every check, browser flows, reproducible artefacts)');
+    passed = sh('node', ['scripts/release-check.mjs', '--from', prepared.tmp], { inherit: true, allowFail: true }).ok;
   }
+  rmSync(prepared.tmp, { recursive: true, force: true });
+  if (!passed) fail('the release check failed. Nothing in your working tree was changed and no branch was created: fix the problem and run this again.');
+  if (!skipCheck) ok('release check passed on the prepared release');
 
-  step(`Committing on ${branch}`);
+  step(`Writing the validated files and committing on ${branch}`);
+  if (dryRun) for (const f of prepared.changed) console.log(`  (dry run) would write ${f} (validated above)`);
   act('git', ['switch', '-c', branch]);
-  act('git', ['add', 'package.json', 'package-lock.json', 'CHANGELOG.md', `docs/releases/v${version}.md`]);
+  if (!dryRun) for (const [f, data] of prepared.contents) writeFileSync(join(root, f), data);
+  act('git', ['add', ...prepared.changed]);
   act('git', ['commit', '-m', `chore(release): ${version}`]);
   ok(`committed "chore(release): ${version}"`);
 
   await confirm(`Push ${branch} to GitHub and open a pull request?`);
   act('git', ['push', '-u', 'origin', branch]);
-  const body = `Release ${version}.\n\n- Version set to ${version}\n- CHANGELOG.md: Unreleased moved under [${version}] - ${date}\n- Release notes: docs/releases/v${version}.md\n\nThe release check passed locally${skipCheck ? ' (skipped)' : ''}. After merging (squash), run:\n\n    make release-publish VERSION=${version}\n`;
+  const body = `Release ${version}.\n\n- Version set to ${version}\n- CHANGELOG.md: Unreleased moved under [${version}] - ${date}\n- Release notes: docs/releases/v${version}.md\n\nThe release check passed locally on exactly these files${skipCheck ? ' (skipped)' : ''}. After merging (squash), run:\n\n    make release-publish VERSION=${version}\n`;
   act('gh', ['pr', 'create', '--base', 'main', '--head', branch, '--title', `chore(release): ${version}`, '--body', body]);
-  console.log(
-    `\nNext: review and squash-merge the pull request, then run on an up-to-date main:\n  git switch main && git pull\n  make release-publish VERSION=${version}`,
-  );
+  if (dryRun)
+    console.log(
+      `\nDry run complete: the prepared release passed${skipCheck ? ' (validation skipped)' : ' the full release check'}, and nothing was changed.\nRun without DRY_RUN=1 to write the same files, commit, push and open the pull request.`,
+    );
+  else
+    console.log(
+      `\nNext: review and squash-merge the pull request, then run on an up-to-date main:\n  git switch main && git pull\n  make release-publish VERSION=${version}`,
+    );
 }
 
 async function publish() {

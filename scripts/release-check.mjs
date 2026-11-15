@@ -12,6 +12,9 @@
 //   npm run release:check              validate the working tree in a clean copy (fresh `npm ci`)
 //   npm run release:check -- --here    validate in place (faster; uses the existing node_modules)
 //   npm run release:check -- --no-browser   skip the headless-browser checks
+//   node scripts/release-check.mjs --from <dir>   validate the files in <dir> instead of this working
+//                                     tree (used by scripts/release.mjs to check a prepared release
+//                                     before touching the working tree)
 //
 // Steps:
 //   1. version consistency
@@ -26,11 +29,35 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { NO_BROWSER_HELP, locateChrome } from './lib/chrome.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
 const args = process.argv.slice(2);
 const here = args.includes('--here');
 const browser = !args.includes('--no-browser');
+const fromIdx = args.indexOf('--from');
+// Where the files to validate come from: this working tree, or a prepared copy.
+const source = fromIdx >= 0 ? args[fromIdx + 1] : root;
+if (fromIdx >= 0 && (!source || !existsSync(join(source, 'package.json')))) {
+  console.error('usage: node scripts/release-check.mjs --from <directory with the files to validate>');
+  process.exit(2);
+}
+if (fromIdx >= 0 && here) {
+  console.error('--from and --here cannot be combined');
+  process.exit(2);
+}
+// The browser checks run inside the clean copy, which has no .cache/browsers/: find the browser here,
+// once, and hand it to every step. Stop now, not after the install and tests, if there is none.
+if (browser) {
+  const chrome = locateChrome();
+  if (!chrome) {
+    console.error(`✗ ${NO_BROWSER_HELP}
+  (Or skip the browser checks with --no-browser, which is not enough for a release.)`);
+    process.exit(2);
+  }
+  process.env.CHROME_PATH = chrome;
+  console.log(`Browser for the browser checks: ${chrome}`);
+}
 const failures = [];
 const step = (name, fn) => {
   process.stdout.write(`\n▶ ${name}\n`);
@@ -49,16 +76,16 @@ const run = (cmd, argv, cwd) => {
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 // 1. One authoritative version: package.json. Everything else must agree.
-const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+const pkg = JSON.parse(readFileSync(join(source, 'package.json'), 'utf8'));
 const v = pkg.version;
 step(`version ${v} is consistent`, () => {
-  const lock = JSON.parse(readFileSync(join(root, 'package-lock.json'), 'utf8'));
+  const lock = JSON.parse(readFileSync(join(source, 'package-lock.json'), 'utf8'));
   if (lock.version !== v || lock.packages[''].version !== v) throw new Error(`package-lock.json has ${lock.version}`);
-  const changelog = readFileSync(join(root, 'CHANGELOG.md'), 'utf8');
+  const changelog = readFileSync(join(source, 'CHANGELOG.md'), 'utf8');
   if (!changelog.includes(`[${v}]`) && !changelog.includes('[Unreleased]')) throw new Error('CHANGELOG.md has neither this version nor Unreleased');
-  if (!existsSync(join(root, 'docs/releases', `v${v}.md`))) throw new Error(`docs/releases/v${v}.md is missing`);
+  if (!existsSync(join(source, 'docs/releases', `v${v}.md`))) throw new Error(`docs/releases/v${v}.md is missing`);
   // The About screen reads the version from package.json at build time (vite.config.ts → __APP_VERSION__).
-  if (!readFileSync(join(root, 'vite.config.ts'), 'utf8').includes('__APP_VERSION__')) throw new Error('vite.config.ts no longer injects __APP_VERSION__');
+  if (!readFileSync(join(source, 'vite.config.ts'), 'utf8').includes('__APP_VERSION__')) throw new Error('vite.config.ts no longer injects __APP_VERSION__');
 });
 
 // 2. Clean copy of what would be committed (tracked + untracked, not ignored), then a fresh install.
@@ -66,8 +93,10 @@ let dir = root;
 if (!here) {
   step('clean copy and fresh install', () => {
     dir = mkdtempSync(join(tmpdir(), 'floodlight-release-'));
-    const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean);
-    for (const f of files) if (existsSync(join(root, f))) cpSync(join(root, f), join(dir, f), { recursive: true });
+    const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], { cwd: source, encoding: 'utf8' })
+      .split('\n')
+      .filter(Boolean);
+    for (const f of files) if (existsSync(join(source, f))) cpSync(join(source, f), join(dir, f), { recursive: true });
     run('git', ['init', '-q'], dir);
     run(npm, ['ci', '--no-audit', '--no-fund'], dir);
     run(npm, ['ci', '--prefix', 'tools/lint', '--no-audit', '--no-fund'], dir);

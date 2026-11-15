@@ -20,6 +20,7 @@ export default tseslint.config(
     ignores: [
       'dist/**',
       'node_modules/**',
+      '.cache/**',
       'tools/**',
       'public/**',
       'screenshots/**',

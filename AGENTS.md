@@ -30,7 +30,7 @@ npm test                       # tests only
 npm run format                 # apply Prettier
 ```
 
-Browser checks (`npm run test:browser`, `check:controls`, `check:adaptive`, …) need Chrome or Chromium. Set `CHROME_PATH` if it isn't found. They use software rendering, so their frame rates mean nothing about real hardware.
+Browser checks (`npm run test:browser`, `check:controls`, `check:adaptive`, …) need a browser: `npm run browsers:install` downloads the pinned Chrome for Testing into `.cache/browsers/`, or set `CHROME_PATH`. They use software rendering, so their frame rates mean nothing about real hardware.
 
 ## Standards
 

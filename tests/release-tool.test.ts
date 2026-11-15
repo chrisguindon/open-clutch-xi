@@ -16,7 +16,7 @@ import { describe, expect, it } from 'vitest';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { chmodSync, cpSync, existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 // @ts-expect-error -- plain JavaScript build helper without type declarations
 import { compareVersions, finaliseNotes, isDraftNotes, parseVersion, releaseJsonSnippet, rollChangelog } from '../scripts/lib/release-lib.mjs';
 
@@ -77,20 +77,30 @@ describe.skipIf(process.platform === 'win32')('release tool end to end (local co
         bin = join(tmp, 'bin'),
         ghLog = join(tmp, 'gh.log');
       const run = (cmd: string, args: string[], cwd = work) => execFileSync(cmd, args, { cwd, encoding: 'utf8' });
-      run('git', ['clone', '-q', '--bare', '--no-local', root, bare], tmp);
-      run('git', ['clone', '-q', bare, work], tmp);
+      // The fixture is built from the files in the current directory, not from its Git history: during
+      // `npm run release:check` the tests run in a clean copy that has no commits at all. Generated,
+      // private and installed folders are left out; node_modules is linked.
+      const SKIP = /^(\.git|node_modules|dist|release|\.local|\.cache|screenshots|test-results|coverage|asset-src)$/;
+      cpSync(root, work, {
+        recursive: true,
+        filter: (src) => {
+          const rel = relative(root, src);
+          return rel === '' || (!SKIP.test(rel.split(sep)[0]) && !rel.startsWith(join('tools', 'lint', 'node_modules')));
+        },
+      });
+      symlinkSync(join(root, 'node_modules'), join(work, 'node_modules'));
+      // Release notes for the new version, written here (the test doesn't depend on any particular
+      // notes file existing): a draft, as a maintainer would leave them.
+      writeFileSync(join(work, 'docs/releases/v9.9.9.md'), '# Open Clutch XI 9.9.9: draft release notes\n\n> **Draft.** Not released yet.\n\nThe notes.\n');
+      run('git', ['init', '-q', '-b', 'main']);
       run('git', ['config', 'user.name', 'Release Test']);
       run('git', ['config', 'user.email', 'release-test@localhost']);
       run('git', ['config', 'core.hooksPath', '/dev/null']);
-      symlinkSync(join(root, 'node_modules'), join(work, 'node_modules'));
-      // Test the release tool as it is in this working tree (it may not be committed yet).
-      cpSync(join(root, 'scripts'), join(work, 'scripts'), { recursive: true });
-      // Release notes for a new version, as a draft, committed and pushed.
-      const notes = readFileSync(join(work, 'docs/releases/v0.1.0.md'), 'utf8').replace(/0\.1\.0/g, '9.9.9');
-      writeFileSync(join(work, 'docs/releases/v9.9.9.md'), notes);
       run('git', ['add', '-A']);
-      run('git', ['commit', '-q', '-m', 'docs(release): notes for 9.9.9']);
-      run('git', ['push', '-q', 'origin', 'main']);
+      run('git', ['commit', '-q', '-m', 'chore: fixture']);
+      run('git', ['init', '-q', '--bare', bare], tmp);
+      run('git', ['remote', 'add', 'origin', bare]);
+      run('git', ['push', '-q', '-u', 'origin', 'main']);
       // A fake gh: records its arguments, is "logged in", and remembers created releases.
       execFileSync('mkdir', ['-p', bin]);
       writeFileSync(
@@ -100,6 +110,25 @@ describe.skipIf(process.platform === 'win32')('release tool end to end (local co
       chmodSync(join(bin, 'gh'), 0o755);
       const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, SOURCE_DATE_EPOCH: '1700000000' };
       const release = (...args: string[]) => spawnSync('node', ['scripts/release.mjs', ...args], { cwd: work, encoding: 'utf8', env });
+
+      // Without a browser, prepare stops before changing anything (no files, no branch).
+      const noBrowser = spawnSync('node', ['scripts/release.mjs', 'prepare', '9.9.9', '--yes'], {
+        cwd: work,
+        encoding: 'utf8',
+        env: { ...env, CHROME_PATH: join(tmp, 'no-such-browser') },
+      });
+      expect(noBrowser.status).not.toBe(0);
+      expect(noBrowser.stderr).toMatch(/No Chrome|browsers:install/);
+      expect(run('git', ['status', '--porcelain'])).toBe('');
+      expect(run('git', ['branch', '--list', 'release/*'])).toBe('');
+
+      // A dry run prepares and reports, but writes, commits and pushes nothing.
+      const dry = release('prepare', '9.9.9', '--dry-run', '--skip-check');
+      expect(dry.status, dry.stderr + dry.stdout).toBe(0);
+      expect(dry.stdout).toMatch(/would write CHANGELOG\.md/);
+      expect(run('git', ['status', '--porcelain'])).toBe('');
+      expect(run('git', ['branch', '--list', 'release/*'])).toBe('');
+      expect(existsSync(ghLog) ? readFileSync(ghLog, 'utf8') : '').not.toMatch(/pr create/);
 
       // prepare: version, changelog, notes, branch, push, pull request.
       const prep = release('prepare', '9.9.9', '--yes', '--skip-check');
