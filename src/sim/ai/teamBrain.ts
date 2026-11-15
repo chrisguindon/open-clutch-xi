@@ -454,6 +454,17 @@ export class TeamBrain {
       }
     }
 
+    // 11v11, ball in midfield: forwards hold the last defender's shoulder in the widest gap of the back
+    // line (onside), so the carrier always has a forward option before the box spots above take over.
+    if (carrier && carrier.team === this.team && carrier.id !== p.id && p.role === 'FWD' && world.players.length >= 16 && m.runTimer <= 0) {
+      const progress = (carrier.pos.x * dir) / L2;
+      if (progress > 0.1 && progress < 0.5) {
+        const target = this.channelTarget(p, world);
+        moveTo(cmd, p, target.x, target.z, 1, ball.pos.x, ball.pos.z, 0.8);
+        return;
+      }
+    }
+
     // Forward runs in behind when a teammate has the ball facing forward.
     if (m.runTimer > 0) {
       const d = moveTo(cmd, p, m.runX, m.runZ, 2, undefined, undefined, 0.6);
@@ -534,6 +545,41 @@ export class TeamBrain {
     }
     void sit;
     moveTo(cmd, p, m.supportX, m.supportZ, supporter ? 1 : 0, ball.pos.x, ball.pos.z, 1.0);
+  }
+
+  private channelTmp = { x: 0, z: 0 };
+  private defenderZ = new Float32Array(16);
+  /**
+   * A forward's spot on the shoulder of the last defender: just onside, in the middle of the widest gap
+   * between defenders near the line (nearest to the forward when gaps are similar). Allocation-free.
+   */
+  private channelTarget(p: Player, world: World): { x: number; z: number } {
+    const dir = world.attackDir(this.team);
+    const W2 = world.pitch.width / 2;
+    const line = lastDefenderX(world, this.team) * dir; // attack-frame depth of the offside line
+    let n = 0;
+    for (const o of world.players) {
+      if (o.team === this.team || o.isGK || o.sentOff) continue;
+      if (line - o.pos.x * dir < 12 && n < this.defenderZ.length) this.defenderZ[n++] = o.pos.z;
+    }
+    const zs = this.defenderZ.subarray(0, n).sort();
+    const edge = W2 * 0.7;
+    let bestScore = -Infinity,
+      bestZ = p.pos.z;
+    for (let i = 0; i <= n; i++) {
+      const lo = i === 0 ? -edge : zs[i - 1],
+        hi = i === n ? edge : zs[i];
+      if (hi <= lo) continue;
+      const mid = (lo + hi) / 2;
+      const score = Math.min(hi - lo, 20) - Math.abs(mid - p.pos.z) * 0.35;
+      if (score > bestScore) {
+        bestScore = score;
+        bestZ = mid;
+      }
+    }
+    this.channelTmp.x = (line - 1) * dir;
+    this.channelTmp.z = clamp(bestZ, -edge, edge);
+    return this.channelTmp;
   }
 
   private boxTmp = { x: 0, z: 0 };

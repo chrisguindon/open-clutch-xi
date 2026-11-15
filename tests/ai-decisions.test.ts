@@ -166,3 +166,23 @@ describe('11v11 attacking (regressions for "too few chances")', () => {
     ).toBeNull();
   });
 });
+
+describe('11v11 forwards offer a forward option', () => {
+  it('a forward holds the last defender’s shoulder, onside, in the widest gap of the back line', async () => {
+    const { lastDefenderX } = await import('../src/sim/ai/tactics');
+    const m = makeMatch({ format: '11v11' });
+    const w = m.world;
+    const dir = w.attackDir(0);
+    const defenders = w.players.filter((p) => p.team === 1 && !p.isGK);
+    // A back line 20 m into the opponents' half with a wide gap in the middle; everyone else far away.
+    const line = [-15, -9, 9, 15];
+    defenders.forEach((d, i) => d.place(dir * (i < line.length ? 20 : -40), i < line.length ? line[i] : (i - 6) * 4, 0));
+    const fwd = w.players.find((p) => p.team === 0 && p.role === 'FWD')!;
+    fwd.place(dir * 5, 3, 0);
+    const brain = m.brains[0] as unknown as { channelTarget(p: typeof fwd, world: typeof w): { x: number; z: number } };
+    const t = brain.channelTarget(fwd, w);
+    expect(t.x * dir).toBeLessThan(lastDefenderX(w, 0) * dir); // onside
+    expect(t.x * dir).toBeGreaterThan(lastDefenderX(w, 0) * dir - 2); // but right on the line
+    expect(Math.abs(t.z)).toBeLessThan(1); // the 18 m gap between −9 and 9
+  });
+});

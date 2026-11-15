@@ -6,7 +6,7 @@
 - **No half-time, added time or extra time.** Matches are one period. See the [rules matrix](../gameplay/FOOTBALL_RULES.md).
 - **Offside nuances.** Only touching the ball counts as an offence ("interfering with play"). Any opponent touch resets offside, including deflections and saves.
 - **Fouls.** No handball, holding or DOGSO judgements. Keepers are never sent off, because there is no substitute keeper.
-- **11v11 chance creation** is still lower per minute than small-sided play. Attackers now take spots in the box, crosses and edge-of-box shots are used, and goals per minute roughly doubled on most levels; shots per minute did not rise. `npm run report:attack` measures it.
+- **11v11 chance creation** is still much lower per minute than small-sided play (about 0.6 shots a minute against 3 in 5v5). Attacks often stall 24–30 m from goal against a deep defence. Forwards now hold the last defender's shoulder and take spots in the box, but more varied support (third-man runs, overlapping full-backs) would help. `npm run report:attack` measures it.
 - **AI crosses** reach a team-mate only some of the time (roughly 10–60% depending on level, over small samples).
 - **Pass evaluation** is pessimistic about a marker standing behind the receiver.
 

@@ -42,6 +42,7 @@ The highest score wins. Every option keeps its **reasons**, which you can watch 
 ## Creating chances in 11v11
 
 On a big pitch with ten defenders, most passes into the penalty area are genuinely blocked. Measuring showed the AI made one pass in 332 attacking-third decisions: there was rarely anyone ahead to pass to, so carriers dribbled into crowds. Real teams fill the box and go round the block, and so does the AI now:
+- **A forward option in midfield:** while a team-mate carries the ball through midfield, forwards stand on the shoulder of the last defender, just onside, in the widest gap of the back line (`channelTarget` in `teamBrain.ts`). Measured over 30 seeds at each level, 11v11 shots rose about 17% and goals about 20%. The biggest gain was on Medium. Tweaking how the *carrier* decides had made things worse, so the improvement came from team-mates' movement.
 - **Attacking spots:** once a team-mate carries the ball within about 26 m of goal, forwards and then midfielders take distinct spots: near post, penalty spot, far post, and the edge of the box for a cut-back. Each is kept onside (`boxTarget` in `teamBrain.ts`).
 - **Wide play:** a pass to a wide player who can cross counts as progress when team-mates are in the box.
 - **Crosses and shots** are allowed at realistic odds, including edge-of-box shots when nothing better is on.
