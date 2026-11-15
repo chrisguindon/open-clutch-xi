@@ -207,7 +207,7 @@ The repository is prepared for the GitHub Copilot coding agent: `AGENTS.md`, `.g
 ## 10b. What can only be verified on GitHub
 
 These were validated locally, but can only be confirmed once the repository exists:
-- **Workflows.** actionlint, the structure checks and every command they run were checked locally. **They have not run on GitHub yet.** Watch the first runs of CI, PR title, Security (CodeQL and dependency review) and Welcome.
+- **Workflows.** The structure checks and every command they run were checked locally. Watch the first runs of CI, PR title, Security (CodeQL and dependency review) and Welcome. Welcome comments on a person's first issue and first pull request, and skips bots such as Dependabot. Its action (`actions/first-interaction` v3) requires both messages; a missing `issue_message` made its first run fail.
 - **Issue and discussion forms.** They were validated against GitHub's documented schema. Open the issue chooser and check each form renders.
 - **Dependabot.** Check **Insights → Dependency graph → Dependabot** for errors after the first scheduled run.
 - **Required status checks.** The names in the ruleset must match the checks GitHub reports.

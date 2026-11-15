@@ -6,12 +6,15 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 
-# Posts one friendly comment on a person's first pull request — and never again for them.
-# pull_request_target is used only so the comment can be posted on pull requests from forks. This workflow
-# never checks out or runs pull-request code, so it is safe.
+# Posts one friendly comment on a person's first issue and on their first pull request — and never again
+# for them. Bots (Dependabot) are skipped. pull_request_target is used only so the comment can be posted on
+# pull requests from forks. This workflow never checks out or runs pull-request code, so it is safe.
+# (actions/first-interaction v3 requires both messages, whichever event triggered it.)
 name: Welcome
 
 on:
+  issues:
+    types: [opened]
   pull_request_target:
     types: [opened]
 
@@ -21,11 +24,19 @@ permissions:
 
 jobs:
   welcome:
+    if: github.event.sender.type != 'Bot'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
         with:
+          issue_message: |
+            Thanks for opening your first issue on Open Clutch XI! 🎉
+
+            Someone will read it soon. Meanwhile:
+            - Clear steps to reproduce the problem, your browser and device, and a screenshot all help.
+            - You don't need to know the cause: describing what you saw is the useful part.
+            - Want to try fixing it yourself? [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) explains how, and questions are welcome in Discussions.
           pr_message: |
             Thanks for your first pull request to Open Clutch XI! 🎉
 
