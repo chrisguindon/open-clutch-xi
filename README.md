@@ -119,9 +119,7 @@ You don't need to know the cause. A clear description is a real contribution. Se
 5. Open a pull request with a title like `fix(ai): stop clearances towards our own goal`, and explain what you changed and how you tested it.
 6. Discuss the review feedback and update your branch. Every pull request is reviewed by a person.
 
-## Licence and credits
-
-Open Clutch XI is open source under the **[Eclipse Public License 2.0](LICENSE)**. It's a personal project by Christopher Guindon. It is not affiliated with or endorsed by the Eclipse Foundation; EPL-2.0 is simply the licence chosen. [NOTICE.md](NOTICE.md) is the legal notice: copyright, the licence, and every third-party licence text.
+## Credits
 
 Third-party content:
 - 3D characters and animations by **Quaternius** (CC0);
@@ -131,6 +129,20 @@ Third-party content:
 - the **Inter** typeface (SIL OFL);
 - the **three.js** library (MIT).
 
-Each is listed with its source in [third-party assets](docs/governance/third-party-assets.md). Teams, kits, player names and sponsors are generic or fictional: no official crests, kits or likenesses.
+Each is listed with its source in [third-party assets](docs/governance/third-party-assets.md). [NOTICE.md](NOTICE.md) holds every licence text. Teams, kits, player names and sponsors are generic or fictional: no official crests, kits or likenesses. This is a personal project, not affiliated with or endorsed by the Eclipse Foundation.
+
+## Author
+
+**Christopher Guindon**
+
+- <https://twitter.com/chrisguindon>
+- <https://fosstodon.org/@chrisguindon>
+- <https://github.com/chrisguindon>
+- <https://www.linkedin.com/in/chrisguindon/>
+- <https://accounts.eclipse.org/users/cguindon>
+
+## Copyright and license
+
+Copyright 2026 Christopher Guindon. Code released under the [Eclipse Public License Version 2.0 (EPL-2.0)](LICENSE).
 
 More: [documentation index](docs/README.md) · [architecture](docs/architecture/README.md) · [governance](GOVERNANCE.md) · [security](SECURITY.md) · [changelog](CHANGELOG.md).
