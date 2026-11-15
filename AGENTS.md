@@ -112,7 +112,8 @@ Browser checks (`npm run test:browser`, `check:controls`, `check:adaptive`, …)
   - Use `!` or a `BREAKING CHANGE:` footer for breaking changes, for example to saved settings.
 - Pull requests are **squash-merged**, so the PR title becomes the commit message on `main` and must follow the same format. `scripts/check-commit-message.mjs` checks it.
 - **No AI-vendor attribution.** No `Co-authored-by:` trailers for tools or models, no "generated with …" signatures, and no AI-tool session links in commits, PR descriptions or files. The repository hygiene check rejects them.
-- Don't commit, push, tag or publish releases unless the human you're working with asks.
+- **Feature branches only.** Before changing anything, check the working tree is clean and `main` is up to date with `origin/main`. Then create a branch named `<type>/<short-description>` (for example `fix/mobile-player-labels`), and commit there in focused Conventional Commits. Never commit directly to `main`. The full workflow is in [CONTRIBUTING.md](CONTRIBUTING.md#branches-pull-requests-and-approval).
+- Don't commit, push, open or merge pull requests, tag, publish releases or deploy unless the human you're working with asks. Merging into `main` always needs their approval.
 
 ### Git authorship policy
 
