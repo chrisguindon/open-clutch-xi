@@ -17,6 +17,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, normalize } from 'node:path';
+import { headingAnchors } from './lib/release-notes.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
 const problems = [];
@@ -38,31 +39,10 @@ for (const f of REQUIRED) {
 }
 if (!existsSync(join(root, 'LICENSE'))) problems.push('missing LICENSE');
 
-/** GitHub-style heading anchors. */
-const slug = (h) =>
-  h
-    .trim()
-    .toLowerCase()
-    .replace(/<[^>]+>/g, '')
-    .replace(/[^\p{L}\p{N}\s_-]/gu, '')
-    .replace(/\s/g, '-');
 const anchorsCache = new Map();
+/** GitHub-style heading anchors of a Markdown file (shared with the release-notes check). */
 function anchors(file) {
-  if (!anchorsCache.has(file)) {
-    const set = new Set();
-    const counts = new Map();
-    let inCode = false;
-    for (const line of readFileSync(file, 'utf8').split('\n')) {
-      if (/^\s*```/.test(line)) inCode = !inCode;
-      const m = !inCode && /^#{1,6}\s+(.*?)\s*#*\s*$/.exec(line);
-      if (!m) continue;
-      const base = slug(m[1].replace(/`/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1'));
-      const n = counts.get(base) ?? 0;
-      counts.set(base, n + 1);
-      set.add(n ? `${base}-${n}` : base);
-    }
-    anchorsCache.set(file, set);
-  }
+  if (!anchorsCache.has(file)) anchorsCache.set(file, headingAnchors(readFileSync(file, 'utf8')));
   return anchorsCache.get(file);
 }
 

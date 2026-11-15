@@ -16,6 +16,7 @@ Browser scripts need Chrome or Chromium (set `CHROME_PATH` if it isn't found). T
 | `generate-sbom.mjs` | `sbom` | CycloneDX SBOM of what ships. `--check` verifies it's reproducible. |
 | `release-check.mjs` | `release:check` | Everything above in a clean copy, plus the release artefacts packaged twice to prove they're reproducible. Never commits, tags or publishes. |
 | `release.mjs` | `release` (`make release-prepare` / `make release-publish`) | Maintainers' release automation: prepare (version, changelog, notes, release check, pull request) and publish (tag, artefacts, draft GitHub release). Asks before anything permanent; `--dry-run` changes nothing. See [releasing](../docs/development/releasing.md). |
+| `release-notes.mjs` | `release:notes` | The release notes as published on GitHub: relative links in `docs/releases/v<version>.md` become links to the files at the release tag (read from the tag when it exists), and every link is checked (file, heading, no links to `main`). Writes `release/release-notes-v<version>.md`. Used by `release-publish` and `release:check`. |
 | `package-web.mjs` | `release:package` | Builds the release artefacts in `release/`: the static web archive (site, licence, notices, `hosting/headers.json`, manifest), the source archive and `SHA256SUMS`. Never tags or uploads. |
 
 ## Browser checks (pass or fail)
