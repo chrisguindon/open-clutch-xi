@@ -16,10 +16,11 @@
 //   node scripts/check-commit-message.mjs --file .git/COMMIT_EDITMSG     (as a git commit-msg hook)
 //   PR_TITLE="…" node scripts/check-commit-message.mjs --env PR_TITLE      (CI: avoids shell injection)
 //
-// It also rejects automatic AI attribution: AI co-author trailers, "Generated with <AI tool>" signatures and
-// AI-tool session links. Humans are responsible for, and credited with, their commits. (This is about
-// automatic trailers and signatures only: a commit body may still *discuss* AI, and the project documents
-// its AI-assisted development openly in README.md and ADR 0008. Human co-authors are welcome.)
+// It also notes automatic AI attribution (AI co-author trailers, "Generated with <AI tool>" signatures and
+// AI-tool session links) as a warning, never a failure: tools such as GitHub Copilot add them on their own,
+// and blocking them made those tools hard to use. A human is still the author and committer, and is
+// responsible for the change. The project documents its AI-assisted development openly (README, ADR 0008).
+// Human co-authors are always welcome.
 import { readFileSync } from 'node:fs';
 
 export const TYPES = ['feat', 'fix', 'docs', 'style', 'refactor', 'perf', 'test', 'build', 'ci', 'chore', 'revert'];
@@ -42,7 +43,12 @@ export function aiAttribution(message) {
   return AI_ATTRIBUTION.filter((a) => a.re.test(message)).map((a) => a.what);
 }
 
-/** Returns a list of problems (empty = valid). */
+/** Notes about a message that never fail a check: automatic AI attribution (see the header comment). */
+export function messageWarnings(message) {
+  return aiAttribution(message).map((what) => `${what} (automatic AI attribution): allowed, but you can remove it, for example when squash-merging.`);
+}
+
+/** Returns a list of problems (empty = valid). Automatic AI attribution is a warning, not a problem: see {@link messageWarnings}. */
 export function checkMessage(message) {
   const problems = [];
   const lines = message
@@ -60,7 +66,6 @@ export function checkMessage(message) {
     problems.push('The summary should not end with a full stop.');
   }
   if (lines.length > 1 && lines[1].trim() !== '') problems.push('Leave a blank line between the header and the body.');
-  for (const what of aiAttribution(message)) problems.push(`Remove ${what} (AI-vendor attribution): the human contributor is responsible for the change.`);
   return problems;
 }
 
@@ -71,6 +76,7 @@ if (isMain) {
   if (args[0] === '--file') msg = readFileSync(args[1], 'utf8');
   else if (args[0] === '--env') msg = process.env[args[1]] ?? '';
   else msg = args.join(' ');
+  for (const w of messageWarnings(msg)) console.warn(`! ${w}`);
   const problems = checkMessage(msg);
   if (problems.length) {
     console.error(problems.map((p) => `✗ ${p}`).join('\n'));
