@@ -20,6 +20,7 @@
 //   1. version consistency
 //   2. clean copy and install
 //   3. npm run ci (format, lint, types, tests, build, licence / repo / docs / GitHub checks)
+//   3b. release notes: every link resolves (as it will be published, pointing at the tag)
 //   4. browser smoke test and rules flow
 //   5. production-build check
 //   6. release artefacts (web and source archives, SHA256SUMS), packaged twice to prove reproducibility
@@ -104,6 +105,8 @@ if (!here) {
 }
 
 step('npm run ci', () => run(npm, ['run', 'ci'], dir));
+// The notes published on GitHub get absolute links to the release tag; check each target exists.
+step(`release notes links (docs/releases/v${v}.md)`, () => run('node', ['scripts/release-notes.mjs', v, '--check'], dir));
 if (browser) {
   step('browser smoke test', () => run('node', ['scripts/browser-smoke.mjs'], dir));
   step('browser rules flow', () => run('node', ['scripts/rules-check.mjs'], dir));

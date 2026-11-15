@@ -252,6 +252,17 @@ async function publish() {
   }
   ok('artefacts built and verified (SHA256SUMS, manifest names the tagged commit)');
 
+  // The published notes: links point at the tag, not relative paths (which break on the release page)
+  // and not main. Built from the tag itself, and every link checked there; stops on a broken link.
+  step('Building the release notes for GitHub (links pointing at the tag)');
+  const publishedNotes = join('release', `release-notes-v${version}.md`);
+  if (!sh('node', ['scripts/release-notes.mjs', version, ...(dryRun ? ['--check'] : [])], { inherit: true, allowFail: true }).ok) {
+    fail(
+      `docs/releases/v${version}.md has broken links: fix them in a pull request, then run this again (the tag is already pushed; it carries on from there)`,
+    );
+  }
+  ok('every link in the release notes resolves at the tag');
+
   step('Creating the GitHub release (draft)');
   act('gh', [
     'release',
@@ -262,7 +273,7 @@ async function publish() {
     '--title',
     `Open Clutch XI ${version}`,
     '--notes-file',
-    notesFile,
+    publishedNotes,
     web,
     src,
     join('release', 'SHA256SUMS'),
