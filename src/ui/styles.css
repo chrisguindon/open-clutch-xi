@@ -678,8 +678,9 @@ kbd,
 }
 .scoreboard {
   position: absolute;
-  top: 18px;
-  left: 22px;
+  /* Safe areas: on phones held in landscape the notch or rounded corners take the screen's edges. */
+  top: calc(18px + env(safe-area-inset-top, 0px));
+  left: calc(22px + env(safe-area-inset-left, 0px));
   display: flex;
   align-items: stretch;
   font-weight: 800;
@@ -734,8 +735,8 @@ kbd,
 
 .player-card {
   position: absolute;
-  left: 22px;
-  bottom: 22px;
+  left: calc(22px + env(safe-area-inset-left, 0px));
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
   background: rgba(15, 23, 42, 0.8);
   border-radius: 10px;
   padding: 10px 14px;
@@ -808,8 +809,8 @@ kbd,
 
 .minimap {
   position: absolute;
-  right: 22px;
-  bottom: 22px;
+  right: calc(22px + env(safe-area-inset-right, 0px));
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
   border-radius: 10px;
   background: rgba(15, 23, 42, 0.6);
   padding: 6px;
@@ -1697,7 +1698,7 @@ body.touch-ui .replay-skip {
 }
 body.touch-ui .minimap {
   animation: none;
-  top: 64px;
+  top: calc(64px + env(safe-area-inset-top, 0px));
   bottom: auto;
   padding: 4px;
 }
@@ -1705,12 +1706,32 @@ body.touch-ui .minimap canvas {
   width: 104px;
   height: 66px;
 }
+/* On touch screens the player card is the main place the controlled player is named (the name over
+   the pitch only appears briefly: src/ui/playerLabel.ts), so it stays compact but readable. It used to
+   be scaled to 70%, which made the name 10.5 px. */
 body.touch-ui .player-card {
   animation: none;
   bottom: auto;
-  top: 64px;
-  transform: scale(0.7);
-  transform-origin: top left;
+  top: calc(64px + env(safe-area-inset-top, 0px));
+  min-width: 0;
+  max-width: 42vw;
+  padding: 5px 10px 6px;
+  border-left-width: 3px;
+  border-radius: 8px;
+}
+body.touch-ui .player-card .pname {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.touch-ui .player-card .prole {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+body.touch-ui .player-card .stamina {
+  margin-top: 4px;
+  height: 4px;
 }
 @media (orientation: portrait) and (pointer: coarse) {
   body.touch-ui::after {
@@ -2491,7 +2512,7 @@ a:focus-visible {
   border: 1px solid rgba(148, 163, 184, 0.25);
   padding: 2px 8px;
   border-radius: 6px;
-  will-change: transform;
+  will-change: transform, opacity;
 }
 
 /* ---- XI Nations Cup (src/ui/cupScreen.ts) ---- */
