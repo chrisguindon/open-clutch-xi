@@ -54,8 +54,17 @@ for (const vp of VIEWPORTS) {
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
-  await page.setViewport({ width: vp.width, height: vp.height, isMobile: vp.touch, hasTouch: vp.touch, deviceScaleFactor: 1 });
-  if (vp.touch) await page.emulateMediaFeatures([{ name: 'pointer', value: 'coarse' }]).catch(() => {});
+  // isLandscape sets the emulated screen orientation to match the window, as on a real device (the
+  // rotate screen trusts the screen orientation: src/ui/orientation.ts).
+  await page.setViewport({
+    width: vp.width,
+    height: vp.height,
+    isMobile: vp.touch,
+    hasTouch: vp.touch,
+    isLandscape: vp.width > vp.height,
+    deviceScaleFactor: 1,
+  });
+  // (Chrome's mobile + touch emulation makes `(pointer: coarse)` match; Puppeteer can't emulate it alone.)
   await page.goto('http://127.0.0.1:5216/', { waitUntil: 'load' });
   await page.evaluate((touch) => {
     localStorage.setItem(
@@ -73,6 +82,15 @@ for (const vp of VIEWPORTS) {
   }, vp.touch);
   await page.reload({ waitUntil: 'load' });
   await page.waitForFunction(() => window.__game && window.__game.state === 'menu', { timeout: 180000 });
+  if (vp.portrait) {
+    // Held upright the rotate screen blocks the menu, so there is no match to measure: check the screen.
+    const shown = await page.evaluate(() => !document.querySelector('.orientation-screen').hidden);
+    console.log(`\n${vp.name} (${vp.width}×${vp.height}, touch)`);
+    check(shown, 'portrait phone shows the full-screen rotate screen');
+    await page.screenshot({ path: `${OUT}/${vp.name}.png` });
+    await page.close();
+    continue;
+  }
   await page.evaluate(() => window.__game.startMatch('match'));
   await page.waitForFunction(() => window.__game.state === 'playing', { timeout: 120000 });
   // Let the pre-match intro (line-ups, title, camera fly-in) finish: it lasts INTRO_LENGTH (6.4 s).
@@ -145,7 +163,7 @@ for (const vp of VIEWPORTS) {
       const labelEl = document.querySelector('.player-label');
       return {
         touchUi: document.body.classList.contains('touch-ui'),
-        rotateNotice: matchMedia('(orientation: portrait) and (pointer: coarse)').matches,
+        rotateNotice: !document.querySelector('.orientation-screen')?.hidden,
         body,
         ball,
         others,
@@ -181,8 +199,9 @@ for (const vp of VIEWPORTS) {
 
   console.log(`\n${vp.name} (${vp.width}×${vp.height}, ${vp.touch ? 'touch' : 'mouse/keyboard'})`);
   if (vp.portrait) {
-    // Portrait isn't a supported orientation on phones: the game asks to rotate. It must still render cleanly.
-    check(s.rotateNotice, 'portrait phone shows the "rotate to landscape" notice');
+    // Portrait isn't a supported orientation on phones: the full-screen rotate screen covers the game
+    // (scripts/orientation-check.mjs checks it in detail).
+    check(s.rotateNotice, 'portrait phone shows the full-screen rotate screen');
     check(!overlap(s.label, { x: s.ball.x - 6, y: s.ball.y - 6, w: 12, h: 12 }), 'no name covers the ball');
   } else {
     const ballBox = { x: s.ball.x - 5, y: s.ball.y - 5, w: 10, h: 10 };

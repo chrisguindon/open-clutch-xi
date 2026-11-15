@@ -49,6 +49,7 @@
     "bench:cpu": "node scripts/cpu-microbench.mjs dist current high 5v5",
     "check:mobile": "node scripts/mobile-check.mjs",
     "check:mobile-hud": "node scripts/mobile-hud-check.mjs",
+    "check:orientation": "node scripts/orientation-check.mjs",
     "check:anim": "node scripts/anim-compare.mjs",
     "check:input": "node scripts/input-check.mjs",
     "check:refresh": "node scripts/refresh-check.mjs 144",
