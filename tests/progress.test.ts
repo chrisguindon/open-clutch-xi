@@ -18,6 +18,7 @@ import {
   saveProgress,
   summariseMatch,
   type MatchSummary,
+  recordCupMilestone,
 } from '../src/game/progress';
 import { ACHIEVEMENTS, ACHIEVEMENT_IDS } from '../src/game/achievements';
 import { MAX_IMPORT_BYTES, SAVE_FORMAT, applySaveFile, exportSaveData, readSaveFile, resetAllData, resetProgress } from '../src/game/saveData';
@@ -317,5 +318,29 @@ describe('export, import and reset', () => {
     expect(loadSettings().minutes).toBe(8);
     resetAllData();
     expect(store.size).toBe(0);
+  });
+});
+
+describe('XI Nations Cup milestones', () => {
+  it('older records without cup counters load as zeros', () => {
+    const old = JSON.parse(JSON.stringify(emptyProgress())) as Record<string, unknown>;
+    delete old.cup;
+    expect(parseProgress(old)?.cup).toEqual({ knockouts: 0, trophies: 0 });
+  });
+
+  it('reaching the knockouts and winning the cup unlock their achievements, once', () => {
+    const at = new Date('2026-11-15T10:00:00Z');
+    const a = recordCupMilestone(emptyProgress(), 'knockouts', at);
+    expect(a.unlocked).toEqual(['cup-knockouts']);
+    const b = recordCupMilestone(a.progress, 'trophy', at);
+    expect(b.unlocked).toEqual(['cup-winner']);
+    expect(b.progress.cup).toEqual({ knockouts: 1, trophies: 1 });
+    expect(recordCupMilestone(b.progress, 'trophy', at).unlocked).toEqual([]);
+    expect(parseProgress(JSON.parse(JSON.stringify(b.progress)))).toEqual(b.progress);
+  });
+
+  it('rejects malformed cup counters', () => {
+    expect(parseProgress({ ...emptyProgress(), cup: { knockouts: -1, trophies: 0 } })).toBeNull();
+    expect(parseProgress({ ...emptyProgress(), cup: 'lots' })).toBeNull();
   });
 });

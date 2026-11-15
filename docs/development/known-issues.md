@@ -10,6 +10,9 @@
 - **AI crosses** reach a team-mate only some of the time (roughly 10–60% depending on level, over small samples).
 - **Pass evaluation** is pessimistic about a marker standing behind the receiver.
 
+## Saved data
+- **Going back to an older version after earning a cup achievement.** Versions before the XI Nations Cup don't know the two cup achievements, so they can't read the newer progress record. They keep it as a recovery copy and start a fresh record, and nothing is deleted. This matters only to a site that rolls back to an older release (see [releasing](releasing.md)).
+
 ## Presentation
 - **Limited character variety.** Two CC0 base bodies, five hairstyles (plus a beard and a shaved head) and seven hair colours. There is no curly hairstyle: none is available in the CC0 pack used, and no other asset has been verified.
 - **Animation quality.** Celebrations, reactions and officials' signals are procedural poses over recorded clips. They were reworked to bend elbows and involve the body, but still need human review (see [playtesting](playtesting.md)).

@@ -12,7 +12,7 @@ import * as THREE from 'three';
 import { Match, MatchOptions } from '../sim/match';
 import { GameMode, SIM_DT } from '../sim/config';
 import { BRAND } from '../brand';
-import { loadProgress, recordMatch, recordTutorialCompleted, saveProgress, summariseMatch, type PlayerProgress } from './progress';
+import { loadProgress, recordCupMilestone, recordMatch, recordTutorialCompleted, saveProgress, summariseMatch, type PlayerProgress } from './progress';
 import { achievementById, type AchievementId } from './achievements';
 import { TeamIdentity } from '../sim/teams';
 import { NATIONS, nationByCode } from '../sim/nations';
@@ -538,7 +538,7 @@ export class Game implements UIHost {
    * A cup match reached full time: store the result (or ask for a shootout after a level knockout
    * match), save, and say what happens next for the full-time screen.
    */
-  private finishCupMatch(m: Match): { next: 'penalties' | 'hub'; note: string } | undefined {
+  private finishCupMatch(m: Match, unlocked: string[]): { next: 'penalties' | 'hub'; note: string } | undefined {
     const c = this.cupMatch,
       t = this.cup.active;
     const f = c && t ? t.fixtures.find((x) => x.id === c.fixtureId) : undefined;
@@ -560,6 +560,16 @@ export class Game implements UIHost {
     this.cup = rec;
     saveCupRecord(rec);
     const next = nextPlayerFixture(t2);
+    // Milestones (once per cup): through to the knockouts, and the trophy.
+    const milestones: Array<'knockouts' | 'trophy'> = [];
+    if (f.stage === 'group' && ((next && next.stage !== 'group') || finish === 'champion')) milestones.push('knockouts');
+    if (finish === 'champion') milestones.push('trophy');
+    for (const kind of milestones) {
+      const r = recordCupMilestone(this.progress, kind, new Date());
+      this.progress = r.progress;
+      unlocked.push(...r.unlocked.map((id) => achievementById(id).name));
+    }
+    if (milestones.length) saveProgress(this.progress);
     const teamName = (code: string) => nationByCode(code)?.name ?? code;
     const note =
       finish === 'champion'
@@ -1402,7 +1412,7 @@ export class Game implements UIHost {
           scorer: g.scorerId !== null ? m.world.players[g.scorerId].name : 'Unknown',
         }));
         const unlocked = this.recordFinishedMatch(m);
-        const cup = this.finishCupMatch(m);
+        const cup = this.finishCupMatch(m, unlocked);
         this.ui.showFullTime(this.clubs, [m.score[0], m.score[1]], m.winner, m.stats, this.mode, goals, m.options.difficulty, unlocked, cup);
       }
     }

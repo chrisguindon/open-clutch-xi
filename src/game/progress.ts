@@ -96,6 +96,11 @@ export interface PlayerProgress {
   /** Unlocked achievements only, with the time they were unlocked (ISO 8601). */
   achievements: Partial<Record<AchievementId, { unlockedAt: string }>>;
   tutorialCompleted: boolean;
+  /**
+   * XI Nations Cup milestones: times the player reached the knockouts, and cups won. Added after the
+   * first records were saved, so older records without it load as zeros (no version bump needed).
+   */
+  cup: { knockouts: number; trophies: number };
 }
 
 /** Recent matches kept (older ones still count in the statistics). */
@@ -129,6 +134,7 @@ export function emptyProgress(): PlayerProgress {
     history: [],
     achievements: {},
     tutorialCompleted: false,
+    cup: { knockouts: 0, trophies: 0 },
   };
 }
 
@@ -208,6 +214,17 @@ export function recordTutorialCompleted(progress: PlayerProgress, at: Date): { p
   if (progress.tutorialCompleted) return { progress, unlocked: [] };
   const p = structuredClone(progress);
   p.tutorialCompleted = true;
+  return { progress: p, unlocked: unlockAchievements(p, null, at.toISOString()) };
+}
+
+/**
+ * An XI Nations Cup milestone: the player's team reached the knockout rounds, or won the cup. Counted
+ * once per cup by the caller (src/game/game.ts). Pure; returns the new record and newly unlocked ids.
+ */
+export function recordCupMilestone(progress: PlayerProgress, kind: 'knockouts' | 'trophy', at: Date): { progress: PlayerProgress; unlocked: AchievementId[] } {
+  const p = structuredClone(progress);
+  if (kind === 'knockouts') p.cup.knockouts = Math.min(MAX_COUNT, p.cup.knockouts + 1);
+  else p.cup.trophies = Math.min(MAX_COUNT, p.cup.trophies + 1);
   return { progress: p, unlocked: unlockAchievements(p, null, at.toISOString()) };
 }
 
@@ -311,6 +328,13 @@ export function parseProgress(raw: unknown): PlayerProgress | null {
   }
   if (typeof raw.tutorialCompleted !== 'boolean') return null;
   out.tutorialCompleted = raw.tutorialCompleted;
+  if (raw.cup !== undefined) {
+    if (!isRecord(raw.cup)) return null;
+    const knockouts = count(raw.cup.knockouts),
+      trophies = count(raw.cup.trophies);
+    if (knockouts === null || trophies === null) return null;
+    out.cup = { knockouts, trophies };
+  }
   return out;
 }
 

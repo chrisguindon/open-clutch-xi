@@ -48,7 +48,7 @@ You play your own team's matches. Every other match is decided by a small model,
 
 ## Saving
 
-The cup in progress and the history of finished cups are one record, `tournament-v1`, validated strictly on load (see [persistence](../architecture/persistence.md)). It's included when you export your saved data and checked on import. **Reset records** (Settings → Saved data) clears it along with your statistics. Your cup matches also count in your statistics and achievements, like any match played to the final whistle.
+The cup in progress and the history of finished cups are one record, `tournament-v1`, validated strictly on load (see [persistence](../architecture/persistence.md)). It's included when you export your saved data and checked on import. **Reset records** (Settings → Saved data) clears it along with your statistics. Your cup matches also count in your statistics and achievements, like any match played to the final whistle. Two achievements belong to the cup: *Into the Knockouts* and *Champions*.
 
 ## For contributors
 
@@ -61,7 +61,6 @@ The cup in progress and the history of finished cups are one record, `tournament
 - **Screens:** `src/ui/cupScreen.ts` (HTML from the record; tests in `tests/cup-screen.test.ts`). `Game.playCupMatch` and `finishCupMatch` connect a fixture to an ordinary `Match`.
 - **Browser check:** `npm run check:cup` plays a whole Short cup through the menus, including a reload mid-cup and a shootout.
 - **Not yet:**
-  - cup-specific achievements;
   - extra time;
   - the 48-team format;
   - a trophy-lift scene in 3D (the trophy is shown on the result screen).

@@ -1,6 +1,6 @@
 # Tournament mode: feasibility and plan
 
-**Status:** Short and Classic formats implemented (see [XI Nations Cup](tournament.md)). Still to do: cup achievements, extra time, the 48-team format, a 3D trophy scene, and the human review of names and visuals (criterion 7). **Audience:** the maintainer (decisions) and contributors (implementation).
+**Status:** Short and Classic formats implemented (see [XI Nations Cup](tournament.md)). Still to do: extra time, the 48-team format, a 3D trophy scene, and the human review of names and visuals (criterion 7). **Audience:** the maintainer (decisions) and contributors (implementation).
 
 A tournament gives players what the [experience review](EXPERIENCE_REVIEW.md) found missing most: a goal that lasts beyond one match. This page records what was verified, the decisions the maintainer needs to make, and a plan with acceptance criteria.
 

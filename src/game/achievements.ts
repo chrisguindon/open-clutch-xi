@@ -20,6 +20,7 @@
  * never rename one (change its name or description instead) and never reuse a removed one.
  */
 import type { MatchSummary, PlayerProgress } from './progress';
+import { BRAND } from '../brand';
 
 export const ACHIEVEMENT_IDS = [
   'first-goal',
@@ -32,6 +33,8 @@ export const ACHIEVEMENT_IDS = [
   'shootout-win',
   'penalty-save',
   'tutorial-complete',
+  'cup-knockouts',
+  'cup-winner',
 ] as const;
 
 /** A permanent achievement identifier (stored in progress and exports). */
@@ -91,6 +94,13 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
   { id: 'shootout-win', name: 'Nerves of Steel', description: 'Win a penalty shootout.', unlocked: (p) => p.stats.shootoutsWon >= 1 },
   { id: 'penalty-save', name: 'Safe Hands', description: 'Save a penalty in a shootout.', unlocked: (p) => p.stats.penaltySaves >= 1 },
   { id: 'tutorial-complete', name: 'Ready to Play', description: 'Complete the tutorial without skipping a step.', unlocked: (p) => p.tutorialCompleted },
+  {
+    id: 'cup-knockouts',
+    name: 'Into the Knockouts',
+    description: `Reach the knockout rounds of the ${BRAND.tournamentName}.`,
+    unlocked: (p) => p.cup.knockouts >= 1,
+  },
+  { id: 'cup-winner', name: 'Champions', description: `Win the ${BRAND.tournamentName}.`, unlocked: (p) => p.cup.trophies >= 1 },
 ];
 
 /** Look up a definition by id. */

@@ -146,6 +146,7 @@ await page.screenshot({ path: `${OUT}/trophy.png` });
 const rec = await page.evaluate(() => JSON.parse(localStorage.getItem('tournament-v1')));
 check(rec.history.length === 1 && rec.history[0].finish === 'champion' && rec.history[0].team === 'CAN', 'history records the trophy');
 const progress = await page.evaluate(() => JSON.parse(localStorage.getItem('player-progress-v1')));
+check(!!progress.achievements['cup-knockouts'] && !!progress.achievements['cup-winner'], 'cup achievements unlocked: Into the Knockouts and Champions');
 check(progress.stats.played >= 6, `cup matches count in the player’s statistics (${progress.stats.played} played)`);
 
 // 5. New cup clears the finished one, keeping the history.

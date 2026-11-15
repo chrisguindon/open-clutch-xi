@@ -1,6 +1,6 @@
 # Statistics, achievements and progression
 
-**Status:** statistics, match history and 10 achievements are implemented; tournament achievements wait for the tournament. **Audience:** players, the maintainer and contributors.
+**Status:** statistics, match history and 12 achievements are implemented, including two for the [XI Nations Cup](tournament.md). **Audience:** players, the maintainer and contributors.
 
 The [experience review](EXPERIENCE_REVIEW.md) found that nothing is remembered between sessions. This page describes the local statistics, achievements and light progression that give players goals and a sense of improvement **without manipulating them**. Open Clutch XI is played by children and learners. It should model respectful game design, not engagement tricks.
 
@@ -44,6 +44,8 @@ All ten are visible from the start, with their conditions, on the Records screen
 | `shootout-win` | Nerves of Steel | Win a penalty shootout |
 | `penalty-save` | Safe Hands | Save a penalty in a shootout |
 | `tutorial-complete` | Ready to Play | Complete the tutorial without skipping a step |
+| `cup-knockouts` | Into the Knockouts | Reach the knockout rounds of the XI Nations Cup |
+| `cup-winner` | Champions | Win the XI Nations Cup |
 
 **Reachable by everyone.** Every achievement except *Top Level* can be earned at Beginner difficulty, with any control scheme and any team composition.
 
@@ -53,7 +55,7 @@ All ten are visible from the start, with their conditions, on the Records screen
 - anything that rewards repetition rather than skill or variety;
 - conditions the simulation can't detect reliably.
 
-**Planned:** *Reach the knockouts* and *Win the trophy*, with the [tournament](tournament-plan.md).
+The two cup achievements are counted from cup milestones (`cup` in the progress record), once per cup. Records saved before they existed load with zero milestones.
 
 ## Progression
 

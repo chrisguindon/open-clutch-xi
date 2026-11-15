@@ -16,6 +16,7 @@ The first public release is planned as **0.1.0 (public beta)**. It includes ever
 
 ### Added
 - **XI Nations Cup**, a fictional international tournament. Play Short (16 teams, quarter-finals) or Classic (32 teams, round of 16) with any national team: a seeded group draw, group tables with documented tie-breakers, a knockout bracket, penalty shootouts for level knockout matches (a game simplification: no extra time), and a trophy. Progress is saved after every match and included in saved-data export and import.
+- **Two cup achievements:** *Into the Knockouts* and *Champions*.
 - **Football rules engine.** Standard rules (11v11) and Arcade rules (3v3, 5v5).
   - An explicit restart state machine.
   - Throw-ins where the thrower can't move and must throw two-handed.
