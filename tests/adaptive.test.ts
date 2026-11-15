@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import { AdaptiveController, AdaptiveOptions, LADDER, levelIndexFor } from '../src/game/adaptive';
 import type { Quality } from '../src/game/settings';
-import { autoFrameSteps, frameIntervalFor } from '../src/game/frames';
+import { REFRESH_FALLBACK_DT, autoFrameSteps, estimateRefresh, frameIntervalFor } from '../src/game/frames';
 
 /**
  * SIMULATED hardware profiles (not real devices): a frame costs max(CPU, GPU) where GPU work scales with
@@ -136,5 +136,75 @@ describe('adaptive quality (simulated profiles)', () => {
     for (let i = 0; i < 130; i++) changed ||= c.frame(1 / 15, 1 / 60, 1).changed; // ~8.7 s of bad frames, first window skipped
     expect(changed).toBe(true);
     expect(c.history[0].t).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('display refresh estimate', () => {
+  // Deterministic jitter so samples look like real rAF timings.
+  const samples = (n: number, f: (i: number) => number) => Float64Array.from({ length: n }, (_, i) => f(i)).sort();
+  const jitter = (i: number) => ((i * 7919) % 13) / 13 - 0.5;
+  const start = () => ({ dt: REFRESH_FALLBACK_DT, measured: false });
+
+  it('measures common screens from steady intervals', () => {
+    for (const hz of [60, 75, 120, 144, 240]) {
+      const out = estimateRefresh(
+        samples(120, (i) => 1 / hz + jitter(i) * 0.0002),
+        120,
+        start(),
+        start(),
+      );
+      expect(out.measured).toBe(true);
+      expect(Math.abs(1 / out.dt / hz - 1)).toBeLessThan(0.03);
+    }
+  });
+
+  it('accepts a steady 30 Hz screen (low-power mode)', () => {
+    const out = estimateRefresh(
+      samples(120, (i) => 1 / 30 + jitter(i) * 0.0003),
+      120,
+      start(),
+      start(),
+    );
+    expect(out.measured).toBe(true);
+    expect(Math.round(1 / out.dt)).toBe(30);
+  });
+
+  it('keeps the previous estimate when a slow device makes the intervals meaningless', () => {
+    // Software rendering at 2–10 fps: long, wandering intervals.
+    const slow = samples(120, (i) => 0.1 + jitter(i) * 0.15);
+    const assumed = estimateRefresh(slow, 120, start(), start());
+    expect(assumed).toEqual({ dt: REFRESH_FALLBACK_DT, measured: false });
+    const measured = estimateRefresh(slow, 120, { dt: 1 / 144, measured: true }, start());
+    expect(measured).toEqual({ dt: 1 / 144, measured: true });
+    // ~37 fps that wanders between 22 and 32 ms isn't a screen either.
+    expect(
+      estimateRefresh(
+        samples(120, (i) => 0.027 + jitter(i) * 0.01),
+        120,
+        start(),
+        start(),
+      ).measured,
+    ).toBe(false);
+  });
+
+  it('never yields a frame-rate target below the 30 fps floor', () => {
+    const out = estimateRefresh(
+      samples(120, (i) => 0.2 + jitter(i) * 0.02),
+      120,
+      start(),
+      start(),
+    );
+    expect(1 / frameIntervalFor(out.dt, 'auto', 1000)).toBeGreaterThanOrEqual(29.5);
+  });
+
+  it('waits for enough samples', () => {
+    expect(
+      estimateRefresh(
+        samples(10, () => 1 / 144),
+        10,
+        start(),
+        start(),
+      ).measured,
+    ).toBe(false);
   });
 });

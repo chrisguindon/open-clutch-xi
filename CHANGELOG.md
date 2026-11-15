@@ -58,6 +58,7 @@ The first public release is planned as **0.1.0 (public beta)**. It includes ever
 - **AI crosses** lead the runner, and keepers claim high balls in their area.
 
 ### Fixed
+- **Very slow devices could show a frame-rate target below 30 fps.** When a device couldn't keep up, the game mistook its own low frame rate for the screen's refresh rate (down to 24 Hz). It now keeps the last good measurement, or assumes 60 Hz, and the F3 overlay marks an assumed refresh. The frame-rate floor of 30 fps now holds and is reached.
 - **Players' feet slid over the grass.** Walking players skated (legs too slow) and jogging players' feet slipped backwards (legs too fast). Leg tempo is now worked out from each running style's real stride length, so planted feet stay put.
 - **The tutorial could leave you stuck.** After a goal the camera kept orbiting the scorer with the ball out of shot, because it only returned to play at a kick-off, which practice never has. Pressing Switch while carrying the ball handed it to an AI team-mate. The tutorial card's Retry, Skip, Restart and Exit buttons didn't respond to clicks. All three are fixed. When the ball is out of reach, the tutorial now says where it is and how to get it back, and returns it if it stays out of reach.
 - **Touch players saw keyboard keys in the tutorial and hints,** and the skill-move lesson had no touch button. Instructions now name only controls your device has, and the skill lesson is left out on touch.

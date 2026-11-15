@@ -185,6 +185,48 @@ export function frameIntervalFor(refreshDt: number, setting: 'auto' | 'balanced'
   return Math.max(1, Math.round(want / refreshDt)) * refreshDt;
 }
 
+/** Refresh interval (s) assumed until the display can be measured: 60 Hz, the most common screen. */
+export const REFRESH_FALLBACK_DT = 1 / 60;
+/** Slowest refresh accepted as a measurement (s): 30 Hz, e.g. a phone's low-power mode. */
+export const REFRESH_SLOWEST_DT = 1 / 30;
+
+/** Display refresh estimate: the interval in seconds, and whether it was measured or assumed. */
+export interface RefreshEstimate {
+  dt: number;
+  measured: boolean;
+}
+
+/**
+ * Estimates the display refresh interval from `requestAnimationFrame` intervals, written into `out`.
+ *
+ * The browser calls back once per display refresh, unless the device is too slow to keep up. Then
+ * the intervals measure the device, not the screen: software rendering at 5 fps once made the game
+ * think it had a 24 Hz display, and its frame-rate target dropped below the 30 fps floor. So:
+ * - intervals faster than 48 Hz are trusted (nothing calls back faster than the screen refreshes);
+ * - slower ones (30–48 Hz) only when they're very regular, as a real screen's are (a struggling
+ *   device's frame times wander);
+ * - otherwise the previous estimate is kept: the last good measurement, or the 60 Hz fallback, which
+ *   stays flagged as assumed so diagnostics can say so.
+ * The caller should pass only intervals that follow cheap callbacks (see `Game.loop`).
+ * @param sorted Recent intervals in seconds, sorted ascending (only the first `n` are read).
+ * @param n Number of intervals; fewer than 30 keeps the previous estimate.
+ * @param prev The current estimate.
+ */
+export function estimateRefresh(sorted: ArrayLike<number>, n: number, prev: RefreshEstimate, out: RefreshEstimate): RefreshEstimate {
+  out.dt = prev.dt;
+  out.measured = prev.measured;
+  if (n < 30) return out;
+  const p10 = sorted[Math.floor(n * 0.1)];
+  const p40 = sorted[Math.floor(n * 0.4)];
+  const fastEnough = p10 <= 1 / 48;
+  const steadySlowScreen = p10 <= REFRESH_SLOWEST_DT * 1.02 && p40 <= p10 * 1.04;
+  if (fastEnough || steadySlowScreen) {
+    out.dt = Math.min(REFRESH_SLOWEST_DT, Math.max(1 / 360, p10));
+    out.measured = true;
+  }
+  return out;
+}
+
 /** Highest frame rate 'auto' aims for: smooth on 120–165 Hz screens, half rate on 240 Hz+. */
 export const AUTO_MAX_FPS = 170;
 /**

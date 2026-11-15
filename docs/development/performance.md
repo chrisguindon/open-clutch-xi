@@ -6,7 +6,7 @@ Goal: smooth, responsive play from phones to high-refresh desktops, without rais
 
 ## Frame pacing
 
-- **Frame limiter.** The game renders on whole multiples of the measured display refresh interval (`frameIntervalFor`, `src/game/frames.ts`), so frames are evenly paced. The refresh rate is estimated from the 10th percentile of raw `requestAnimationFrame` intervals, and settles after about 30 frames.
+- **Frame limiter.** The game renders on whole multiples of the measured display refresh interval (`frameIntervalFor`, `src/game/frames.ts`), so frames are evenly paced. The refresh rate is estimated from the 10th percentile of raw `requestAnimationFrame` intervals, and settles after about 30 frames (`estimateRefresh`). Only intervals after cheap callbacks count, and slow readings (30–48 Hz) only when they're as regular as a real screen's. On a device too slow to measure the screen, the last good estimate is kept, or 60 Hz is assumed, and the F3 overlay says *(assumed)*. Otherwise the device's own low frame rate would be mistaken for the screen's refresh.
 - **Frame-rate settings:**
 
   | Setting | Behaviour |

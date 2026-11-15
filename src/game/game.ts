@@ -34,7 +34,7 @@ import { applyTuning, loadTuning } from '../dev/tuning';
 import { AudioEngine } from '../audio/audio';
 import { InputManager, UICommand } from '../input/input';
 import { MinimapData, UI, UIHost, bindHtml, controlAvailable } from '../ui/ui';
-import { FixedStepClock, Frame, ReplayBuffer, autoFrameSteps, frameIntervalFor } from './frames';
+import { FixedStepClock, Frame, REFRESH_FALLBACK_DT, RefreshEstimate, ReplayBuffer, autoFrameSteps, estimateRefresh, frameIntervalFor } from './frames';
 import { AdaptiveController, AdaptiveOptions, LADDER, levelIndexFor } from './adaptive';
 import { ReplayDirector } from './replay';
 import { CameraMode, Quality, Settings, classifyDevice, hasStoredSettings, loadSettings, profileFor, saveSettings } from './settings';
@@ -981,13 +981,20 @@ export class Game implements UIHost {
   // Main loop
   // ---------------------------------------------------------------------------
 
-  /** Raw rAF intervals (s) for estimating the display refresh. */
+  /** Raw rAF intervals (s) for estimating the display refresh, and a scratch copy for sorting. */
   private rafDeltas = new Float32Array(120);
+  private rafSorted = new Float32Array(120);
   private rafN = 0;
   private lastRaf = 0;
   private sinceRender = 0;
+  /** Seconds of game work in the previous callback (0 when the limiter skipped it). */
+  private lastWorkS = 0;
+  /** Display refresh estimate (see {@link estimateRefresh}); assumed 60 Hz until measured. */
+  readonly refresh: RefreshEstimate = { dt: REFRESH_FALLBACK_DT, measured: false };
   /** Estimated display refresh interval (s). */
-  refreshDt = 1 / 60;
+  get refreshDt(): number {
+    return this.refresh.dt;
+  }
 
   /** Target interval between rendered frames for the frame-rate setting (an even multiple of the refresh). */
   private benchFrameRate: Settings['frameRate'] | null = null;
@@ -999,16 +1006,21 @@ export class Game implements UIHost {
 
   private loop = (t: number): void => {
     requestAnimationFrame(this.loop);
-    // Display refresh estimate from raw rAF intervals (10th percentile, refreshed every 60 ticks).
+    // Display refresh estimate from rAF intervals. Only intervals after a cheap callback count: after a
+    // heavy one, the interval measures this device's speed, not the screen's.
     const raw = this.lastRaf ? (t - this.lastRaf) / 1000 : 0;
     this.lastRaf = t;
-    if (raw > 0 && raw < 0.2) {
+    const clean = this.lastWorkS < raw * 0.5;
+    this.lastWorkS = 0;
+    if (raw > 0 && raw < 0.2 && clean) {
       this.rafDeltas[this.rafN++ % this.rafDeltas.length] = raw;
-      // Converge quickly (30 samples ≈ 0.13 s at 240 Hz): until the first estimate the limiter assumes
-      // 60 Hz, which paced frames unevenly on fast displays for the first ~120 callbacks.
+      // Re-estimate every 30 samples (≈0.13 s at 240 Hz) so fast displays are paced evenly almost at once.
       if (this.rafN % 30 === 0) {
-        const sorted = Array.from(this.rafDeltas.subarray(0, Math.min(this.rafN, this.rafDeltas.length))).sort((a, b) => a - b);
-        this.refreshDt = Math.min(1 / 24, Math.max(1 / 360, sorted[Math.floor(sorted.length * 0.1)]));
+        const n = Math.min(this.rafN, this.rafDeltas.length);
+        const sorted = this.rafSorted.subarray(0, n);
+        sorted.set(this.rafDeltas.subarray(0, n));
+        sorted.sort();
+        estimateRefresh(sorted, n, this.refresh, this.refresh);
       }
     }
     // Frame-rate limiter: skip whole vsyncs so frames stay evenly paced (e.g. 72 fps on 144 Hz).
@@ -1027,7 +1039,9 @@ export class Game implements UIHost {
     } catch (err) {
       console.error(err);
     }
-    this.diag.frameEnd(performance.now() - tStart);
+    const workMs = performance.now() - tStart;
+    this.lastWorkS = workMs / 1000;
+    this.diag.frameEnd(workMs);
   };
 
   private frame(dt: number): void {
@@ -1042,6 +1056,7 @@ export class Game implements UIHost {
     this.input.frame.aim = this.computeAim();
     this.diag.add('input', P.now() - tp);
     this.diag.display.hz = Math.round(1 / this.refreshDt);
+    this.diag.display.measured = this.refresh.measured;
     this.diag.display.setting = this.benchFrameRate ?? this.settings.frameRate;
     this.diag.display.targetFps = Math.round(1 / this.targetFrameDt());
     // Real-input latency tracking (only for the human-controlled player in live play).

@@ -74,6 +74,8 @@ const status = (page) =>
       res: a.state.resScale,
       fpsStep: a.state.fpsStep,
       targetFps: Math.round(1 / g.targetFrameDt()),
+      refreshHz: Math.round(1 / g.refresh.dt),
+      refreshMeasured: g.refresh.measured,
       active: g.activeQuality,
       history: a.history.map((h) => `${h.t}s ${h.text}`),
       status: g.graphicsStatus(),
@@ -109,10 +111,9 @@ const status = (page) =>
   console.log('[slow]', JSON.stringify(s, null, 1));
   check(s.level >= 5, `slow device stepped down to the Low rungs (now ${s.active}, level ${s.level})`);
   check(s.res < 1, `slow device reduced resolution (${s.res})`);
-  // The floor must hold: the controller never chooses a frame-rate target below ~30 fps. (Whether it
-  // *reaches* that step depends on the measured display refresh, which can't be measured while software
-  // rendering runs at 2–10 fps: the estimate collapses towards its 24 Hz clamp, the next step would be
-  // under the floor, and the controller rightly holds. Verify reaching it on real hardware.)
+  // The floor must hold: the controller never chooses a frame-rate target below ~30 fps. Software
+  // rendering at 2–10 fps makes the display refresh unmeasurable; the estimate must then keep its last
+  // good value (or the assumed 60 Hz), never the device's own frame rate.
   const fpsSteps = s.history
     .map((h) => /frame-rate target ↓ (\d+) fps/.exec(h)?.[1])
     .filter(Boolean)
@@ -121,6 +122,12 @@ const status = (page) =>
     fpsSteps.every((f) => f >= 29),
     `frame-rate floor respected: no target below ~30 fps (steps taken: ${fpsSteps.join(', ') || 'none'}; live target ${s.targetFps} fps)`,
   );
+  check(fpsSteps.includes(30), `slow device stepped the frame-rate target down to 30 fps (steps: ${fpsSteps.join(', ') || 'none'})`);
+  check(
+    s.refreshHz >= 30,
+    `display refresh never estimated from the slow device's frame rate (${s.refreshHz} Hz, ${s.refreshMeasured ? 'measured' : 'assumed'})`,
+  );
+  check(s.targetFps >= 29, `live frame-rate target at or above the floor (${s.targetFps} fps)`);
   check(same && t1 > t0, `match kept running through the quality changes (same match object, game time ${t0.toFixed(1)} → ${t1.toFixed(1)} s)`);
   check(errors.length === 0, `no console errors (${errors.slice(0, 3).join(' | ')})`);
   await browser.close();
@@ -138,6 +145,7 @@ const status = (page) =>
   const s = await status(page);
   console.log('[fast]', JSON.stringify(s, null, 1));
   check(s.targetFps === 144, `fast device holds 144 fps on 144 Hz (${s.targetFps})`);
+  check(s.refreshMeasured && s.refreshHz === 144, `144 Hz display measured (${s.refreshHz} Hz, ${s.refreshMeasured ? 'measured' : 'assumed'})`);
   check(s.level < 5, `fast device climbed from Low (now ${s.active}, level ${s.level})`);
   check(errors.length === 0, `no console errors (${errors.slice(0, 3).join(' | ')})`);
   await browser.close();

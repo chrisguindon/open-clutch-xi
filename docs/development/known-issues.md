@@ -17,6 +17,5 @@
 - **Replays** don't record officials (they're hidden during replays).
 
 ## Platforms and verification
-- **Very slow devices (below ~24 fps):** the game estimates the display refresh rate from browser frame timing, so when the device can't keep up even at the lowest quality, the estimate collapses towards 24 Hz and the frame-rate readout can show a target below the 30 fps floor. The adaptive controller itself never chooses a lower target. Found with software rendering; not yet checked on real slow hardware.
 - **Not tested on real devices.** Real phones, tablets, controllers, fullscreen, older iOS audio and adaptive quality on real low-end and high-refresh hardware have not been verified. Automated checks use emulation.
 - **GitHub Actions** workflows haven't yet run on GitHub.

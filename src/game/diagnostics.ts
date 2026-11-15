@@ -120,6 +120,8 @@ export interface PerfSummary {
   refreshHzEstimate: number;
   /** Display refresh measured from raw requestAnimationFrame intervals (independent of the limiter). */
   displayHz: number;
+  /** False when the refresh couldn't be measured (device too slow) and {@link displayHz} is assumed. */
+  displayHzMeasured: boolean;
   frameLimiter: { setting: string; targetFps: number };
   /** Measurement validity: share of frames in live play, focus/visibility interruptions. */
   validity: { liveFramePct: number; modeFrames: Record<string, number>; blurEvents: number; hiddenEvents: number; valid: boolean; warnings: string[] };
@@ -254,7 +256,7 @@ export class FluidityDiagnostics {
   /** Real-input latency tracking (keyboard / gamepad / touch → simulation / frame). */
   readonly tracker = new InputLatencyTracker();
   /** Set by the game every frame. */
-  display = { hz: 60, setting: 'balanced', targetFps: 60 };
+  display = { hz: 60, measured: false, setting: 'balanced', targetFps: 60 };
   /** Latest AI ball-carrier decision with its reasons (F3 dev overlay). */
   aiDecision: () => string | null = () => null;
   /** Adaptive performance state (graphics mode, level, recent adjustments with reasons). */
@@ -565,6 +567,7 @@ export class FluidityDiagnostics {
     const idleSpanMs = performance.now() - this.idleStart;
     return {
       displayHz: this.display.hz,
+      displayHzMeasured: this.display.measured,
       frameLimiter: { setting: this.display.setting, targetFps: this.display.targetFps },
       validity: {
         liveFramePct: r2(livePct, 1),
@@ -640,7 +643,7 @@ export class FluidityDiagnostics {
           `${S[k].mean > BUDGET_MS[k] ? '!' : ' '}${SECTION_LABEL[k].padEnd(21)} ${S[k].mean.toFixed(2).padStart(6)}  p95 ${S[k].p95.toFixed(2).padStart(5)}  /${BUDGET_MS[k]}`,
       ).join('\n');
       this.textEl.textContent =
-        `FPS ${s.fps}   1% low ${s.low1Fps}   display ${s.displayHz} Hz · limiter ${s.frameLimiter.setting} → ${s.frameLimiter.targetFps} fps\n` +
+        `FPS ${s.fps}   1% low ${s.low1Fps}   display ${s.displayHz} Hz${s.displayHzMeasured ? '' : ' (assumed)'} · limiter ${s.frameLimiter.setting} → ${s.frameLimiter.targetFps} fps\n` +
         (s.validity.valid ? '' : `⚠ ${s.validity.warnings.join('; ')}\n`) +
         `frame ms  p50 ${s.frameMs.p50}  p95 ${s.frameMs.p95}  p99 ${s.frameMs.p99}  max ${s.frameMs.max}\n` +
         `hitches ${s.hitchPct}%   game JS ${s.jsFrameMs} ms/frame = ${s.jsBusyPct}% of wall time\n` +
