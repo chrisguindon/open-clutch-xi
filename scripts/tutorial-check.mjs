@@ -214,15 +214,18 @@ check(
   `Switch while carrying keeps the ball with the controlled player (${JSON.stringify({ carrier, human: afterSwitch.human, ctrl: afterSwitch.ctrl })})`,
 );
 
-// Lose the ball: a simulated deflection leaves it 10 m behind, out of the team-mates' reach.
+// Lose the ball: a simulated deflection leaves it 10 m behind, out of the team-mates' reach. The human
+// starts from the centre spot so the scenario doesn't depend on where earlier lessons ended (a ball
+// "lost" next to a team-mate is rightly picked up by them, and then no hint is due).
 await page.evaluate(() => {
   const m = window.__game.match,
     w = m.world,
     h = m.human,
     L2 = w.pitch.length / 2;
+  h.place(0, 0, 0);
   for (const p of w.players) if (p.team === 0 && p.id !== h.id) p.place(w.attackDir(0) * (L2 - 4), (p.index - 1) * 6, 0);
   w.clearPossession();
-  w.ball.reset(h.pos.x - 10 * w.attackDir(0), h.pos.z);
+  w.ball.reset(-10 * w.attackDir(0), 0);
 });
 const hinted = await until(() => /The ball is over there/.test(document.querySelector('.tutorial .msg')?.textContent ?? ''));
 check(hinted && /press R/.test((await ui()).msg), `Losing the ball shows where it is and how to get it back ("${(await ui()).msg.slice(0, 80)}")`);
