@@ -19,6 +19,7 @@ import * as THREE from 'three';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { Anim } from '../../sim/player';
 import { KICK_TIMING } from '../../sim/config';
+import { gaitWeights } from '../../sim/gait';
 import { BakedAction, PoseSampler, retargetFor } from './clipSampler';
 import { clamp, lerp, smoothstep } from '../../core/math';
 import { CharacterAssets } from './assets';
@@ -540,26 +541,14 @@ export class Footballer implements PlayerVisual {
     }
   }
 
-  /** Blend weights for idle / walk / jog / sprint by speed. */
+  /** Blend weights for idle / walk / jog / sprint by speed (shared with the simulation's gait, {@link gaitWeights}). */
   private locomotionWeights(s: PoseInput): [number, number, number, number] {
     // Damp the legs during on-the-spot actions so kicks read clearly.
     let sp = s.speed;
     if (s.anim === Anim.Kick || s.anim === Anim.Pass || s.anim === Anim.Tackle) sp = Math.min(sp, 2.2);
-    const keys = [0.15, 1.9, 4.2, 7.6];
-    const w: [number, number, number, number] = [0, 0, 0, 0];
-    if (sp <= keys[0]) w[0] = 1;
-    else if (sp >= keys[3]) w[3] = 1;
-    else {
-      for (let i = 0; i < 3; i++) {
-        if (sp >= keys[i] && sp <= keys[i + 1]) {
-          const f = (sp - keys[i]) / (keys[i + 1] - keys[i]);
-          w[i] = 1 - f;
-          w[i + 1] = f;
-        }
-      }
-    }
-    return w;
+    return gaitWeights(sp, this.locoW);
   }
+  private readonly locoW: [number, number, number, number] = [0, 0, 0, 0];
 
   /** Apply locomotion targets with clip times driven by the simulation gait phase. */
   private applyLoco(w: [number, number, number, number], scale: number): void {

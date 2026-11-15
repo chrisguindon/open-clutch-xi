@@ -57,6 +57,7 @@ The first public release is planned as **0.1.0 (public beta)**. It includes ever
 - **AI crosses** lead the runner, and keepers claim high balls in their area.
 
 ### Fixed
+- **Players' feet slid over the grass.** Walking players skated (legs too slow) and jogging players' feet slipped backwards (legs too fast). Leg tempo is now worked out from each running style's real stride length, so planted feet stay put.
 - **The tutorial could leave you stuck.** After a goal the camera kept orbiting the scorer with the ball out of shot, because it only returned to play at a kick-off, which practice never has. Pressing Switch while carrying the ball handed it to an AI team-mate. The tutorial card's Retry, Skip, Restart and Exit buttons didn't respond to clicks. All three are fixed. When the ball is out of reach, the tutorial now says where it is and how to get it back, and returns it if it stays out of reach.
 - **Touch players saw keyboard keys in the tutorial and hints,** and the skill-move lesson had no touch button. Instructions now name only controls your device has, and the skill lesson is left out on touch.
 - **Most players looked bald.** Only one of the hairstyles was ever loaded, and the others were bound to the wrong bones, standing at the centre spot. Every hairstyle now appears, including a short cut modelled for the women's body.

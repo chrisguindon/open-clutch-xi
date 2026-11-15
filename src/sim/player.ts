@@ -9,6 +9,7 @@
  */
 
 import { MOVE, GK, PLAYER, Role, TeamId } from './config';
+import { cadence } from './gait';
 import { Vec2, angleDiff, approachAngle, clamp, hyp } from '../core/math';
 
 /** Animation/action state. Also drives the procedural animation in the renderer. */
@@ -281,8 +282,8 @@ export class Player {
     this.pos.addScaled(this.vel, dt);
     const sp = this.speed;
     this.runPhase += sp * dt;
-    // Cadence rises with speed (walk ≈1 Hz, jog ≈1.2 Hz, sprint ≈1.55 Hz full cycles).
-    if (sp > 0.15) this.gaitPhase += (0.85 + sp * 0.085) * Math.PI * 2 * dt;
+    // Legs cycle at the rate where a stride covers the distance travelled, so feet don't skate.
+    this.gaitPhase += cadence(sp) * Math.PI * 2 * dt;
   }
 
   /**
