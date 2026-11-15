@@ -43,6 +43,7 @@ import { advance, champion, createTournament, nextPlayerFixture, playerFinish, r
 import { loadCupRecord, saveCupRecord, withHistory, type CupRecord } from './tournament/record';
 import { fixtureLabel } from '../ui/cupScreen';
 import { playerLabelCueTime, playerLabelMode, playerLabelOpacity } from '../ui/playerLabel';
+import { OrientationGuard, orientationAction } from '../ui/orientation';
 import { emptySiteConfig, loadSiteConfig, type SiteConfig } from './siteConfig';
 import { setSiteBoardPanels } from '../render/textures';
 
@@ -131,6 +132,9 @@ export class Game implements UIHost {
     this.firstLaunch = !hasStoredSettings();
     this.settings = loadSettings();
     this.ui = new UI(uiRoot, this);
+    // Phones in portrait get a full-screen "rotate" screen that blocks play, from the loading screen on,
+    // and pauses a running match (src/ui/orientation.ts).
+    this.orientation = new OrientationGuard(document.getElementById('app') ?? this.container, (blocked) => this.onOrientationChange(blocked));
   }
 
   // ---------------------------------------------------------------------------
@@ -444,6 +448,8 @@ export class Game implements UIHost {
     this.state = 'playing';
     this.input.gameplayActive = true;
     this.ui.showHud(true, this.settings.minimap && opts.mode !== 'penalties');
+    // A match that starts while a phone is upright starts paused, behind the rotate screen.
+    if (this.orientation?.isBlocking) this.onOrientationChange(true);
     this.audio.setCrowdIntensity(0.35);
     if (opts.mode === 'match') {
       this.audio.whistle('short');
@@ -479,6 +485,26 @@ export class Game implements UIHost {
     this.input.gameplayActive = false;
     this.ui.tutorialActive = !!this.tutorial;
     this.ui.showPause(this.mode);
+  }
+
+  /** The rotate screen for phones in portrait, and whether the current pause is its doing. */
+  private orientation: OrientationGuard | null = null;
+  private pausedByOrientation = false;
+
+  /**
+   * The rotate screen appeared or went away: pause a running match, and resume it afterwards only if
+   * the rotate screen was what paused it (see orientationAction).
+   */
+  private onOrientationChange(blocked: boolean): void {
+    const action = orientationAction(blocked, this.state, this.pausedByOrientation);
+    if (action === 'pause' && !this.bench?.running) {
+      this.pause();
+      this.pausedByOrientation = this.state === 'paused';
+    } else if (action === 'resume') {
+      this.resume();
+    }
+    if (!blocked) this.pausedByOrientation = false;
+    this.orientation?.setMatchPaused(blocked && this.state === 'paused');
   }
 
   private autoPause(): void {
