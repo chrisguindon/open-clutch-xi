@@ -24,7 +24,7 @@ export function headingAnchors(markdown) {
     h
       .trim()
       .toLowerCase()
-      .replace(/<[^>]+>/g, '')
+      .replace(/[<>]/g, '')
       .replace(/[^\p{L}\p{N}\s_-]/gu, '')
       .replace(/\s/g, '-');
   const set = new Set();
