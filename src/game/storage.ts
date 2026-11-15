@@ -33,6 +33,8 @@ export const STORAGE_KEYS = {
   settings: 'floodlight-fc-settings-v1',
   /** Statistics, match history and achievements (src/game/progress.ts). Brand-neutral by design. */
   progress: 'player-progress-v1',
+  /** The XI Nations Cup in progress and past cups (src/game/tournament/record.ts). Brand-neutral by design. */
+  tournament: 'tournament-v1',
   /** Movement-lab tuning (developer tool, `?lab`). */
   devTuning: 'floodlight-fc-tuning-v1',
 } as const;

@@ -26,6 +26,7 @@
 import { DEFAULT_SETTINGS, sanitizeSettings, type Settings } from './settings';
 import { parseProgress, type PlayerProgress } from './progress';
 import { STORAGE_KEYS, forget, isRecord, readJson, writeJson } from './storage';
+import { parseCupRecord, type CupRecord } from './tournament/record';
 
 /** Identifies an export file. Brand-neutral and permanent, so files from before a rename still import. */
 export const SAVE_FORMAT = 'football-game-save';
@@ -39,7 +40,7 @@ export interface SaveFile {
   format: typeof SAVE_FORMAT;
   version: typeof SAVE_VERSION;
   exportedAt: string;
-  data: { settings?: Partial<Settings>; progress?: PlayerProgress };
+  data: { settings?: Partial<Settings>; progress?: PlayerProgress; tournament?: CupRecord };
 }
 
 /** The current saved data as an export file (pretty-printed so people can read it). */
@@ -49,6 +50,8 @@ export function exportSaveData(now = new Date()): string {
   if (isRecord(settings)) file.data.settings = sanitizeSettings(settings);
   const progress = parseProgress(readJson(STORAGE_KEYS.progress));
   if (progress) file.data.progress = progress;
+  const cup = parseCupRecord(readJson(STORAGE_KEYS.tournament));
+  if (cup && (cup.active || cup.history.length)) file.data.tournament = cup;
   return JSON.stringify(file, null, 2);
 }
 
@@ -70,7 +73,7 @@ export function readSaveFile(text: string): ImportResult {
   if (!isRecord(raw) || raw.format !== SAVE_FORMAT) return { ok: false, error: 'That file isn’t a saved-data file from this game.' };
   if (typeof raw.version !== 'number' || raw.version > SAVE_VERSION) return { ok: false, error: 'That file comes from a newer version of the game.' };
   if (raw.version !== SAVE_VERSION || !isRecord(raw.data)) return { ok: false, error: 'That saved-data file is damaged.' };
-  const known = new Set(['settings', 'progress']);
+  const known = new Set(['settings', 'progress', 'tournament']);
   if (Object.keys(raw.data).some((k) => !known.has(k))) return { ok: false, error: 'That saved-data file contains unexpected data.' };
   const file: SaveFile = {
     format: SAVE_FORMAT,
@@ -89,28 +92,35 @@ export function readSaveFile(text: string): ImportResult {
     if (!progress) return { ok: false, error: 'The statistics and achievements in that file are damaged.' };
     file.data.progress = progress;
   }
-  if (!file.data.settings && !file.data.progress) return { ok: false, error: 'That saved-data file is empty.' };
+  if (raw.data.tournament !== undefined) {
+    const cup = parseCupRecord(raw.data.tournament);
+    if (!cup) return { ok: false, error: 'The tournament in that file is damaged.' };
+    file.data.tournament = cup;
+  }
+  if (!file.data.settings && !file.data.progress && !file.data.tournament) return { ok: false, error: 'That saved-data file is empty.' };
   const p = file.data.progress;
   const summary = [
     file.data.settings ? 'settings' : null,
+    file.data.tournament ? 'the XI Nations Cup' : null,
     p
       ? `${p.stats.played} match${p.stats.played === 1 ? '' : 'es'} and ${Object.keys(p.achievements).length} achievement${Object.keys(p.achievements).length === 1 ? '' : 's'}`
       : null,
-  ]
-    .filter(Boolean)
-    .join(' and ');
-  return { ok: true, file, summary };
+  ].filter((x): x is string => !!x);
+  const listed = summary.length > 1 ? `${summary.slice(0, -1).join(', ')} and ${summary[summary.length - 1]}` : summary[0];
+  return { ok: true, file, summary: listed };
 }
 
 /** Apply a checked file (from {@link readSaveFile}): replaces what it contains, keeps the rest. */
 export function applySaveFile(file: SaveFile): void {
   if (file.data.settings) writeJson(STORAGE_KEYS.settings, { ...structuredClone(DEFAULT_SETTINGS), ...file.data.settings });
   if (file.data.progress) writeJson(STORAGE_KEYS.progress, file.data.progress);
+  if (file.data.tournament) writeJson(STORAGE_KEYS.tournament, file.data.tournament);
 }
 
-/** Forget statistics, match history and achievements (settings stay). */
+/** Forget statistics, match history, achievements and the XI Nations Cup (settings stay). */
 export function resetProgress(): void {
   forget(STORAGE_KEYS.progress);
+  forget(STORAGE_KEYS.tournament);
 }
 
 /** Forget everything the game has saved in this browser: settings, progress, developer tuning and recovery copies. */
