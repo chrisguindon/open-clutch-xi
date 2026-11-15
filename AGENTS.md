@@ -111,16 +111,17 @@ Browser checks (`npm run test:browser`, `check:controls`, `check:adaptive`, …)
   - Suggested scopes: `ai`, `physics`, `gameplay`, `controls`, `graphics`, `audio`, `ui`, `a11y`, `perf`, `tutorial`, `penalties`, `docs`, `ci`, `deps`, `release`, `repo`.
   - Use `!` or a `BREAKING CHANGE:` footer for breaking changes, for example to saved settings.
 - Pull requests are **squash-merged**, so the PR title becomes the commit message on `main` and must follow the same format. `scripts/check-commit-message.mjs` checks it.
-- **No AI-vendor attribution.** No `Co-authored-by:` trailers for tools or models, no "generated with …" signatures, and no AI-tool session links in commits, PR descriptions or files. The repository hygiene check rejects them.
+- **AI attribution trailers are allowed, not required.** Tools such as GitHub Copilot (the coding agent, Autofix) add `Co-authored-by:` trailers on their own. The checks report them as a warning, never a failure. Don't write "generated with …" signatures into files: the repository hygiene check rejects those.
 - Don't commit, push, tag or publish releases unless the human you're working with asks.
 
 ### Git authorship policy
 
 - **A real, authorised human is the author and committer** of every commit: the person who reviewed the change and takes responsibility for it, using their own configured Git identity.
 - **Never invent, guess or impersonate an identity.** Don't set `user.name` or `user.email` for someone, and don't commit as an AI tool, a model or a vendor. If no authorised identity is configured, don't commit: leave the work ready for the human to review and commit.
-- **No automatic AI attribution:** no AI co-author trailers, no "generated with …" signatures, no AI-tool session links.
-  - For Claude Code, the shared project settings (`.claude/settings.json`) turn its automatic commit and PR attribution off (`attribution.commit` and `attribution.pr` empty, `sessionUrl` false). Other tools need their own equivalent setting.
-  - `scripts/check-commit-message.mjs` (CI, the optional `.githooks/commit-msg` hook, and the hygiene check over history) rejects these trailers, signatures and links.
+- **Automatic AI attribution in commit messages** (AI co-author trailers, "generated with …" signatures, AI-tool session links) is tolerated. Many tools add it themselves, and blocking it made them hard to use.
+  - `scripts/check-commit-message.mjs` (CI, the optional `.githooks/commit-msg` hook, and the hygiene check over history) reports it as a warning and never fails because of it.
+  - The maintainer may drop such trailers from the squash-merge message, but doesn't have to.
+  - Claude Code's shared project settings (`.claude/settings.json`) keep its own commit and PR attribution off. That's a project preference, not a rule.
 - **Keep legitimate attribution:** human co-authors (`Co-authored-by:` a person), third-party copyright notices and licence-required notices stay.
 - **This is not a claim of human-only authorship.** The project uses AI-assisted development and says so openly (README, ADR 0008, [docs/development/ai-assisted-workflow.md](docs/development/ai-assisted-workflow.md)). The policy is about responsibility: a human reviews, understands, commits and publishes every change.
 - Never bypass checks (`--no-verify`), amend or rewrite published history, or force-push.

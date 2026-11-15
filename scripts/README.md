@@ -9,7 +9,7 @@ Browser scripts need Chrome or Chromium (set `CHROME_PATH` if it isn't found). T
 | Script | npm command | Checks |
 |---|---|---|
 | `check-licenses.mjs` | `check:licenses` | Licence headers, dependency licence allow-lists, asset inventory. `--write` regenerates the licence texts in `NOTICE.md` and `public/NOTICE.txt`. |
-| `check-repo-hygiene.mjs` | `check:repo` | Nothing private would be published: profiling exports, private paths, tokens, AI attribution trailers, `.local/` or `release/` files; no hosting-platform deploy configuration |
+| `check-repo-hygiene.mjs` | `check:repo` | Nothing private would be published: profiling exports, private paths, tokens, AI signatures written into files (AI trailers in commit messages are only reported), `.local/` or `release/` files; no hosting-platform deploy configuration |
 | `check-docs.mjs` | `check:docs` | Community files exist; every relative Markdown link and anchor resolves |
 | `check-github-config.mjs` | `check:github` | Issue and discussion forms, chooser config, labels, Dependabot; workflows (explicit permissions, actions pinned to commit SHAs, no script injection) |
 | `check-commit-message.mjs` | — | A commit message or PR title follows Conventional Commits (used by CI and `.githooks/commit-msg`) |
