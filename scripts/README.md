@@ -15,6 +15,7 @@ Browser scripts need Chrome or Chromium (set `CHROME_PATH` if it isn't found). T
 | `check-commit-message.mjs` | — | A commit message or PR title follows Conventional Commits (used by CI and `.githooks/commit-msg`) |
 | `generate-sbom.mjs` | `sbom` | CycloneDX SBOM of what ships. `--check` verifies it's reproducible. |
 | `release-check.mjs` | `release:check` | Everything above in a clean copy, plus the release artefacts packaged twice to prove they're reproducible. Never commits, tags or publishes. |
+| `release.mjs` | `release` (`make release-prepare` / `make release-publish`) | Maintainers' release automation: prepare (version, changelog, notes, release check, pull request) and publish (tag, artefacts, draft GitHub release). Asks before anything permanent; `--dry-run` changes nothing. See [releasing](../docs/development/releasing.md). |
 | `package-web.mjs` | `release:package` | Builds the release artefacts in `release/`: the static web archive (site, licence, notices, `hosting/headers.json`, manifest), the source archive and `SHA256SUMS`. Never tags or uploads. |
 
 ## Browser checks (pass or fail)

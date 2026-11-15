@@ -46,6 +46,7 @@ const sourceFiles = [
   join(root, '.githooks', 'commit-msg'),
   join(root, 'tools', 'lint', 'eslint.config.mjs'),
   join(root, 'vite.config.ts'),
+  join(root, 'Makefile'),
   join(root, 'index.html'),
 ].filter((f) => ['.ts', '.mts', '.mjs', '.js', '.sh', '.css', '.html', '.yml', ''].includes(extname(f)) && !f.includes('/fixtures/'));
 for (const f of sourceFiles) {

@@ -31,9 +31,46 @@ The web archive is **reproducible**: it's built without a site URL, its entries 
   - `npm run release:check` verifies they agree, and that `docs/releases/v<version>.md` exists.
 - [Conventional Commits](https://www.conventionalcommits.org/) titles on squash-merged pull requests keep the history readable.
 
-## Release checklist (example: v0.1.0)
+## Releasing with one command per step
 
-The commands are given for reference. Run them yourself, in order, only when you're ready.
+The release tool (`scripts/release.mjs`) automates the checklist below. It fits squash-merged pull requests and asks before anything permanent.
+
+**Before you start:**
+- `gh auth login` once (the [GitHub CLI](https://cli.github.com/));
+- on an up-to-date, clean `main`;
+- with the release notes written in `docs/releases/v<version>.md` (copy the previous ones; a "Draft" notice at the top is removed for you);
+- with the changes listed under *Unreleased* in `CHANGELOG.md`.
+
+```bash
+make release-status                    # current version, latest tag, unreleased changes
+make release-prepare VERSION=0.2.0     # step 1
+#   → review and squash-merge the "chore(release): 0.2.0" pull request on GitHub, then:
+git switch main && git pull
+make release-publish VERSION=0.2.0     # step 2
+```
+
+| Step | What it does |
+|---|---|
+| `release-prepare` | Checks the repository (on `main`, clean, in sync with GitHub, tag free, notes exist). Sets the version in `package.json` and `package-lock.json`, moves *Unreleased* in the changelog under `[0.2.0] - <today>` with compare links, and finalises the release notes. Runs `npm run release:check` (stops if it fails, leaving the changes for you to fix). Commits `chore(release): 0.2.0` on `release/v0.2.0`, then **asks**, pushes it and opens a pull request. |
+| `release-publish` | Checks `main` is the merged release (version, dated changelog section, final notes). **Asks**, then creates and pushes the annotated tag `v0.2.0`. Builds the artefacts from the tag and verifies them (checksums, and a manifest naming the tagged, clean commit). Creates a **draft** GitHub release with the web archive, source archive, `SHA256SUMS` and SBOM. **Asks** whether to publish it now. Prints the `release.json` lines for sites that host the game. |
+
+**Options:**
+- `DRY_RUN=1` shows every step and changes nothing.
+- `YES=1` answers the questions before pushing and tagging, but never publishes the release: publishing always needs a human, on GitHub or at the prompt.
+- Without `make`: `npm run release -- prepare 0.2.0` and `npm run release -- publish 0.2.0`.
+
+**Safety:**
+- A question needs you to type the version, so a stray Enter can't push or tag.
+- The tool never force-pushes, and never moves or reuses a tag.
+- If `publish` stops after the tag was pushed (a network error, say), run it again: it carries on from that tag, as long as `main` is still exactly the tagged commit.
+
+**The first release (0.1.0):** `package.json` already says 0.1.0, so `make release-prepare VERSION=0.1.0` just rolls the changelog and finalises the notes. Edit the intro under *Unreleased* first if you like ("The first public release is planned as…"): it moves into the 0.1.0 section as written.
+
+Sites download release files only while the repository is **public**: publish the release once `open-clutch-xi` is public (or before, as a preview only).
+
+## Release checklist by hand (example: v0.1.0)
+
+What the tool does, step by step, if you'd rather run it yourself. Run them in order, only when you're ready.
 
 **1. Validate the release** (clean copy, fresh install, every check, browser flows, artefacts and their reproducibility, SBOM):
 
