@@ -1,0 +1,73 @@
+# Copyright (c) 2026 Christopher Guindon
+#
+# This program and the accompanying materials are made available
+# under the terms of the Eclipse Public License 2.0,
+# which is available at https://www.eclipse.org/legal/epl-2.0/.
+#
+# SPDX-License-Identifier: EPL-2.0
+
+# Deterministic issue triage and opt-in planning (no AI service, no secrets beyond the workflow token).
+# - triage: when an issue is opened or edited, add an area label and `status:needs-info` if required answers
+#   are missing (scripts/triage/triage.mjs). Adds labels only — no comments, so no noise.
+# - plan: when a maintainer adds `plan:requested`, post one plan skeleton comment built from labels only.
+# Issue content is untrusted: it is read by a script from the event file, never interpolated into commands.
+# Issue events always run the default branch's code, so an issue can't change what runs here.
+name: Triage
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    if: github.event.action != 'labeled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/triage
+            .github/labels.yml
+            package.json
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: npm install --no-save --ignore-scripts yaml@2.9.1
+      - run: node scripts/triage/run.mjs triage
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  plan:
+    if: github.event.action == 'labeled' && github.event.label.name == 'plan:requested'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/triage
+            .github/labels.yml
+            package.json
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: npm install --no-save --ignore-scripts yaml@2.9.1
+      - run: node scripts/triage/run.mjs plan
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

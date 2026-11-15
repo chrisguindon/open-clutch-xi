@@ -1,0 +1,17 @@
+title: '[Learning] '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        No question is too basic here. Mention what you're trying to learn or build, and what you've tried so far.
+        Remove anything private (names in file paths, tokens) from error messages you paste.
+  - type: textarea
+    id: question
+    attributes:
+      label: What are you working on or trying to understand?
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried? (optional)

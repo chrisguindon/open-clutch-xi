@@ -1,0 +1,37 @@
+# Copyright (c) 2026 Christopher Guindon
+#
+# This program and the accompanying materials are made available
+# under the terms of the Eclipse Public License 2.0,
+# which is available at https://www.eclipse.org/legal/epl-2.0/.
+#
+# SPDX-License-Identifier: EPL-2.0
+
+# Posts one friendly comment on a person's first pull request — and never again for them.
+# pull_request_target is used only so the comment can be posted on pull requests from forks. This workflow
+# never checks out or runs pull-request code, so it is safe.
+name: Welcome
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
+        with:
+          pr_message: |
+            Thanks for your first pull request to Open Clutch XI! 🎉
+
+            A few pointers while you wait for a review:
+            - **CI** runs formatting, lint, type checks, tests, a production build and some repository checks. If something fails, open the failed step to see why — `npm run ci` runs the same checks locally.
+            - The **PR title** becomes the commit message, so it needs the [Conventional Commits](https://www.conventionalcommits.org/) form, e.g. `fix(controls): …`.
+            - [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) has the details.
+
+            Questions are welcome — ask here or in Discussions.

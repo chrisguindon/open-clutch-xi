@@ -1,0 +1,77 @@
+name: Bug report
+description: Something doesn't work, crashes or looks broken
+title: 'Bug: '
+labels: [bug, 'status:needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Short reports are welcome — fill in what you can.
+
+        **Privacy:** do not include passwords, access tokens, private files, personal profiling results or other sensitive information.
+        **Security problems** (anything that could be exploited) should be reported privately — see [SECURITY.md](../blob/main/SECURITY.md).
+  - type: textarea
+    id: description
+    attributes:
+      label: What's the bug?
+      description: A short description of the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Quick Match, 5v5
+        2. Win the ball near the touchline
+        3. Press pass
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Game mode
+      options: [Quick Match, Penalty shootout, Practice, Tutorial, Menus / settings, Other]
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Difficulty
+      options: [Easy, Medium, Hard, Not relevant]
+  - type: dropdown
+    id: input
+    attributes:
+      label: Input method
+      options: [Keyboard, Keyboard & mouse, Controller, Touch]
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and operating system (optional)
+      description: Only if it seems relevant. Hardware details are optional too.
+      placeholder: Firefox 140 on Windows 11
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or recordings (optional)
+      description: Drag files here. Please check they contain nothing private.
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostic information (optional)
+      description: For performance problems, the numbers shown in the F3 panel (FPS, frame time, quality level) help. Please don't paste full system profiles or exports unless a maintainer asks.
+      render: text
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context (optional)

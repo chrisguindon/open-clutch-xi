@@ -1,0 +1,40 @@
+name: Accessibility issue
+description: Something makes the game harder or impossible to use or play
+title: 'Accessibility: '
+labels: ['area:accessibility', 'status:needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you — accessibility reports help everyone play. You don't need to share anything about yourself; describe the barrier and the behaviour you'd expect.
+  - type: textarea
+    id: barrier
+    attributes:
+      label: What's the barrier?
+      placeholder: e.g. "Focus is not visible on the team selection grid when using the keyboard."
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Affected screen or feature
+      placeholder: Settings → Controls, HUD, tutorial, penalty aiming…
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected accessible behaviour
+  - type: input
+    id: at
+    attributes:
+      label: Assistive technology or settings (optional)
+      description: Only if relevant and you're happy to share — e.g. a screen reader, keyboard-only use, OS high-contrast mode, browser zoom.
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Suggested improvements (optional)

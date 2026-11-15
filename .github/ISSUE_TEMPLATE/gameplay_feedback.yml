@@ -1,0 +1,48 @@
+name: Gameplay feedback
+description: How does it feel to play? AI opponents, movement, passing, shooting, penalties, balance
+title: 'Feedback: '
+labels: ['area:gameplay', 'status:needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Playtesting notes are one of the most useful contributions. Describe what happened in plain words — no technical knowledge needed.
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Game mode
+      options: [Quick Match 3v3, Quick Match 5v5, Quick Match 11v11, Penalty shootout, Practice, Tutorial]
+    validations:
+      required: true
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Difficulty
+      options: [Easy, Medium, Hard]
+  - type: dropdown
+    id: controls
+    attributes:
+      label: Controls
+      options: [Keyboard, Keyboard & mouse, Controller, Touch]
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Mostly about
+      multiple: true
+      options:
+        [AI opponents, AI team-mates, Goalkeepers, Movement / dribbling, Passing, Shooting, Defending / tackling, Penalties, Camera, Difficulty balance, Other]
+  - type: textarea
+    id: experience
+    attributes:
+      label: What happened?
+      description: Describe the moment or pattern, e.g. "the AI keeps passing backwards to the keeper under no pressure".
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What would you expect instead?
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Suggestions (optional)

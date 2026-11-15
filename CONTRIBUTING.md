@@ -1,0 +1,136 @@
+# Contributing to Open Clutch XI
+
+Thanks for your interest! Open Clutch XI is a free 3D football game for the browser and a community learning project. Everyone is welcome:
+- first-time open-source contributors
+- students
+- TypeScript and Three.js developers
+- people experimenting with AI-assisted development
+- experienced engineers who care about gameplay, accessibility or performance
+
+Please read the [Code of Conduct](CODE_OF_CONDUCT.md). Report security problems privately, as described in [SECURITY.md](SECURITY.md).
+
+## Ways to help (no code needed for many of them)
+
+- **Play and give feedback.** Use the *Gameplay feedback* issue form for AI opponents, passing, shooting, penalties and balance.
+- **Report bugs** and **accessibility barriers**. Each has its own issue form.
+- **Improve docs and learning material.** If something confused you, it will confuse others too. Use the *Documentation or learning* form.
+- **Answer questions** in Discussions, or **share what you built** in *Show and Tell*: a fork, a new skill move, an experiment.
+- **Write code:** start with an issue labelled [`good first issue`](https://github.com/OWNER/open-clutch-xi/labels/good%20first%20issue).
+
+**Issues vs Discussions.**
+- *Issues* track actionable work: a bug to fix, an agreed improvement, a doc to write.
+- *Discussions* are for questions, early ideas, learning and showing off.
+- Not sure which? Start a discussion. It can become an issue later.
+
+## Getting set up
+
+You need [Node.js](https://nodejs.org/) 22 or newer (24 recommended; `mise.toml` pins it) and Git. The project works on Linux, macOS and Windows.
+
+```bash
+git clone https://github.com/<you>/open-clutch-xi.git && cd open-clutch-xi
+npm ci                 # exact dependency versions from package-lock.json
+npm run lint:setup     # once: installs the ESLint toolchain in tools/lint
+npm run dev            # http://localhost:5173
+```
+
+New to the codebase? [docs/learning/README.md](docs/learning/README.md) has a guided tour and exercises.
+
+Useful in-game tools:
+- **F3** or `?diag`: diagnostics, including the AI's latest decision and its reasons
+- `?lab`: movement lab
+- `?bench`: benchmark
+
+Benchmark and diagnostics exports describe your computer. Keep them local, and don't attach them to public issues unless a maintainer asks.
+
+## Making a change
+
+1. **Pick or open an issue.** For anything bigger than a small fix, comment first so we can agree on the approach and nobody duplicates work.
+2. **Branch** from `main` in your fork.
+3. **Keep it focused:** one topic per pull request, matching the surrounding style.
+4. **Add or update tests.** Gameplay and AI changes need a scenario or simulation test (see `tests/ai-decisions.test.ts`, `tests/controls.test.ts`). Fixes need a regression test where practical.
+5. **Run the checks.** `npm run ci` runs everything CI runs:
+   - formatting (Prettier)
+   - lint (ESLint)
+   - type check
+   - tests
+   - production build
+   - licence and asset checks
+   - repository hygiene
+   - documentation links
+   - GitHub configuration
+
+   `npm run format` fixes formatting. Browser checks (`npm run test:browser`, `check:controls` and others) need Chrome or Chromium; set `CHROME_PATH` if it isn't found.
+6. **Update docs.** Docs are organised by subject in [docs/](docs/README.md). Update the page that describes the behaviour you changed. For football rules that's [the rules matrix](docs/gameplay/FOOTBALL_RULES.md); significant architecture choices get a short [ADR](docs/architecture/decisions/README.md). Add a line under *Unreleased* in [CHANGELOG.md](CHANGELOG.md) for anything players would notice.
+7. **Open a pull request.** The template guides you. Describe how you verified the change. If something could only be checked in emulation (touch, controllers, slow devices), say so.
+
+### Commit messages and pull-request titles
+
+We use [Conventional Commits](https://www.conventionalcommits.org/) and **squash-merge** pull requests, so your **PR title becomes the commit on `main`**. CI checks the title. Your individual commits can be informal.
+
+```
+<type>(<optional scope>): <summary in the imperative, no full stop>
+
+feat(controls): add a left-handed touch layout
+fix(ai): stop clearances towards our own goal
+docs(learning): add a troubleshooting section
+test(ai): cover restart long balls staying in play
+```
+
+- **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+- **Scopes** are optional, for example `ai`, `physics`, `controls`, `graphics`, `ui`, `a11y`, `perf`, `docs`, `ci`, `deps`.
+- Breaking changes (for example to saved settings) get a `!`: `feat(settings)!: …`.
+
+To check your own commit messages locally (optional): `git config core.hooksPath .githooks`. The check also rejects automatic AI attribution (AI co-author trailers, "generated with …" signatures, AI-tool session links): commit under your own name, as the person responsible for the change. Using AI tools is fine (see below); human co-authors are welcome.
+
+Please **don't add `Co-authored-by` trailers for AI tools** or "generated with …" signatures. You're the author, and you're responsible for the change.
+
+### Code style
+
+- TypeScript strict mode, formatted by Prettier, checked by ESLint. Follow the existing patterns: small pure functions where possible. The [coding standards](docs/development/CODING_STANDARDS.md) explain naming, module headers, TSDoc and hot-path rules.
+- **Comments explain *why*:** the football idea or the trade-off. People learn from this code.
+- Keep the simulation (`src/sim/`) deterministic and free of DOM or rendering code. Avoid allocations in per-frame hot paths.
+- Every source file starts with this header, in its format's comment syntax (`npm run check:licenses` enforces it; see the [coding standards](docs/development/CODING_STANDARDS.md#licence-headers) for shell, YAML and HTML):
+
+  ```ts
+  /*
+   * Copyright (c) <year> <copyright holder>
+   *
+   * This program and the accompanying materials are made available
+   * under the terms of the Eclipse Public License 2.0,
+   * which is available at https://www.eclipse.org/legal/epl-2.0/.
+   *
+   * SPDX-License-Identifier: EPL-2.0
+   */
+  ```
+
+## AI-assisted contributions
+
+They're welcome. Many people learn this way, and the project started as an AI-assisted experiment. The rules are the same as for any contribution:
+- **You remain responsible** for what you submit. Review it, run it, and make sure you understand it well enough to explain it and to address review comments.
+- You don't need to share your prompts.
+- Make sure the result is something you have the right to contribute under the EPL-2.0. Don't submit generated code or assets that copy other projects or copyrighted material.
+
+Agents and coding assistants working in this repository should follow [AGENTS.md](AGENTS.md).
+
+## Licensing of contributions
+
+Open Clutch XI is licensed under the [Eclipse Public License 2.0](LICENSE). By submitting a contribution, you agree that it is licensed under the EPL-2.0 (inbound = outbound), and you confirm that you have the right to submit it. We recommend signing off your commits (`git commit -s`), following the [Developer Certificate of Origin](https://developercertificate.org/).
+
+**Assets** (models, textures, sounds, fonts, images) must be your own work, or come under a licence that allows redistribution in an EPL-2.0 project. CC0 is preferred; MIT, OFL or CC-BY are fine with attribution. Add every new shipped file to [docs/governance/third-party-assets.md](docs/governance/third-party-assets.md) with its source, author and licence. `npm run check:licenses` fails on unlisted files in `public/`.
+
+**Please don't contribute:**
+- real club or federation crests, official kits, sponsor marks, real players' names or likenesses
+- recordings of real chants
+- anything you don't have the rights to
+
+The creator portrait on the About screen is **not** EPL-licensed, so don't reuse it in forks.
+
+## Project principles
+
+- **Free and private.** No accounts, tracking, analytics, ads or third-party requests at runtime.
+- **Accessible.** Keyboard, mouse, controller and touch, with remappable controls and reduced motion.
+- **Smooth on modest hardware.** Adaptive quality rather than higher minimum requirements.
+- **Original and neutral.** Generated names, generic kits.
+- **Welcoming and honest.** Patient reviews, and claims backed by tests.
+
+See [GOVERNANCE.md](GOVERNANCE.md) for how decisions are made and [docs/development/releasing.md](docs/development/releasing.md) for how releases work.

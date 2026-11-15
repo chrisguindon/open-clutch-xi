@@ -1,0 +1,101 @@
+# Copyright (c) 2026 Christopher Guindon
+#
+# This program and the accompanying materials are made available
+# under the terms of the Eclipse Public License 2.0,
+# which is available at https://www.eclipse.org/legal/epl-2.0/.
+#
+# SPDX-License-Identifier: EPL-2.0
+
+# The repository's label taxonomy (documented in docs/governance/github-setup.md).
+# Maintainers apply it with: node scripts/sync-labels.mjs --apply   (needs the GitHub CLI, `gh auth login`)
+# Contributors never need to run this.
+
+# Type — what kind of work
+- name: bug
+  color: 'd73a4a'
+  description: Something doesn't work as intended
+- name: enhancement
+  color: 'a2eeef'
+  description: A new feature or an improvement to an existing one
+- name: documentation
+  color: '0075ca'
+  description: Docs, guides, learning material or code comments
+- name: question
+  color: 'd876e3'
+  description: A question; usually better in Discussions → Q&A
+
+# Area — which part of the game
+- name: 'area:gameplay'
+  color: '1d76db'
+  description: Rules, modes, game feel, balance, penalties
+- name: 'area:ai'
+  color: '1d76db'
+  description: Computer-controlled players and keepers
+- name: 'area:physics'
+  color: '1d76db'
+  description: Ball and player physics, collisions
+- name: 'area:graphics'
+  color: '1d76db'
+  description: Rendering, animation, stadium, camera
+- name: 'area:controls'
+  color: '1d76db'
+  description: Keyboard, mouse, controller and touch input
+- name: 'area:accessibility'
+  color: '1d76db'
+  description: Barriers for players with different needs
+- name: 'area:performance'
+  color: '1d76db'
+  description: Frame rate, CPU/GPU use, adaptive quality, loading
+- name: 'area:testing'
+  color: '1d76db'
+  description: Tests, simulations and browser checks
+- name: 'area:documentation'
+  color: '1d76db'
+  description: README, guides, learning docs
+- name: 'area:infrastructure'
+  color: '1d76db'
+  description: Build, CI, dependencies, deployment, repository tooling
+
+# Contribution — who could pick it up
+- name: good first issue
+  color: '7057ff'
+  description: Small, well-described, suitable for a newcomer
+- name: help wanted
+  color: '008672'
+  description: The maintainer would welcome a contribution
+- name: mentorship available
+  color: 'c5def5'
+  description: Someone has offered to guide a contributor through it
+
+# Priority — set during triage
+- name: 'priority:critical'
+  color: 'b60205'
+  description: Game unplayable, data loss or security; fix first
+- name: 'priority:high'
+  color: 'd93f0b'
+  description: A core feature is broken for many players
+- name: 'priority:medium'
+  color: 'fbca04'
+  description: Noticeable, or affects some players
+- name: 'priority:low'
+  color: 'c2e0c6'
+  description: Minor, cosmetic or nice to have
+
+# Status — where it is in triage
+- name: 'status:needs-triage'
+  color: 'ededed'
+  description: New; not yet reviewed by a maintainer
+- name: 'status:needs-info'
+  color: 'ededed'
+  description: Waiting for more information from the reporter
+- name: 'status:ready'
+  color: '0e8a16'
+  description: Agreed and described well enough to start work
+
+# Planning — opt-in, maintainer-applied (see docs/development/ai-assisted-workflow.md)
+- name: 'plan:requested'
+  color: 'bfd4f2'
+  description: A maintainer asked for an implementation plan before coding
+- name: 'plan:approved'
+  color: '0e8a16'
+  description: The plan is approved; coding (by a person or an assigned agent) may start

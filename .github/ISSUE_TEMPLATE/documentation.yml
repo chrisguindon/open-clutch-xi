@@ -1,0 +1,39 @@
+name: Documentation or learning improvement
+description: Missing or unclear docs, setup trouble, documentation errors, ideas for learning exercises
+title: 'Docs: '
+labels: [documentation, 'status:needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **New to open source or to programming? This form is a great place to start.** If something confused you, it will confuse others too — telling us is a real contribution.
+        Setup problems are welcome here; general questions can also go to **Discussions → Q&A** or **Learning**.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of improvement?
+      options: [Missing documentation, Unclear explanation, Setup / getting started difficulty, Documentation error, Learning exercise idea, Other]
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Which page or file? (optional)
+      placeholder: README.md, docs/learning/README.md, CONTRIBUTING.md…
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened or what's missing?
+      description: For setup trouble, include the command you ran and the message you saw (remove anything private, like file paths with your name).
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement (optional)
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Want to help?
+      options:
+        - label: I'd like to try fixing this myself (a maintainer can point you in the right direction)

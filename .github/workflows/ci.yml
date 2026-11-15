@@ -1,0 +1,88 @@
+# Copyright (c) 2026 Christopher Guindon
+#
+# This program and the accompanying materials are made available
+# under the terms of the Eclipse Public License 2.0,
+# which is available at https://www.eclipse.org/legal/epl-2.0/.
+#
+# SPDX-License-Identifier: EPL-2.0
+
+# Quality gates for every pull request and for main. Runs the same commands as `npm run ci` locally.
+# No secrets are used, so pull requests from forks get exactly the same checks. Read-only permissions.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, test, build and repository checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # full history, so the hygiene check can audit commit messages
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            tools/lint/package-lock.json
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm ci --prefix tools/lint
+      - name: Formatting (Prettier)
+        run: npm run check:format
+      - name: Lint (ESLint)
+        run: npm run lint
+      - name: Type check (TypeScript)
+        run: npm run typecheck
+      - name: Tests (unit, simulation, scenarios)
+        run: npm test
+      - name: Production build
+        run: npx vite build
+      - name: Licences, notices and asset inventory
+        run: npm run check:licenses
+      - name: Repository hygiene (secrets, private paths, profiling exports, generated files, commit trailers)
+        run: npm run check:repo
+      - name: Documentation links and structure
+        run: npm run check:docs
+      - name: GitHub configuration (issue forms, workflows, Dependabot, labels)
+        run: npm run check:github
+      - name: Software bill of materials (CycloneDX)
+        run: node scripts/generate-sbom.mjs --check
+      - name: Vulnerabilities in shipped (runtime) dependencies
+        run: npm audit --omit=dev --audit-level=moderate
+
+  browser:
+    name: Browser checks (headless, software rendering)
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      # GitHub's Ubuntu runners include Google Chrome; scripts/lib/chrome.mjs finds it (CHROME_PATH overrides).
+      - name: Smoke test (menus, match, modes, settings)
+        run: npm run test:browser
+      - name: Laws of the Game flow (restarts, celebration, kick-off)
+        run: npm run check:rules

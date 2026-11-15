@@ -1,0 +1,13 @@
+dist
+node_modules
+tools/lint/node_modules
+public
+asset-src
+benchmark
+screenshots
+test-results
+coverage
+package-lock.json
+tools/lint/package-lock.json
+*.md
+LICENSE

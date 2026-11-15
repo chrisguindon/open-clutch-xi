@@ -1,0 +1,44 @@
+# Copyright (c) 2026 Christopher Guindon
+#
+# This program and the accompanying materials are made available
+# under the terms of the Eclipse Public License 2.0,
+# which is available at https://www.eclipse.org/legal/epl-2.0/.
+#
+# SPDX-License-Identifier: EPL-2.0
+
+# Environment for the GitHub Copilot coding agent (used only when a maintainer assigns an issue to Copilot).
+# GitHub requires a single job named `copilot-setup-steps`. It runs again here whenever this file changes,
+# so its validity is visible in CI. Read-only permissions; Copilot gets its own token for its work.
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  push:
+    paths: [.github/workflows/copilot-setup-steps.yml]
+  pull_request:
+    paths: [.github/workflows/copilot-setup-steps.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            tools/lint/package-lock.json
+      - name: Install dependencies (same as CI)
+        run: |
+          npm ci
+          npm ci --prefix tools/lint

@@ -1,0 +1,56 @@
+# Dependencies and build output
+node_modules
+dist
+coverage
+.vite
+.netlify
+
+# Logs and test artefacts
+*.log
+test-results
+screenshots
+playwright-report
+
+# Personal profiling data (the tools stay in the repo; their output never does)
+benchmark
+floodlight-benchmark-*.json
+floodlight-perf-*.json
+floodlight-cpucheck-*.json
+open-clutch-xi-benchmark-*.json
+open-clutch-xi-perf-*.json
+open-clutch-xi-cpucheck-*.json
+open-clutch-xi-player-data-*.json
+Trace-*.json
+Trace-*.json.gz
+*.cpuprofile
+*.heapsnapshot
+*.heapprofile
+*.heaptimeline
+*.trace
+
+# Raw asset sources (large, rebuilt into public/assets by scripts/build-assets.mjs)
+asset-src
+
+# Local configuration and secrets
+.env
+.env.*
+*.local
+.npmrc
+
+# Personal editor and OS files
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.swp
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Private, local-only development records (AI working notes, phase reports, benchmarks)
+.local/
+
+# Release artefacts (SBOM, packaged builds) — produced by npm run release:check / npm run sbom
+release
+
+# Personal Claude Code settings (the shared project settings in .claude/settings.json are committed)
+.claude/settings.local.json

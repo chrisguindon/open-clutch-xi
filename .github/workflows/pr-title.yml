@@ -1,0 +1,31 @@
+# Copyright (c) 2026 Christopher Guindon
+#
+# This program and the accompanying materials are made available
+# under the terms of the Eclipse Public License 2.0,
+# which is available at https://www.eclipse.org/legal/epl-2.0/.
+#
+# SPDX-License-Identifier: EPL-2.0
+
+# Pull requests are squash-merged, so the PR title becomes the commit message on main.
+# This checks that the title follows Conventional Commits. No permissions needed.
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  conventional-title:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+      - name: Check the title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }} # passed via env, never interpolated into the shell
+        run: node scripts/check-commit-message.mjs --env PR_TITLE

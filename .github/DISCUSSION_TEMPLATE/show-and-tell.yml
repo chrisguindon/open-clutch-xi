@@ -1,0 +1,20 @@
+title: '[Show and Tell] '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Built something with Open Clutch XI? A fork, a new skill move, a different camera, a learning experiment — share it! Videos and GIFs are great.
+  - type: textarea
+    id: what
+    attributes:
+      label: What did you build?
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Link to your fork, branch or demo (optional)
+  - type: textarea
+    id: how
+    attributes:
+      label: How does it work? What did you learn? (optional)

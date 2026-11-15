@@ -1,0 +1,37 @@
+name: Feature request
+description: Suggest an improvement to the game or the project
+title: 'Idea: '
+labels: [enhancement, 'status:needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Please start with the **problem or opportunity** — what's missing or could be better — before the solution.
+        Open-ended or early ideas fit well in **Discussions → Ideas** too.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What situation is frustrating, missing or could be better?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+      description: What could change? A rough idea is fine.
+    validations:
+      required: true
+  - type: textarea
+    id: benefit
+    attributes:
+      label: Expected benefit to players or contributors
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Possible alternatives
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Sketches, examples from other games, links. Please keep the project principles in mind (CONTRIBUTING.md) — e.g. no tracking, no real crests or player likenesses.

@@ -1,0 +1,15 @@
+# Issue chooser: the forms in this folder, plus links for things that aren't issues.
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and help (Discussions → Q&A)
+    url: https://github.com/OWNER/open-clutch-xi/discussions/categories/q-a
+    about: Questions about playing, building or the code. Issues are for actionable work.
+  - name: Share what you built (Discussions → Show and Tell)
+    url: https://github.com/OWNER/open-clutch-xi/discussions/categories/show-and-tell
+    about: Forks, experiments, new skill moves, videos — we'd love to see them.
+  - name: Report a security vulnerability
+    url: https://github.com/OWNER/open-clutch-xi/security/policy
+    about: Please report security problems privately, not as public issues.
+  - name: Contribution guide
+    url: https://github.com/OWNER/open-clutch-xi/blob/main/CONTRIBUTING.md
+    about: How to set up the project and open your first pull request.

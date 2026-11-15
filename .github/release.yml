@@ -1,0 +1,15 @@
+# Categories for GitHub's automatically generated release notes ("Generate release notes" on a draft release).
+changelog:
+  exclude:
+    labels: [question]
+  categories:
+    - title: New features
+      labels: [enhancement]
+    - title: Bug fixes
+      labels: [bug]
+    - title: Accessibility
+      labels: ['area:accessibility']
+    - title: Documentation and learning
+      labels: [documentation, 'area:documentation']
+    - title: Other changes
+      labels: ['*']

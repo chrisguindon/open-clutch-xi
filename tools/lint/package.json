@@ -1,0 +1,14 @@
+{
+  "name": "floodlight-fc-lint",
+  "private": true,
+  "description": "ESLint toolchain for Open Clutch XI. Kept separate because typescript-eslint needs the TypeScript 6 JavaScript API, while the project type-checks with TypeScript 7 (native), which has none.",
+  "license": "EPL-2.0",
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.15.0",
+    "globals": "17.3.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.2"
+  }
+}
