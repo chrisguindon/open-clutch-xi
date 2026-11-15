@@ -42,7 +42,7 @@ import { Tutorial } from './tutorial';
 import { advance, champion, createTournament, nextPlayerFixture, playerFinish, recordResult, type CupFormat } from './tournament/cup';
 import { loadCupRecord, saveCupRecord, withHistory, type CupRecord } from './tournament/record';
 import { fixtureLabel } from '../ui/cupScreen';
-import { playerLabelMode, playerLabelOpacity } from '../ui/playerLabel';
+import { playerLabelCueTime, playerLabelMode, playerLabelOpacity } from '../ui/playerLabel';
 import { emptySiteConfig, loadSiteConfig, type SiteConfig } from './siteConfig';
 import { setSiteBoardPanels } from '../render/textures';
 
@@ -293,6 +293,8 @@ export class Game implements UIHost {
 
   private buildMatch(opts: MatchOptions, clubs: [TeamIdentity, TeamIdentity], attract: boolean): void {
     this.disposeMatch();
+    this.labelName = null;
+    this.labelChangedAt = -Infinity;
     this.attract = attract;
     this.clubs = clubs;
     this.mode = opts.mode;
@@ -886,11 +888,11 @@ export class Game implements UIHost {
    * Project the controlled player's name onto the screen for the UI's HTML label (no allocation). On
    * touch or small screens it only shows briefly after the controlled player changes (playerLabelMode).
    */
-  private updatePlayerLabel(view: MatchView): void {
+  private updatePlayerLabel(view: MatchView, introActive: boolean): void {
     const text = this.attract ? null : view.labelText;
+    this.labelChangedAt = playerLabelCueTime(this.labelName, text, this.labelChangedAt, this.time, introActive);
     if (text !== this.labelName) {
       this.labelName = text;
-      if (text) this.labelChangedAt = this.time;
     }
     const mode = playerLabelMode({ touchControls: this.input.touchActive, width: innerWidth, height: innerHeight });
     const opacity = playerLabelOpacity(mode, this.time - this.labelChangedAt, this.settings.reduceMotion);
@@ -1417,7 +1419,7 @@ export class Game implements UIHost {
       if (live) this.input.touch.setDefending(!!m.world.controller && m.world.controller.team !== 0);
     }
     if (!this.attract) this.updateHud(input);
-    this.updatePlayerLabel(view);
+    this.updatePlayerLabel(view, this.cam.cinematic?.kind === 'intro');
     this.ui.update(dt);
     this.diag.add('ui', P.now() - tp);
     if (this.fullTimeTimer > 0) {
