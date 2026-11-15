@@ -20,6 +20,7 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { Anim } from '../../sim/player';
 import { KICK_TIMING } from '../../sim/config';
 import { gaitWeights } from '../../sim/gait';
+import { Lean, bodyLean } from './lean';
 import { BakedAction, PoseSampler, retargetFor } from './clipSampler';
 import { clamp, lerp, smoothstep } from '../../core/math';
 import { CharacterAssets } from './assets';
@@ -94,6 +95,10 @@ const vA = new THREE.Vector3();
 const vB = new THREE.Vector3();
 const vC = new THREE.Vector3();
 const vT = new THREE.Vector3();
+/** Scratch target for {@link bodyLean}, shared by all footballers (used and consumed within one update). */
+const leanTarget: Lean = { pitch: 0, roll: 0 };
+/** Height (m) of the body's pivot above the feet: about the hips, where dives roll. */
+const PIVOT_HEIGHT = 0.95;
 const mA = new THREE.Matrix4();
 // Two-bone arm solver scratch (kept separate: aim() reuses vA–vC and vT internally).
 const ikS = new THREE.Vector3();
@@ -173,6 +178,8 @@ export class Footballer implements PlayerVisual {
   private skipAccum = 0;
   private time = Math.random() * 10;
   private roll = 0;
+  /** Smoothed body lean (radians) from {@link bodyLean}. */
+  private lean: Lean = { pitch: 0, roll: 0 };
   private materials: THREE.Material[] = [];
 
   constructor(
@@ -188,8 +195,8 @@ export class Footballer implements PlayerVisual {
     this.model = SkeletonUtils.clone(bodyAssets.gltf.scene);
     // Each character starts its looping reactions at a different point, so team-mates never move in unison.
     this.loopOffset = ((seed * 0.6180339) % 1) * 3;
-    this.pivot.position.y = 0.95;
-    this.model.position.y = -0.95;
+    this.pivot.position.y = PIVOT_HEIGHT;
+    this.model.position.y = -PIVOT_HEIGHT;
     this.model.scale.set(look.build, look.height, look.build);
     this.pivot.add(this.model);
     this.root.add(this.pivot);
@@ -667,8 +674,19 @@ export class Footballer implements PlayerVisual {
     const diving = s.anim === Anim.Dive;
     const rollTarget = diving ? -(s.diveSide >= 0 ? 1 : -1) * 1.35 * smoothstep(0, 0.28, t) * (1 - smoothstep(0.95, 1.15, t)) : 0;
     this.roll += (rollTarget - this.roll) * (1 - Math.exp(-dt * (diving ? 18 : 8)));
-    this.pivot.rotation.z = this.roll;
-    this.pivot.position.y = 0.95 - Math.abs(this.roll) * 0.45 * (s.y <= 0.02 && diving && t > 0.3 ? 1 : 0.35);
+    // Lean into speeding up, braking and turning (see lean.ts). Only while running: actions and
+    // dives pose the whole body themselves.
+    if (s.anim === Anim.Locomotion) bodyLean(s.accFwd, s.accLat, s.speed, leanTarget);
+    else leanTarget.pitch = leanTarget.roll = 0;
+    const k = 1 - Math.exp(-dt * 10); // ≈0.1 s: smooths the step-to-step jitter of simulated acceleration
+    this.lean.pitch += (leanTarget.pitch - this.lean.pitch) * k;
+    this.lean.roll += (leanTarget.roll - this.lean.roll) * k;
+    this.pivot.rotation.z = this.roll - this.lean.roll;
+    this.pivot.rotation.x = this.lean.pitch;
+    // Tilt about the feet, not the hips: shift the hips the other way so the planted feet stay put.
+    this.pivot.position.x = PIVOT_HEIGHT * Math.sin(this.lean.roll);
+    this.pivot.position.z = PIVOT_HEIGHT * Math.sin(this.lean.pitch);
+    this.pivot.position.y = PIVOT_HEIGHT - Math.abs(this.roll) * 0.45 * (s.y <= 0.02 && diving && t > 0.3 ? 1 : 0.35);
     if (diving) {
       this.matricesDirty = true;
       const side = s.diveSide >= 0 ? 1 : -1;

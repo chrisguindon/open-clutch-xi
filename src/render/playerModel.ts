@@ -224,6 +224,12 @@ export interface PoseInput {
   /** Velocity in model space: forward (+z) and lateral (+x = model left) components. */
   fwd: number;
   lat: number;
+  /**
+   * Acceleration in model space (m/s²): forward (+ speeding up, − braking) and lateral (+ towards
+   * the model's left, i.e. turning left). The body leans into it, as a runner's must to stay balanced.
+   */
+  accFwd: number;
+  accLat: number;
   /** Seconds since the last dribble touch and the foot used (+1 left, −1 right). */
   touchAge: number;
   touchFoot: number;

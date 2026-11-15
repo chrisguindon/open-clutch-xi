@@ -14,6 +14,7 @@
 - **Recorded clips** (CC0 Universal Animation Libraries) are baked to 30 fps and blended by `PoseSampler` (`src/render/characters/clipSampler.ts`) without allocation.
   - **Locomotion** blends idle, walk, jog and sprint by speed. Clip time follows the simulation's **gait phase**, so the feet land on the dribble touches.
   - **No foot skating:** the legs cycle at speed ÷ stride length (`cadence` in `src/sim/gait.ts`), using stride lengths measured from the clips, so a planted foot stays put on the grass. The simulation and the renderer share one blend table (`gaitWeights`). `tests/gait.test.ts` re-measures the clips and fails if the table drifts from them.
+  - **Body lean:** runners lean forward to burst away, sit back to brake and bank into curves, by a share of the physical angle atan(a / g) of the simulated acceleration (`bodyLean` in `src/render/characters/lean.ts`). The body tilts about the feet, so planted feet don't move.
   - **Action clips** are indexed by the simulation's action time: slides, stumbles, falls and get-ups, throw-ins, celebrations, dejection.
   - **Nothing in animation adds input delay:** the simulation decides, and the animation follows.
 - **Procedural layers** (`Footballer`, `src/render/characters/footballer.ts`) aim bone chains at targets in model space:

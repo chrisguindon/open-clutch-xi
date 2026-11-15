@@ -294,6 +294,8 @@ export class MatchView {
           lat: 0,
           touchAge: 10,
           touchFoot: 1,
+          accFwd: 0,
+          accLat: 0,
           kickFoot: -1,
           reach: null,
         });
@@ -332,6 +334,8 @@ export class MatchView {
         lat: 0,
         touchAge: 10,
         touchFoot: 1,
+        accFwd: 0,
+        accLat: 0,
         kickFoot: -1,
         reach: null,
       });
@@ -538,6 +542,15 @@ export class MatchView {
       ps.gait = Math.abs(gb - ga) < 3 ? lerp(ga, gb, alpha) : gb;
       ps.fwd = fwd;
       ps.lat = lat;
+      // Acceleration from the two simulation snapshots (exact simulated velocities, so no jitter from
+      // render timing). Zero across a snap (restart, replay cut): that velocity change never happened.
+      const stepDt = b.time - a.time;
+      if (alpha === this.lastAlpha && stepDt > 1e-4 && stepDt < 0.1) {
+        const ax = (Bp[o + PF.VelX] - A[o + PF.VelX]) / stepDt,
+          az = (Bp[o + PF.VelZ] - A[o + PF.VelZ]) / stepDt;
+        ps.accFwd = ax * cf + az * sf;
+        ps.accLat = ax * sf - az * cf;
+      } else ps.accFwd = ps.accLat = 0;
       const tga = A[o + PF.TouchAge],
         tgb = Bp[o + PF.TouchAge];
       ps.touchAge = tgb >= tga ? lerp(tga, tgb, alpha) : tgb;
@@ -692,6 +705,8 @@ export class MatchView {
         lat: 0,
         touchAge: 10,
         touchFoot: 1,
+        accFwd: 0,
+        accLat: 0,
         kickFoot: -1,
         reach: null,
         gesture: 0,

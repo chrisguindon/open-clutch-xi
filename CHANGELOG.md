@@ -44,6 +44,7 @@ The first public release is planned as **0.1.0 (public beta)**. It includes ever
 - **Project:** EPL-2.0 licence, contribution guide, code of conduct, security policy, governance, GitHub issue forms, CI quality gates, Dependabot, and a learning guide.
 
 ### Changed
+- **Players lean into their running.** They tilt forward when bursting away, sit back when braking and bank into curved runs, following the simulated acceleration. Before, they ran bolt upright through every turn and stop.
 - **11v11 attacking:** forwards and midfielders attack the near post, the penalty spot, the far post and the edge of the box when a team-mate has the ball near goal; wide players and crosses are used; edge-of-box shots are allowed; pass risk counts the most dangerous defenders only. In seeded AI matches, goals per minute roughly doubled on most levels.
 - **New players start on Easy** (it was Medium). Returning players keep the difficulty they chose.
 - **The tutorial is offered once, right after you choose how to play,** instead of at your first Kick Off. It's always available from the menu.
