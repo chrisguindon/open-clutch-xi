@@ -1552,10 +1552,10 @@ export class UI {
 
   /**
    * Show the controlled player's name at a screen position (percent of the viewport), or hide it with
-   * null. Called every frame: it only touches the DOM text when the name changes, and moves the label
-   * with a transform (cheap, no layout).
+   * null. `opacity` fades a brief name out (see src/ui/playerLabel.ts). Called every frame: it only
+   * touches the DOM text when the name changes, and moves the label with a transform (cheap, no layout).
    */
-  playerLabel(text: string | null, xPct: number, yPct: number): void {
+  playerLabel(text: string | null, xPct: number, yPct: number, opacity = 1): void {
     const e = this.playerLabelEl;
     if (!text) {
       if (!e.hidden) e.hidden = true;
@@ -1567,6 +1567,8 @@ export class UI {
     }
     if (e.hidden) e.hidden = false;
     e.style.transform = `translate(-50%, -100%) translate(${xPct.toFixed(2)}vw, ${yPct.toFixed(2)}vh)`;
+    const o = opacity >= 1 ? '' : opacity.toFixed(2);
+    if (e.style.opacity !== o) e.style.opacity = o;
   }
 
   tutorial(step: string | null, msg = '', done = false): void {
