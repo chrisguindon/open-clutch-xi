@@ -42,6 +42,7 @@ import { Tutorial } from './tutorial';
 import { advance, champion, createTournament, nextPlayerFixture, playerFinish, recordResult, type CupFormat } from './tournament/cup';
 import { loadCupRecord, saveCupRecord, withHistory, type CupRecord } from './tournament/record';
 import { fixtureLabel } from '../ui/cupScreen';
+import { playerLabelMode, playerLabelOpacity } from '../ui/playerLabel';
 import { emptySiteConfig, loadSiteConfig, type SiteConfig } from './siteConfig';
 import { setSiteBoardPanels } from '../render/textures';
 
@@ -878,16 +879,28 @@ export class Game implements UIHost {
   }
 
   private labelPos = new THREE.Vector3();
-  /** Project the controlled player's name onto the screen for the UI's HTML label (no allocation). */
+  /** The name last shown over the pitch, and the game time it changed (see src/ui/playerLabel.ts). */
+  private labelName: string | null = null;
+  private labelChangedAt = -Infinity;
+  /**
+   * Project the controlled player's name onto the screen for the UI's HTML label (no allocation). On
+   * touch or small screens it only shows briefly after the controlled player changes (playerLabelMode).
+   */
   private updatePlayerLabel(view: MatchView): void {
     const text = this.attract ? null : view.labelText;
-    if (!text) {
+    if (text !== this.labelName) {
+      this.labelName = text;
+      if (text) this.labelChangedAt = this.time;
+    }
+    const mode = playerLabelMode({ touchControls: this.input.touchActive, width: innerWidth, height: innerHeight });
+    const opacity = playerLabelOpacity(mode, this.time - this.labelChangedAt, this.settings.reduceMotion);
+    if (!text || opacity <= 0) {
       this.ui.playerLabel(null, 0, 0);
       return;
     }
     const v = this.labelPos.copy(view.labelAnchor).project(this.cam.camera);
     const onScreen = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
-    this.ui.playerLabel(onScreen ? text : null, (v.x * 0.5 + 0.5) * 100, (0.5 - v.y * 0.5) * 100);
+    this.ui.playerLabel(onScreen ? text : null, (v.x * 0.5 + 0.5) * 100, (0.5 - v.y * 0.5) * 100, opacity);
   }
 
   /** Stereo position of a world point as seen by the current camera (−1 left … 1 right), softened. */
