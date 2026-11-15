@@ -14,6 +14,8 @@ Add entries under **Unreleased** as part of your pull request. The maintainer mo
 
 ### Fixed
 - **Links in the GitHub release notes.** Published notes now link to the documents at the release's tag. Relative links like `../../README.md` led nowhere on the release page. Every link is checked before a release is published.
+- **Player names no longer hide the action on phones.** On touch screens and small windows, your player's name now appears over the pitch only briefly when you switch players, then fades. The ring at your player's feet and the player card in the corner show who you control. Desktop keeps the name above your player.
+- **The player card is readable on phones** (it was shrunk to 70%), and the scoreboard, player card and minimap keep clear of notches and rounded corners in landscape.
 
 ## [0.1.0] - 2026-11-15
 
