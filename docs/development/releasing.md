@@ -94,7 +94,7 @@ Also check:
 - `docs/releases/v0.1.0.md`: update the notes, testing status and known limitations.
 - The publication checklist in [github-setup.md](github-setup.md#11-publication-checklist): code of conduct contact set, repository URL set.
 
-**3. Create the release commit** (Conventional Commit; only when authorised, with no AI co-author trailers):
+**3. Create the release commit** (Conventional Commit; only when authorised):
 
 ```bash
 # Only if the version changes (0.1.0 is already set):

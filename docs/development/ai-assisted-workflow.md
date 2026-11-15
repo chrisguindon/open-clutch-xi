@@ -51,6 +51,6 @@ These can't be set from repository files:
 ## What contributors using assistants must do
 
 - Review and understand every line. Run `npm run ci`. Explain non-obvious decisions in the pull request.
-- **Don't add AI co-author trailers or vendor signatures.** The commit-message and hygiene checks reject them.
+- **AI co-author trailers are fine.** Tools such as Copilot add them automatically; the checks only warn. You remain the author and the person responsible for the change.
 - **Don't paste private data** (profiling exports, tokens, personal files) into prompts or pull requests.
 - Prompts don't need to be shared.
