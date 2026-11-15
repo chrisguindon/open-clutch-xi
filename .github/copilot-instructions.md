@@ -6,6 +6,8 @@ Most important, in brief:
 - **Before finishing:** run `npm run ci`, add tests for behaviour changes, and update the relevant docs (`docs/`, `CHANGELOG.md`).
 - **Football rules:** follow `docs/gameplay/FOOTBALL_RULES.md`. Decisions belong in the simulation (`src/sim/`), never in rendering.
 - **Commits and PR titles:** Conventional Commits. A real human is the author (see the Git authorship policy in AGENTS.md). Automatic co-author trailers are allowed; the checks only warn.
+- **Branches:** work on a `<type>/<short-description>` branch from an up-to-date `main`; never commit to `main` directly.
+- **Commits and PR titles:** Conventional Commits. No AI co-author trailers, vendor signatures or AI-tool session links; a real human is the author (see the Git authorship policy in AGENTS.md).
 - **Never commit** secrets, personal profiling data or private paths.
 - **Code style:** follow `docs/development/CODING_STANDARDS.md`: a header comment on every module, TSDoc on exports, and comments that explain *why* (this is an educational project).
 - **Licensing:** start every new source file with the Eclipse-style EPL-2.0 header (format in the coding standards; `npm run check:licenses` checks it). Only add assets with verified redistribution rights.
