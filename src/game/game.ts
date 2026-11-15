@@ -39,6 +39,9 @@ import { AdaptiveController, AdaptiveOptions, LADDER, levelIndexFor } from './ad
 import { ReplayDirector } from './replay';
 import { CameraMode, Quality, Settings, classifyDevice, hasStoredSettings, loadSettings, profileFor, saveSettings } from './settings';
 import { Tutorial } from './tutorial';
+import { advance, champion, createTournament, nextPlayerFixture, playerFinish, recordResult, type CupFormat } from './tournament/cup';
+import { loadCupRecord, saveCupRecord, withHistory, type CupRecord } from './tournament/record';
+import { fixtureLabel } from '../ui/cupScreen';
 
 type State = 'loading' | 'menu' | 'playing' | 'paused' | 'fulltime';
 
@@ -85,6 +88,15 @@ export class Game implements UIHost {
   private fpsShown = 0;
   private showFps = new URLSearchParams(location.search).has('fps');
   private lastMatchOptions: MatchOptions | null = null;
+  /** Teams for the next launch when they don't come from the settings (a cup match). */
+  private launchTeams: [TeamIdentity, TeamIdentity] | null = null;
+  /** The XI Nations Cup record (src/game/tournament/). */
+  cup: CupRecord = loadCupRecord();
+  /**
+   * The cup match being played: its fixture, whether the player's team is the fixture's home side, and
+   * the score after normal time when a shootout follows. In memory only: quitting replays the match.
+   */
+  private cupMatch: { fixtureId: string; home: boolean; regulation: [number, number] | null } | null = null;
   /** The player's local record (statistics, history, achievements); see src/game/progress.ts. */
   progress: PlayerProgress = loadProgress();
   /**
@@ -135,6 +147,7 @@ export class Game implements UIHost {
       this.cam = new CameraRig(PITCH_PLACEHOLDER, this.aspect());
       this.cam.reduceMotion = this.settings.reduceMotion;
       Footballer.reduceMotion = this.settings.reduceMotion;
+      document.documentElement.classList.toggle('reduce-motion', this.settings.reduceMotion); // for UI animations
       this.cam.mode = this.settings.camera;
       this.activeQuality = this.settings.quality;
       this.renderer.applyQuality(this.settings.quality, this.cam.camera);
@@ -366,6 +379,8 @@ export class Game implements UIHost {
   }
 
   startMatch(mode: GameMode): void {
+    this.launchTeams = null;
+    this.cupMatch = null;
     this.audio.unlock();
     this.applyVolumes();
     this.audio.startCrowd();
@@ -387,6 +402,8 @@ export class Game implements UIHost {
   }
 
   startTutorial(): void {
+    this.launchTeams = null;
+    this.cupMatch = null;
     this.launch({ mode: 'practice', format: '5v5', difficulty: 'easy', duration: 9999, replays: false, autoSwitch: true, seed: 1 });
     this.tutorial = new Tutorial(this.match!, this.settings, (step, msg, done) => this.ui.tutorial(step, msg, done));
   }
@@ -411,7 +428,7 @@ export class Game implements UIHost {
     this.ui.hide();
     this.ui.clearPauseContext();
     this.ui.clearBanner();
-    this.buildMatch(opts, [nationByCode(this.settings.homeTeam) ?? NATIONS[0], nationByCode(this.settings.awayTeam) ?? NATIONS[1]], false);
+    this.buildMatch(opts, this.launchTeams ?? [nationByCode(this.settings.homeTeam) ?? NATIONS[0], nationByCode(this.settings.awayTeam) ?? NATIONS[1]], false);
     this.matchId = opts.mode === 'match' || opts.mode === 'penalties' ? `${Date.now().toString(36)}-${opts.seed}` : null;
     this.state = 'playing';
     this.input.gameplayActive = true;
@@ -459,6 +476,98 @@ export class Game implements UIHost {
     // records focus/visibility interruptions as validity warnings instead.
     if (this.bench?.running) return;
     if (this.state === 'playing' && !this.replay) this.pause();
+  }
+
+  // ---------------------------------------------------------------------------
+  // XI Nations Cup
+  // ---------------------------------------------------------------------------
+
+  /** Starts a new cup with the player's team and current match settings, and saves it. */
+  startCup(format: CupFormat): void {
+    const s = this.settings;
+    const catalogue = NATIONS.map((n) => ({ code: n.short, region: n.region ?? 'Other' }));
+    const t = createTournament({
+      catalogue,
+      team: s.homeTeam,
+      format,
+      seed: Math.floor(Math.random() * 0x100000000) >>> 0,
+      settings: { format: s.format, difficulty: s.difficulty, minutes: s.minutes },
+    });
+    this.cup = { ...this.cup, active: advance(t) };
+    this.cupMatch = null;
+    saveCupRecord(this.cup);
+  }
+
+  /** Abandons the cup in progress, or clears a finished one so a new one can start. History is kept. */
+  abandonCup(): void {
+    this.cup = { ...this.cup, active: null };
+    this.cupMatch = null;
+    saveCupRecord(this.cup);
+  }
+
+  /**
+   * Plays the player's next cup match: a normal match with the cup's settings, the player's team as the
+   * human side. If that fixture just ended level in a knockout round, this is its penalty shootout.
+   */
+  playCupMatch(): void {
+    const t = this.cup.active;
+    const f = t ? nextPlayerFixture(t) : null;
+    if (!t || !f) return;
+    const home = f.home === t.team;
+    const mine = nationByCode(t.team),
+      opp = nationByCode(home ? f.away : f.home);
+    if (!mine || !opp) return;
+    const shootout = this.cupMatch?.fixtureId === f.id && this.cupMatch.regulation !== null;
+    this.cupMatch = { fixtureId: f.id, home, regulation: shootout ? this.cupMatch!.regulation : null };
+    this.launchTeams = [mine, opp];
+    this.audio.unlock();
+    this.applyVolumes();
+    this.audio.startCrowd();
+    this.launch({
+      mode: shootout ? 'penalties' : 'match',
+      format: t.settings.format,
+      difficulty: t.settings.difficulty,
+      duration: t.settings.minutes * 60,
+      replays: this.settings.replays,
+      autoSwitch: this.settings.autoSwitch,
+      seed: Math.floor(Math.random() * 1e9),
+    });
+  }
+
+  /**
+   * A cup match reached full time: store the result (or ask for a shootout after a level knockout
+   * match), save, and say what happens next for the full-time screen.
+   */
+  private finishCupMatch(m: Match): { next: 'penalties' | 'hub'; note: string } | undefined {
+    const c = this.cupMatch,
+      t = this.cup.active;
+    const f = c && t ? t.fixtures.find((x) => x.id === c.fixtureId) : undefined;
+    if (!c || !t || !f || f.result) return undefined;
+    const ours: [number, number] = [m.score[0], m.score[1]]; // the player's team is always side 0
+    if (this.mode === 'match' && f.stage !== 'group' && ours[0] === ours[1]) {
+      c.regulation = ours;
+      return { next: 'penalties', note: 'Level at full time: a penalty shootout decides who goes through.' };
+    }
+    const regulation = this.mode === 'penalties' && c.regulation ? c.regulation : ours;
+    const kicks = this.mode === 'penalties' ? ours : null;
+    const orient = (p: [number, number]) => (c.home ? { home: p[0], away: p[1] } : { home: p[1], away: p[0] });
+    const t2 = recordResult(t, f.id, { ...orient(regulation), ...(kicks ? { shootout: orient(kicks) } : {}) });
+    this.cupMatch = null;
+    let rec: CupRecord = { ...this.cup, active: t2 };
+    const champ = champion(t2);
+    const finish = playerFinish(t2);
+    if (champ && finish) rec = withHistory(rec, { format: t2.format, team: t2.team, finish, champion: champ, finishedAt: new Date().toISOString() });
+    this.cup = rec;
+    saveCupRecord(rec);
+    const next = nextPlayerFixture(t2);
+    const teamName = (code: string) => nationByCode(code)?.name ?? code;
+    const note =
+      finish === 'champion'
+        ? `Champions! ${teamName(t2.team)} win the ${BRAND.tournamentName}.`
+        : next
+          ? `Next: ${fixtureLabel(next)} v ${teamName(next.home === t2.team ? next.away : next.home)}.`
+          : `${teamName(t2.team)} are out. ${champ ? `${teamName(champ)} won the cup.` : ''}`;
+    return { next: 'hub', note };
   }
 
   quitToMenu(): void {
@@ -514,6 +623,7 @@ export class Game implements UIHost {
     if (changed === 'reduceMotion' || changed === 'all') {
       this.cam.reduceMotion = s.reduceMotion;
       Footballer.reduceMotion = s.reduceMotion;
+      document.documentElement.classList.toggle('reduce-motion', s.reduceMotion);
     }
     if (changed === 'minimap' && this.state !== 'menu') this.ui.showHud(true, s.minimap && this.mode !== 'penalties');
     if (changed === 'autoSwitch' && this.match && !this.attract) this.match.options.autoSwitch = s.autoSwitch;
@@ -1292,7 +1402,8 @@ export class Game implements UIHost {
           scorer: g.scorerId !== null ? m.world.players[g.scorerId].name : 'Unknown',
         }));
         const unlocked = this.recordFinishedMatch(m);
-        this.ui.showFullTime(this.clubs, [m.score[0], m.score[1]], m.winner, m.stats, this.mode, goals, m.options.difficulty, unlocked);
+        const cup = this.finishCupMatch(m);
+        this.ui.showFullTime(this.clubs, [m.score[0], m.score[1]], m.winner, m.stats, this.mode, goals, m.options.difficulty, unlocked, cup);
       }
     }
     this.trackPerformance(this.rawFrameDt);

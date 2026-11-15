@@ -51,6 +51,7 @@
     "check:input": "node scripts/input-check.mjs",
     "check:refresh": "node scripts/refresh-check.mjs 144",
     "check:tutorial": "node scripts/tutorial-check.mjs",
+    "check:cup": "node scripts/cup-check.mjs",
     "check:prod": "npm run build && node scripts/prod-check.mjs",
     "capture:ui": "node scripts/ui-capture.mjs",
     "report:penalties": "node scripts/run-with-env.mjs PENALTIES=1 vitest run tests/tools/penalty-report.test.ts",

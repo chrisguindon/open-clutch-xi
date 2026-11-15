@@ -38,6 +38,11 @@ export const BRAND = {
   contact: 'info@chrisguindon.com',
   /** Prefix for files the game lets players download (exports, diagnostics). Lowercase, no spaces. */
   filePrefix: 'open-clutch-xi',
+  /**
+   * Name of the game's fictional international tournament. Never the name of a real competition.
+   * See docs/gameplay/tournament.md.
+   */
+  tournamentName: 'XI Nations Cup',
   /** Text on the stadium's advertising boards. */
   boardText: 'OPEN CLUTCH XI',
 } as const;

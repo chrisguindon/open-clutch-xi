@@ -25,6 +25,7 @@ Browser scripts need Chrome or Chromium (set `CHROME_PATH` if it isn't found). T
 | `rules-check.mjs` | `check:rules` | Throw-in, attempted walking with the ball, goal, celebration skip, kick-off |
 | `controls-check.mjs` | `check:controls` | First-launch chooser, mouse buttons, rebinding |
 | `tutorial-check.mjs` | `check:tutorial` | The whole tutorial with real key presses, then deliberate mistakes: switch while carrying, losing the ball, reset key, scoring (camera returns to play), retry, skip, exit, re-entry |
+| `cup-check.mjs` | `check:cup` | A whole XI Nations Cup through the menus: start, group matches, reload mid-cup, a level quarter-final and its shootout, the trophy, past cups |
 | `mobile-check.mjs` | `check:mobile` | Touch controls in phone emulation; the page never scrolls or zooms |
 | `adaptive-check.mjs` | `check:adaptive` | Auto graphics steps down on a slow device without restarting the match |
 | `input-check.mjs` | `check:input` | Input diagnostics, benchmark validity flags, guided CPU check |

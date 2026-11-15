@@ -2493,3 +2493,162 @@ a:focus-visible {
   border-radius: 6px;
   will-change: transform;
 }
+
+/* ---- XI Nations Cup (src/ui/cupScreen.ts) ---- */
+.cup .panel {
+  width: min(640px, 94vw);
+  max-height: 92vh;
+  overflow-y: auto;
+}
+.cup .panel.wide {
+  width: min(980px, 96vw);
+}
+.cup h2 .desc {
+  font-size: 14px;
+  font-weight: 600;
+}
+.cup-btn {
+  width: 100%;
+}
+.cup-formats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.cup-formats .btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 4px;
+}
+.cup-formats .btn.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.cup-formats small {
+  color: var(--muted);
+  font-weight: 500;
+}
+.cup-flag {
+  vertical-align: -2px;
+  margin: 0 6px;
+  border-radius: 2px;
+}
+.cup-next {
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin: 8px 0 12px;
+}
+.cup-vs {
+  font-size: 20px;
+  margin-top: 4px;
+}
+.cup-vs span {
+  color: var(--muted);
+  margin: 0 6px;
+}
+.cup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+.cup-table,
+.cup-results {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.cup-table caption,
+.cup-results caption {
+  text-align: left;
+  font-weight: 800;
+  padding: 4px 0;
+}
+.cup-table th,
+.cup-table td,
+.cup-results th,
+.cup-results td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+.cup-table td {
+  text-align: center;
+}
+.cup-table tr.through th[scope='row'] {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.cup-table tr.me,
+.cup-bracket li.me {
+  background: rgba(96, 165, 250, 0.12);
+}
+.cup-table .you {
+  color: var(--accent);
+  font-weight: 700;
+}
+.cup-bracket {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.cup-bracket h4 {
+  margin: 10px 0 4px;
+}
+.cup-bracket ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.cup-bracket ul li {
+  padding: 3px 4px;
+  border-radius: 6px;
+}
+.cup-bracket .cup-pens,
+.cup-table + .desc.small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.cup-groups summary {
+  cursor: pointer;
+  margin-top: 12px;
+  font-weight: 700;
+}
+.cup-history {
+  padding-left: 18px;
+}
+.cup-won {
+  text-align: center;
+}
+.cup-trophy {
+  display: block;
+  margin: 0 auto 8px;
+  filter: drop-shadow(0 6px 18px rgba(96, 165, 250, 0.35));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cup-trophy {
+    animation: cup-rise 0.9s ease-out both;
+  }
+}
+.reduce-motion .cup-trophy {
+  animation: none;
+}
+@keyframes cup-rise {
+  from {
+    transform: translateY(18px) scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.cup-note {
+  color: var(--accent);
+  font-weight: 700;
+  margin: 10px 0 0;
+}

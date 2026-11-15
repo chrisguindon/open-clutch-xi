@@ -7,6 +7,7 @@
 | Mode | What it is | Rules |
 |---|---|---|
 | **Quick Match** | 3v3, 5v5 or 11v11 against the computer, 2–8 minutes, night, dusk or day | Arcade (3v3, 5v5) or Standard (11v11): see the [rules matrix](FOOTBALL_RULES.md) |
+| **XI Nations Cup** | A fictional international tournament: Short (16 teams) or Classic (32), groups then knockouts, saved between matches. See [XI Nations Cup](tournament.md). | As Quick Match. Level knockout matches go straight to a shootout (a game simplification). |
 | **Penalty shootout** | Best of five, then sudden death. You shoot and keep in turn. | See [penalties](ai-and-difficulty.md#penalties) |
 | **Practice** | Free play with two passing partners and a keeper. `R` returns the ball. No clock and no restarts: the ball comes back to you when it goes out. | — |
 | **Tutorial** | Six steps on the practice pitch (move, sprint, pass, shoot, score, skill move), advanced by what you actually do. Offered once on first launch, right after the controls chooser (or at the first Kick Off if the chooser was skipped), and always on the menu. | — |

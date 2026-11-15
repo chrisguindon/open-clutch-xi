@@ -12,6 +12,9 @@ import { BRAND } from '../brand';
 import { SQUAD_LABELS, SquadMix } from '../render/characters/squad';
 import { ACHIEVEMENTS } from '../game/achievements';
 import type { PlayerProgress } from '../game/progress';
+import type { CupRecord } from '../game/tournament/record';
+import { champion, nextPlayerFixture, type CupFormat } from '../game/tournament/cup';
+import { cupFinishedHtml, cupHubHtml, cupSetupHtml, fixtureLabel } from './cupScreen';
 import { MAX_IMPORT_BYTES, applySaveFile, exportSaveData, readSaveFile, resetAllData, resetProgress, type SaveFile } from '../game/saveData';
 import { download, stamp } from '../game/diagnostics';
 import { TeamIdentity } from '../sim/teams';
@@ -62,6 +65,14 @@ export interface UIHost {
   readonly progress: PlayerProgress;
   /** Saved data was imported or reset: reload so every part of the game starts from it. */
   reloadSavedData(): void;
+  /** The XI Nations Cup record (the cup in progress and past cups). */
+  readonly cup: CupRecord;
+  /** Start a new cup with the player's chosen team and match settings. */
+  startCup(format: CupFormat): void;
+  /** Play the player's next cup match. */
+  playCupMatch(): void;
+  /** Abandon the cup in progress (or clear a finished one). */
+  abandonCup(): void;
 }
 
 /** Everything the in-match HUD shows, gathered by the game once per frame. */
@@ -87,7 +98,8 @@ export interface MinimapData {
   colors: [string, string];
 }
 
-type Screen = 'loading' | 'menu' | 'setup' | 'settings' | 'howto' | 'about' | 'chooser' | 'pause' | 'fulltime' | 'tutorialOffer' | 'records' | 'error' | 'none';
+type Screen =
+  'loading' | 'menu' | 'setup' | 'settings' | 'howto' | 'about' | 'chooser' | 'pause' | 'fulltime' | 'tutorialOffer' | 'records' | 'cup' | 'error' | 'none';
 
 const el = <T extends HTMLElement = HTMLElement>(html: string): T => {
   const t = document.createElement('template');
@@ -271,6 +283,7 @@ export class UI {
       </div>
       <nav class="menu-nav">
         <button class="btn primary big" data-action="play">Kick Off<small>${s.format} · ${cap(s.difficulty)} · ${s.minutes} min</small></button>
+        ${this.cupMenuButton()}
         <div class="menu-row">
           <button class="btn" data-action="setup">Teams &amp; options</button>
           <button class="btn" data-action="penalties">Penalty shootout</button>
@@ -860,6 +873,8 @@ export class UI {
     difficulty?: Difficulty,
     /** Names of achievements this match unlocked: shown quietly here, never during play. */
     unlocked: string[] = [],
+    /** In a cup match: what happens next (a shootout, or back to the cup) and a line explaining it. */
+    cup?: { next: 'penalties' | 'hub'; note: string },
   ): void {
     const total = Math.max(1e-6, stats[0].possession + stats[1].possession);
     const poss0 = Math.round((stats[0].possession / total) * 100);
@@ -889,11 +904,42 @@ export class UI {
       ${statsRows}
       ${unlocked.length ? `<ul class="ft-achievements" aria-label="Achievements unlocked">${unlocked.map((n) => `<li><span aria-hidden="true">★</span> Achievement unlocked: <b>${escapeHtml(n)}</b></li>`).join('')}</ul>` : ''}
       ${mode === 'match' ? nextStepHint(winner, difficulty) : ''}
-      <div class="modal-actions ft-actions"><button class="btn primary center" data-action="restart">Rematch</button><button class="btn center" data-action="changeTeams">Change teams</button><button class="btn center" data-action="quit">Main menu</button></div>
+      ${cup ? `<p class="cup-note" role="status">${escapeHtml(cup.note)}</p>` : ''}
+      <div class="modal-actions ft-actions">${
+        cup
+          ? cup.next === 'penalties'
+            ? '<button class="btn primary center" data-action="cupPlay">Take the penalty shootout</button>'
+            : '<button class="btn primary center" data-action="cup">Continue the cup</button><button class="btn center" data-action="quit">Main menu</button>'
+          : '<button class="btn primary center" data-action="restart">Rematch</button><button class="btn center" data-action="changeTeams">Change teams</button><button class="btn center" data-action="quit">Main menu</button>'
+      }</div>
     </div></div>`),
     );
     this.setScreen('fulltime');
     if (unlocked.length) this.liveEl.textContent = `Achievement unlocked: ${unlocked.join(', ')}.`;
+  }
+
+  /** The cup button on the main menu: start one, or continue with the next opponent named. */
+  private cupMenuButton(): string {
+    const t = this.host.cup.active;
+    const next = t ? nextPlayerFixture(t) : null;
+    const opp = t && next ? nationByCode(next.home === t.team ? next.away : next.home)?.name : null;
+    const sub = !t ? 'Groups, knockouts, a trophy' : next ? `Continue · ${fixtureLabel(next)} v ${opp ?? ''}` : champion(t) ? 'See how it ended' : 'Continue';
+    return `<button class="btn big cup-btn" data-action="cup">${escapeHtml(BRAND.tournamentName)}<small>${escapeHtml(sub)}</small></button>`;
+  }
+
+  private cupFormat: CupFormat = 'short16';
+  private cupConfirmAbandon = false;
+
+  /** The XI Nations Cup: setup when no cup is active, the hub during one, the result once it's over. */
+  showCup(): void {
+    const t = this.host.cup.active;
+    const html = !t
+      ? cupSetupHtml(this.host.settings, this.cupFormat, this.host.cup)
+      : champion(t)
+        ? cupFinishedHtml(t)
+        : cupHubHtml(t, this.cupConfirmAbandon);
+    this.mount('cup', el(html));
+    this.setScreen('cup');
   }
 
   /**
@@ -1014,6 +1060,39 @@ export class UI {
         break;
       case 'records':
         this.showRecords();
+        break;
+      case 'cup':
+        this.cupConfirmAbandon = false;
+        this.showCup();
+        break;
+      case 'cupFormat':
+        this.cupFormat = node.dataset.v as CupFormat;
+        this.showCup();
+        break;
+      case 'cupTeam':
+        this.showSetup('home');
+        break;
+      case 'cupStart':
+        this.host.startCup(this.cupFormat);
+        this.showCup();
+        this.liveEl.textContent = `${BRAND.tournamentName} started.`;
+        break;
+      case 'cupPlay':
+        this.host.playCupMatch();
+        break;
+      case 'cupAbandon':
+        this.cupConfirmAbandon = true;
+        this.showCup();
+        break;
+      case 'cupAbandonCancel':
+        this.cupConfirmAbandon = false;
+        this.showCup();
+        break;
+      case 'cupAbandonConfirm':
+      case 'cupNew':
+        this.cupConfirmAbandon = false;
+        this.host.abandonCup();
+        this.showCup();
         break;
       case 'dataExport':
         download(`${BRAND.filePrefix}-player-data-${stamp()}.json`, JSON.parse(exportSaveData()));
@@ -1216,6 +1295,7 @@ export class UI {
       case 'settings':
       case 'about':
       case 'records':
+      case 'cup':
         if (this.pauseFrom === 'match' && this.previous === 'pause') {
           this.setScreen('pause');
         } else if (this.pauseFrom === 'match' && (this.current === 'settings' || this.current === 'howto')) {

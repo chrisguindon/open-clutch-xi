@@ -10,6 +10,7 @@ Open Clutch XI has no backend. Everything it remembers lives **in the player's o
 |---|---|---|
 | `floodlight-fc-settings-v1` | Settings: graphics, audio, controls and bindings, teams, format, difficulty, team composition, tutorial seen | `src/game/settings.ts` |
 | `player-progress-v1` | Statistics, the last 20 matches, unlocked achievements (with dates), tutorial completed | `src/game/progress.ts` |
+| `tournament-v1` | The XI Nations Cup in progress (draw, fixtures, results, settings) and the last 20 finished cups | `src/game/tournament/record.ts` |
 | `floodlight-fc-tuning-v1` | Movement-lab tuning (developer tool, `?lab`) | `src/dev/tuning.ts` |
 | `<key>:corrupt` | The first unreadable copy of a key, kept for recovery | `src/game/storage.ts` |
 
