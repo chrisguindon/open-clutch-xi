@@ -12,6 +12,9 @@ Add entries under **Unreleased** as part of your pull request. The maintainer mo
 
 ## [Unreleased]
 
+### Fixed
+- **Links in the GitHub release notes.** Published notes now link to the documents at the release's tag. Relative links like `../../README.md` led nowhere on the release page. Every link is checked before a release is published.
+
 ## [0.1.0] - 2026-11-15
 
 The first public release is planned as **0.1.0 (public beta)**. It includes everything developed so far:
