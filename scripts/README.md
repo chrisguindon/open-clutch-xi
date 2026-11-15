@@ -28,6 +28,7 @@ Browser scripts need Chrome or Chromium (set `CHROME_PATH` if it isn't found). T
 | `controls-check.mjs` | `check:controls` | First-launch chooser, mouse buttons, rebinding |
 | `tutorial-check.mjs` | `check:tutorial` | The whole tutorial with real key presses, then deliberate mistakes: switch while carrying, losing the ball, reset key, scoring (camera returns to play), retry, skip, exit, re-entry |
 | `cup-check.mjs` | `check:cup` | A whole XI Nations Cup through the menus: start, group matches, reload mid-cup, a level quarter-final and its shootout, the trophy, past cups |
+| `mobile-hud-check.mjs` | `check:mobile-hud` | Player visibility and HUD layout on three phones (landscape), a phone in portrait, a tablet and two desktops, in a crowded moment: the name never covers the ball or players, touch screens name the player in the HUD and only briefly over the pitch, switching updates the name, HUD panels and touch buttons don't overlap or cover the action, text stays readable. Screenshots in `screenshots/mobile-hud/` |
 | `mobile-check.mjs` | `check:mobile` | Touch controls in phone emulation; the page never scrolls or zooms |
 | `adaptive-check.mjs` | `check:adaptive` | Auto graphics steps down on a slow device without restarting the match |
 | `input-check.mjs` | `check:input` | Input diagnostics, benchmark validity flags, guided CPU check |
