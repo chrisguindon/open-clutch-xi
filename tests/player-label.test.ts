@@ -11,7 +11,8 @@
 // When the controlled player's name is shown over the pitch (src/ui/playerLabel.ts). The layouts and
 // the screen measurements are checked in a real browser by scripts/mobile-hud-check.mjs.
 import { describe, expect, it } from 'vitest';
-import { BRIEF_LABEL_FADE, BRIEF_LABEL_SECONDS, SMALL_SCREEN_SHORT_SIDE, playerLabelMode, playerLabelOpacity } from '../src/ui/playerLabel';
+import { BRIEF_LABEL_FADE, BRIEF_LABEL_SECONDS, SMALL_SCREEN_SHORT_SIDE, playerLabelCueTime, playerLabelMode, playerLabelOpacity } from '../src/ui/playerLabel';
+import { INTRO_LENGTH } from '../src/render/camera';
 
 describe('player name over the pitch', () => {
   it('is always shown on a big screen with a mouse or keyboard', () => {
@@ -48,6 +49,37 @@ describe('player name over the pitch', () => {
     expect(playerLabelOpacity('brief', BRIEF_LABEL_SECONDS)).toBe(0);
     expect(playerLabelOpacity('brief', 60)).toBe(0);
     expect(playerLabelOpacity('brief', Infinity)).toBe(0); // no change yet
+  });
+
+  it('starts the initial cue after an unskipped intro', () => {
+    let name: string | null = null;
+    let changedAt = -Infinity;
+    for (let now = 0; now < INTRO_LENGTH; now += 0.1) {
+      changedAt = playerLabelCueTime(name, 'Kick-off taker', changedAt, now, true);
+      name = 'Kick-off taker';
+    }
+
+    expect(changedAt).toBe(-Infinity);
+    changedAt = playerLabelCueTime(name, 'Kick-off taker', changedAt, INTRO_LENGTH, false);
+    expect(changedAt).toBe(INTRO_LENGTH);
+    expect(playerLabelOpacity('brief', INTRO_LENGTH - changedAt)).toBe(1);
+    expect(playerLabelOpacity('brief', INTRO_LENGTH + BRIEF_LABEL_SECONDS - changedAt)).toBeCloseTo(0, 12);
+  });
+
+  it('starts the initial cue immediately when the intro is skipped, then restarts it on a player switch', () => {
+    let name: string | null = null;
+    let changedAt = -Infinity;
+    changedAt = playerLabelCueTime(name, 'Kick-off taker', changedAt, 0.25, true);
+    name = 'Kick-off taker';
+    expect(changedAt).toBe(-Infinity);
+
+    changedAt = playerLabelCueTime(name, 'Kick-off taker', changedAt, 0.25, false);
+    expect(changedAt).toBe(0.25);
+    expect(playerLabelOpacity('brief', 0.25 - changedAt)).toBe(1);
+
+    changedAt = playerLabelCueTime(name, 'New player', changedAt, 2, false);
+    expect(changedAt).toBe(2);
+    expect(playerLabelOpacity('brief', 2 - changedAt)).toBe(1);
   });
 
   it('with reduced motion a brief name disappears without fading', () => {
