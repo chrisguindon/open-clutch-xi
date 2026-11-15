@@ -107,7 +107,12 @@ step('npm run ci', () => run(npm, ['run', 'ci'], dir));
 if (browser) {
   step('browser smoke test', () => run('node', ['scripts/browser-smoke.mjs'], dir));
   step('browser rules flow', () => run('node', ['scripts/rules-check.mjs'], dir));
-  step('production build check', () => run('node', ['scripts/prod-check.mjs'], dir));
+  // Builds first, so this check stands on its own (it used to fail as a side effect when `npm run ci`
+  // stopped before its build step, which hid the real failure).
+  step('production build check', () => {
+    run(npm, ['run', 'build'], dir);
+    run('node', ['scripts/prod-check.mjs'], dir);
+  });
 }
 step('release artefacts are reproducible', () => {
   // Package the validated copy twice (the second time from a fresh build) and compare the bytes. The

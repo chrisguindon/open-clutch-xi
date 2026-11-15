@@ -89,8 +89,13 @@ describe.skipIf(process.platform === 'win32')('release tool end to end (local co
         },
       });
       symlinkSync(join(root, 'node_modules'), join(work, 'node_modules'));
-      // Release notes for the new version, written here (the test doesn't depend on any particular
-      // notes file existing): a draft, as a maintainer would leave them.
+      // The changelog and release notes for the new version are written here, so the test doesn't depend
+      // on the repository's own: during a release check of a prepared release, or right after a release,
+      // the real changelog has no unreleased entries.
+      writeFileSync(
+        join(work, 'CHANGELOG.md'),
+        `# Changelog\n\n## [Unreleased]\n\n### Added\n\n- Something new.\n\n[Unreleased]: https://github.com/chrisguindon/open-clutch-xi/commits/main\n`,
+      );
       writeFileSync(join(work, 'docs/releases/v9.9.9.md'), '# Open Clutch XI 9.9.9: draft release notes\n\n> **Draft.** Not released yet.\n\nThe notes.\n');
       run('git', ['init', '-q', '-b', 'main']);
       run('git', ['config', 'user.name', 'Release Test']);
