@@ -64,7 +64,7 @@ Use the **Bug report** form. You don't need to know the cause. Tell us:
 ## Making a change
 
 1. **Pick or open an issue.** For anything bigger than a small fix, comment first so we can agree on the approach and nobody duplicates work.
-2. **Branch** from `main` in your fork.
+2. **Branch** from an up-to-date `main`, in your fork (see [Branches, pull requests and approval](#branches-pull-requests-and-approval)).
 3. **Keep it focused:** one topic per pull request, matching the surrounding style.
 4. **Add or update tests.** Gameplay and AI changes need a scenario or simulation test (see `tests/ai-decisions.test.ts`, `tests/controls.test.ts`). Fixes need a regression test where practical.
 5. **Run the checks.** `npm run ci` runs everything CI runs:
@@ -81,6 +81,27 @@ Use the **Bug report** form. You don't need to know the cause. Tell us:
    `npm run format` fixes formatting. Browser checks (`npm run test:browser`, `check:controls` and others) need a browser: run `npm run browsers:install` once (a pinned Chrome for Testing in `.cache/browsers/`), or set `CHROME_PATH` to an installed Chrome or Chromium.
 6. **Update docs.** Docs are organised by subject in [docs/](docs/README.md). Update the page that describes the behaviour you changed. For football rules that's [the rules matrix](docs/gameplay/FOOTBALL_RULES.md); significant architecture choices get a short [ADR](docs/architecture/decisions/README.md). Add a line under *Unreleased* in [CHANGELOG.md](CHANGELOG.md) for anything players would notice.
 7. **Open a pull request.** The template guides you. Describe how you verified the change. If something could only be checked in emulation (touch, controllers, slow devices), say so.
+
+### Branches, pull requests and approval
+
+Everyone works this way, the maintainer and AI coding agents included:
+
+- **Nobody commits directly to `main`.** `main` only changes through reviewed, squash-merged pull requests. It's always the latest working version, and releases are cut from it.
+- **One branch per change**, created from an up-to-date `main`. Name it `<type>/<short-description>`, using the same type as the change's Conventional Commit:
+  - `fix/mobile-player-labels`
+  - `feat/cup-extra-time`
+  - `docs/learning-guide-typos`
+  - `test/restart-clearances`
+- **Commit in small, focused Conventional Commits** on the branch. Each commit should leave the tests passing.
+- **Keep the branch current** before asking for review: `git fetch origin && git rebase origin/main`. Then update your pull request with `git push --force-with-lease`, which only ever changes your own branch. Never force-push `main`.
+- **Open a pull request** when the change is ready, or as a draft to get early feedback. The title becomes the commit message on `main`, so it follows Conventional Commits too.
+- **Approval before merging:**
+  - CI must pass (the same checks as `npm run ci`, plus security checks);
+  - the maintainer reviews the pull request and approves it;
+  - review conversations are resolved.
+
+  Only then does the maintainer squash-merge it and delete the branch. The maintainer's own pull requests follow the same path, with a deliberate final review of the diff before merging.
+- **Releases** are separate: they're prepared from `main` with `make release-prepare`, which opens its own `release/v<version>` pull request (see [releasing](docs/development/releasing.md)).
 
 ### Your first pull request, step by step
 

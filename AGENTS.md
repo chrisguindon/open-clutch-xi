@@ -113,6 +113,9 @@ Browser checks (`npm run test:browser`, `check:controls`, `check:adaptive`, …)
 - Pull requests are **squash-merged**, so the PR title becomes the commit message on `main` and must follow the same format. `scripts/check-commit-message.mjs` checks it.
 - **AI attribution trailers are allowed, not required.** Tools such as GitHub Copilot (the coding agent, Autofix) add `Co-authored-by:` trailers on their own. The checks report them as a warning, never a failure. Don't write "generated with …" signatures into files: the repository hygiene check rejects those.
 - Don't commit, push, tag or publish releases unless the human you're working with asks.
+- **No AI-vendor attribution.** No `Co-authored-by:` trailers for tools or models, no "generated with …" signatures, and no AI-tool session links in commits, PR descriptions or files. The repository hygiene check rejects them.
+- **Feature branches only.** Before changing anything, check the working tree is clean and `main` is up to date with `origin/main`. Then create a branch named `<type>/<short-description>` (for example `fix/mobile-player-labels`), and commit there in focused Conventional Commits. Never commit directly to `main`. The full workflow is in [CONTRIBUTING.md](CONTRIBUTING.md#branches-pull-requests-and-approval).
+- Don't commit, push, open or merge pull requests, tag, publish releases or deploy unless the human you're working with asks. Merging into `main` always needs their approval.
 
 ### Git authorship policy
 

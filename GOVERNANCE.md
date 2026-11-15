@@ -12,6 +12,7 @@ Regular contributors may be invited to become maintainers, with merge rights for
 
 ## How decisions are made
 
+- **Every change goes through a pull request** from a feature branch: nobody commits directly to `main`, the maintainer included. A change merges after CI passes and the maintainer approves it (see [CONTRIBUTING.md](CONTRIBUTING.md#branches-pull-requests-and-approval)).
 - **Small changes** (fixes, polish, tests, docs) are decided in the pull request.
 - **Larger changes** (new modes, new dependencies, changes to controls or defaults, new third-party assets, anything affecting privacy or licensing) start as an issue. Discussion happens in the open, and the maintainer decides. The reasoning is recorded in the issue.
 - **Disagreements** are resolved by the maintainer after hearing the arguments. The [Code of Conduct](CODE_OF_CONDUCT.md) applies to all project spaces.
