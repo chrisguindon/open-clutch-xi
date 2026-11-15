@@ -16,8 +16,15 @@
 ## Presentation
 - **Limited character variety.** Two CC0 base bodies, five hairstyles (plus a beard and a shaved head) and seven hair colours. There is no curly hairstyle: none is available in the CC0 pack used, and no other asset has been verified.
 - **Animation quality.** Celebrations, reactions and officials' signals are procedural poses over recorded clips. They were reworked to bend elbows and involve the body, but still need human review (see [playtesting](playtesting.md)).
-- **Name labels:** only the controlled player has one.
+- **Name labels:** only the controlled player has one. On touch screens and small windows it appears only briefly when you switch players (see [controls](../gameplay/controls.md#who-am-i-controlling)), so on a phone the HUD's player card is where to look.
 - **Replays** don't record officials (they're hidden during replays).
+
+## Mobile
+Found while improving player visibility on phones; worth tracking as issues:
+- **Camera framing ignores the touch buttons.** The camera centres the play, while the touch buttons take the bottom-right corner. When play moves into that corner, the buttons can sit over players. Biasing the framing up and left on touch layouts would help.
+- **The scoreboard is wide on small phones.** It takes over half the width of a 667 px landscape screen. A compact touch version (team codes and score only) would free space.
+- **Portrait isn't supported on phones.** The game asks you to rotate. A portrait layout would need a different camera and HUD.
+- **Safe areas:** the HUD now keeps clear of notches and rounded corners via `env(safe-area-inset-*)`, but browser emulation can't produce real insets, so this is unverified on devices with a notch.
 
 ## Platforms and verification
 - **Not tested on real devices.** Real phones, tablets, controllers, fullscreen, older iOS audio and adaptive quality on real low-end and high-refresh hardware have not been verified. Automated checks use emulation.
