@@ -12,6 +12,8 @@ Add entries under **Unreleased** as part of your pull request. The maintainer mo
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-15
+
 The first public release is planned as **0.1.0 (public beta)**. It includes everything developed so far:
 
 ### Added
@@ -87,4 +89,5 @@ The first public release is planned as **0.1.0 (public beta)**. It includes ever
 - Mouse buttons couldn't be rebound.
 - On small landscape phones, the menu logo was cut off and the full-time buttons were off-screen. Screens now scroll when they don't fit, and the full-time buttons stay visible. (Checked in phone emulation only.)
 
-[Unreleased]: https://github.com/chrisguindon/open-clutch-xi/commits/main
+[Unreleased]: https://github.com/chrisguindon/open-clutch-xi/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/chrisguindon/open-clutch-xi/releases/tag/v0.1.0
