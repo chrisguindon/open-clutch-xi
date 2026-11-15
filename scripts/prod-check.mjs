@@ -8,18 +8,20 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-// Production check: serves dist/ with the headers from netlify.toml (CSP, MIME types, caching) and
-// verifies the built site loads with no CSP violations, failed requests or console errors; opens team
-// selection (flags), starts a match and confirms the 3D characters and textures loaded.
+// Production check: serves a built site with the headers from the hosting policy (hosting/headers.json:
+// CSP, MIME types, caching) and verifies it loads with no CSP violations, failed requests or console
+// errors; opens team selection (flags), starts a match and confirms the 3D characters and textures loaded.
 //   npm run build && node scripts/prod-check.mjs
+//   PROD_DIR=<built site> node scripts/prod-check.mjs   check another build, e.g. an assembled deployment
 import http from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import puppeteer from 'puppeteer-core';
 import { findChrome } from './lib/chrome.mjs';
+import { headersFor, loadHostingPolicy } from './lib/hosting.mjs';
 
-const toml = readFileSync('netlify.toml', 'utf8');
-const csp = toml.match(/Content-Security-Policy = "([^"]+)"/)[1];
+const policy = loadHostingPolicy();
+const root = process.env.PROD_DIR || 'dist';
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript',
@@ -35,14 +37,11 @@ const types = {
 };
 const server = http
   .createServer((req, res) => {
-    let p = join('dist', decodeURIComponent(req.url.split('?')[0]));
-    if (existsSync(p) && statSync(p).isDirectory()) p = join(p, 'index.html');
-    if (!existsSync(p)) p = 'dist/index.html'; // SPA fallback, as in netlify.toml
-    res.writeHead(200, {
-      'Content-Type': types[extname(p)] ?? 'application/octet-stream',
-      'Content-Security-Policy': csp,
-      'X-Content-Type-Options': 'nosniff',
-    });
+    let path = decodeURIComponent(req.url.split('?')[0]);
+    if (existsSync(join(root, path)) && statSync(join(root, path)).isDirectory()) path = join(path, 'index.html');
+    if (!existsSync(join(root, path))) path = policy.spaFallback.to; // single-page fallback
+    const p = join(root, path);
+    res.writeHead(200, { 'Content-Type': types[extname(p)] ?? 'application/octet-stream', ...headersFor(policy, path) });
     res.end(readFileSync(p));
   })
   .listen(5212, '127.0.0.1');

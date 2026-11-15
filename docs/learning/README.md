@@ -57,6 +57,7 @@ rendering, once per display frame                  src/render/
 | Statistics and achievements | `src/game/progress.ts`, `src/game/achievements.ts` | `recordMatch`, `ACHIEVEMENTS` |
 | Women, men and mixed squads | `src/render/characters/squad.ts`, `clipSampler.ts` | `bodyFor`, `retargetFor` |
 | The game's name and logo | `src/brand.ts` | `BRAND` |
+| Release archives and site metadata | `scripts/package-web.mjs`, `src/siteMeta.ts` | `createTar`, `renderSiteMeta` |
 | Adaptive graphics | `src/game/adaptive.ts` | `AdaptiveController`, a small, pure, well-tested state machine |
 | Menus and HUD | `src/ui/ui.ts`, `src/ui/styles.css` | plain HTML strings and CSS, no framework |
 
@@ -79,6 +80,7 @@ Each guide explains one idea with the real code, then points to exercises.
 | [The game loop](game-loop.md) | Fixed timestep, interpolation, determinism |
 | [Ball and player physics](physics.md) | Gravity, drag, the Magnus force, bounces, rolling, player movement |
 | [3D rendering with Three.js](threejs.md) | Scenes, skinned characters, instancing, adaptive quality |
+| [Releases and hosting](releases-and-hosting.md) | Versioned, checksummed, reproducible releases; customising a site without rebuilding; security headers |
 | [Football AI](football-ai.md) | Situation analysis, roles, utility scoring, fair difficulty |
 | [Football rules in code](football-rules.md) | Offside, fouls and cards, the restart stage machine |
 | [Saving data safely](persistence.md) | localStorage, validation, migrations, privacy |

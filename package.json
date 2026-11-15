@@ -60,6 +60,7 @@
     "check:rules": "node scripts/rules-check.mjs",
     "sbom": "node scripts/generate-sbom.mjs",
     "release:check": "node scripts/release-check.mjs",
+    "release:package": "node scripts/package-web.mjs",
     "report:attack": "node scripts/run-with-env.mjs ATTACK=1 vitest run tests/tools/attack-report.test.ts"
   },
   "dependencies": {

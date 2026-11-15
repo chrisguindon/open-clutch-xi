@@ -37,7 +37,7 @@ gh repo edit \
   --add-topic football,soccer,browser-game,threejs,typescript,webgl,open-source,game-development,ai-assisted-development,learning
 ```
 
-GitHub detects the licence (EPL-2.0) from `LICENSE`. GitHub Pages isn't used: the game is hosted on Netlify.
+GitHub detects the licence (EPL-2.0) from `LICENSE`. GitHub Pages isn't used, and no hosting service is connected to this repository: pull requests and pushes never deploy a website. Releases attach the static web archive and checksums (see [releasing](../development/releasing.md)).
 
 ## 3. General settings
 
@@ -176,4 +176,4 @@ These were validated locally, but can only be confirmed once the repository exis
 - [ ] First CI run is green on GitHub, then the ruleset is imported (section 5)
 - [ ] Labels created (section 6), Discussions enabled with categories (section 7)
 - [ ] Project board and first milestone (section 8), starter issues created (section 9)
-- [ ] Netlify: the production deploy builds from `main` and the About screen shows the source link and version
+- [ ] No hosting integration (deploy app or webhook) is installed on the repository; the maintainer's site is deployed from its own repository, from a chosen release

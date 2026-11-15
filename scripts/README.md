@@ -9,12 +9,13 @@ Browser scripts need Chrome or Chromium (set `CHROME_PATH` if it isn't found). T
 | Script | npm command | Checks |
 |---|---|---|
 | `check-licenses.mjs` | `check:licenses` | Licence headers, dependency licence allow-lists, asset inventory. `--write` regenerates the licence texts in `NOTICE.md` and `public/NOTICE.txt`. |
-| `check-repo-hygiene.mjs` | `check:repo` | Nothing private would be published: profiling exports, private paths, tokens, AI attribution trailers |
+| `check-repo-hygiene.mjs` | `check:repo` | Nothing private would be published: profiling exports, private paths, tokens, AI attribution trailers, `.local/` or `release/` files; no hosting-platform deploy configuration |
 | `check-docs.mjs` | `check:docs` | Community files exist; every relative Markdown link and anchor resolves |
 | `check-github-config.mjs` | `check:github` | Issue and discussion forms, chooser config, labels, Dependabot; workflows (explicit permissions, actions pinned to commit SHAs, no script injection) |
 | `check-commit-message.mjs` | — | A commit message or PR title follows Conventional Commits (used by CI and `.githooks/commit-msg`) |
 | `generate-sbom.mjs` | `sbom` | CycloneDX SBOM of what ships. `--check` verifies it's reproducible. |
-| `release-check.mjs` | `release:check` | Everything above in a clean copy. Never commits, tags or publishes. |
+| `release-check.mjs` | `release:check` | Everything above in a clean copy, plus the release artefacts packaged twice to prove they're reproducible. Never commits, tags or publishes. |
+| `package-web.mjs` | `release:package` | Builds the release artefacts in `release/`: the static web archive (site, licence, notices, `hosting/headers.json`, manifest), the source archive and `SHA256SUMS`. Never tags or uploads. |
 
 ## Browser checks (pass or fail)
 
@@ -30,7 +31,7 @@ Browser scripts need Chrome or Chromium (set `CHROME_PATH` if it isn't found). T
 | `refresh-check.mjs` | `check:refresh` | Frame limiter on an emulated 144 Hz display |
 | `fluidity-check.mjs` | `check:fluidity` | Movement stays smooth under irregular frame timing |
 | `audio-check.mjs` | `check:audio` | Every sound plays, and the synthesised fallback works when files are blocked |
-| `prod-check.mjs` | `check:prod` | The production build under the real CSP headers |
+| `prod-check.mjs` | `check:prod` | The production build served with the headers from `hosting/headers.json` (`PROD_DIR=` checks another built site) |
 | `anim-compare.mjs` | `check:anim` | The baked pose sampler matches three.js's mixer for every clip |
 
 ## Captures for human review (screenshots only)

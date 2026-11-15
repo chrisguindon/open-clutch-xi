@@ -200,9 +200,9 @@ More detail:
 - [Playtesting guide](docs/development/playtesting.md): what needs human eyes.
 - [Documentation index](docs/README.md).
 
-## Deployment
+## Hosting
 
-The site is static and deployed on Netlify at **https://fc.chrisguindon.com**. See [docs/development/deployment.md](docs/development/deployment.md). `npm run build` produces `dist/` with relative asset paths: hashed bundles go in `static/`, and the game's own files go in `assets/`. It can also be hosted on any static web server, including from a subdirectory. There are no API keys or external services. The only runtime requests are for the game's own files in `assets/`: models, animations, turf and audio, about 3.5 MB in total. If any of them fails to load, the game falls back to procedural players, grass or sound.
+Open Clutch XI is a static web app that any static host can serve, including from a subdirectory; the project doesn't depend on a hosting platform, and contributors need no hosting account. `npm run build` produces `dist/` with relative asset paths: hashed bundles go in `static/`, and the game's own files go in `assets/`. Releases also provide a ready-to-host, checksummed web archive (`npm run release:package`). See [hosting](docs/development/hosting.md) for the recommended security headers and how to set your own site's title and link previews. The maintainer's own copy at https://fc.chrisguindon.com is deployed separately, from approved releases only. There are no API keys or external services. The only runtime requests are for the game's own files in `assets/`: models, animations, turf and audio, about 3.5 MB in total. If any of them fails to load, the game falls back to procedural players, grass or sound.
 
 ## Licence & assets
 

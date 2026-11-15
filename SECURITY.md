@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Open Clutch XI is a static web game. Fixes are made on the `main` branch and deployed to https://fc.chrisguindon.com. Older releases aren't patched separately.
+Open Clutch XI is a static web game. Fixes are made on the `main` branch and shipped in the next release (a PATCH version for security fixes). Older releases aren't patched separately: sites hosting the game should move to the release that contains the fix. The maintainer's own site, https://fc.chrisguindon.com, runs a chosen release.
 
 ## Reporting a vulnerability
 
@@ -32,7 +32,7 @@ The game runs entirely in the browser:
 
 Relevant reports include, for example:
 - cross-site scripting, or HTML injection through settings, URL parameters or game content
-- weaknesses in the Content-Security-Policy or other headers in `netlify.toml`
+- weaknesses in the Content-Security-Policy or other recommended headers in `hosting/headers.json`
 - a vulnerable dependency that actually ships in the game (three.js, or the Inter font files)
 - supply-chain or permission problems in the build, the GitHub Actions workflows or dependency updates
 

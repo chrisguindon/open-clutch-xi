@@ -18,7 +18,7 @@ issue ──► triage (automatic, deterministic) ──► plan (opt-in) ──
 5. **Assignment.** The maintainer assigns the issue to Copilot (or a contributor picks it up). Copilot works in its GitHub Actions environment, prepared by `.github/workflows/copilot-setup-steps.yml`, and follows `AGENTS.md` and `.github/copilot-instructions.md`.
 6. **Pull request.** CI validates it like any other: formatting, lint, types, tests, build, licences, repository hygiene, docs, SBOM, browser checks, CodeQL and dependency review.
 7. **Human review.** It's reviewed like any contribution. The reviewer understands the change, checks the tests, and asks for changes.
-8. **Merge** is a human decision. Squash-merge with a Conventional Commit title. Deployment happens through Netlify from `main`, and releases are manual.
+8. **Merge** is a human decision. Squash-merge with a Conventional Commit title. Merging deploys nothing; releases are manual, and the maintainer's own site moves to a release only when they choose.
 
 ## Repository files (already in place)
 

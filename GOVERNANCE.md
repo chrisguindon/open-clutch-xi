@@ -4,7 +4,7 @@ Open Clutch XI is a personal open-source project that welcomes a community of pl
 
 ## Roles
 
-- **Maintainer:** Christopher Guindon ([chrisguindon.com](https://www.chrisguindon.com/about/)) owns the repository, reviews and merges pull requests, manages releases and deployment, and has the final say on direction.
+- **Maintainer:** Christopher Guindon ([chrisguindon.com](https://www.chrisguindon.com/about/)) owns the repository, reviews and merges pull requests, manages releases (and, separately, their own site's deployment), and has the final say on direction.
 - **Contributors:** anyone who opens an issue, answers a question, reviews a change, playtests, improves the docs or submits a pull request.
 - **Mentors:** experienced contributors who offer to guide a newcomer through an issue. Mark the issue `mentorship available`.
 
@@ -24,9 +24,9 @@ These guide decisions and reviews:
 3. **Accessible and smooth.** It should work on keyboard, mouse, controller and touch, with remappable controls. Adaptive quality is preferred over higher minimum requirements.
 4. **Honest verification.** Changes say how they were tested. Emulated results are not presented as real-device results.
 
-## Releases, deployment and planning
+## Releases, hosting and planning
 
-- **Deployment.** `main` deploys continuously: Netlify builds it and publishes it to https://fc.chrisguindon.com (see [docs/development/deployment.md](docs/development/deployment.md)).
+- **Hosting.** The project doesn't deploy anything. It produces versioned releases with a static web archive that anyone can host (see [docs/development/hosting.md](docs/development/hosting.md)). Changes to `main` and pull requests never update a live website: the maintainer's own site at https://fc.chrisguindon.com is managed separately and moves to a new release only when the maintainer decides.
 - **Releases.** Occasional, versioned snapshots (Semantic Versioning, `vX.Y.Z` tags, [CHANGELOG.md](CHANGELOG.md)), created by hand by a maintainer. See [docs/development/releasing.md](docs/development/releasing.md).
 - **Planning.** Work is tracked with labels, a simple project board and milestones for meaningful releases (see [docs/governance/github-setup.md](docs/governance/github-setup.md)).
 - **Current priorities, in order:**

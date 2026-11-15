@@ -11,7 +11,8 @@
 // Public-repository hygiene. Checks every file that is (or would be) committed — tracked files plus new
 // files not ignored by .gitignore — and the commit history, for things that shouldn't be published:
 //   - profiling exports (the game's F3/benchmark/CPU-check JSON, Chrome traces, CPU profiles, heap snapshots)
-//   - generated output (dist/, screenshots/, test results, logs) and unexpectedly large files
+//   - generated output (dist/, screenshots/, test results, logs, release/) and unexpectedly large files
+//   - hosting-platform deploy configuration (netlify.toml and similar) and private .local/ files
 //   - private filesystem paths (home directories) and secrets (tokens, private keys)
 //   - email addresses other than the project's public contacts and licence-notice authors
 //   - AI-vendor signatures or co-author trailers in files or commit messages
@@ -34,6 +35,10 @@ const PROFILING = [
   /(^|\/)benchmark\//,
 ];
 const GENERATED = [/^dist\//, /^screenshots\//, /^test-results\//, /^coverage\//, /(^|\/)node_modules\//, /\.log$/, /^\.vite\//, /^asset-src\//];
+// The public project is independent of any hosting platform: deploy configuration belongs to the sites
+// that host it (see docs/development/hosting.md). Private working files and release output stay local.
+const HOSTING = [/(^|\/)netlify\.toml$/, /(^|\/)\.netlify\//, /(^|\/)vercel\.json$/, /(^|\/)\.vercel\//, /(^|\/)_redirects$/];
+const PRIVATE = [/^\.local\//, /^release\//];
 const BINARY = /\.(png|jpe?g|webp|glb|mp3|woff2?|ico|gif|mp4|webm)$/i;
 const MAX_BYTES = 3 * 1024 * 1024;
 
@@ -64,6 +69,8 @@ const AI_SIGNATURE = new RegExp(
 for (const f of files) {
   if (PROFILING.some((r) => r.test(f))) problems.push(`profiling export or personal data file: ${f}`);
   if (GENERATED.some((r) => r.test(f))) problems.push(`generated file (should be ignored): ${f}`);
+  if (HOSTING.some((r) => r.test(f))) problems.push(`hosting-platform configuration (belongs in the deploying site's own repository): ${f}`);
+  if (PRIVATE.some((r) => r.test(f))) problems.push(`private working file or release output: ${f}`);
   let size;
   try {
     size = statSync(root + f).size;

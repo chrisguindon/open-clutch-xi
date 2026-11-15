@@ -76,7 +76,7 @@ Browser checks (`npm run test:browser`, `check:controls`, `check:adaptive`, …)
 - Persist only through `src/game/storage.ts`. Every record is typed, versioned, validated and migrated (see `docs/architecture/persistence.md`, ADR 0009). Storage keys and achievement ids are permanent identifiers: never derive them from the brand, never rename them.
 - Statistics are recorded only at full time from simulation data (`src/game/progress.ts`), once per match. Achievements stay visible, pressure-free and reliably detectable (`docs/gameplay/progression.md`).
 - Imported files are untrusted: size-limited, validated strictly, applied only after confirmation.
-- No backend, accounts, Netlify Functions, analytics or databases without an issue and the maintainer's agreement.
+- No backend, accounts, serverless functions, analytics or databases without an issue and the maintainer's agreement.
 
 **Performance and accessibility**
 - Keep per-frame work allocation-free. New visual cost joins the adaptive quality ladder. Read `docs/development/performance.md`.
@@ -139,7 +139,8 @@ Agents should make that review easy: explain non-obvious decisions, and list any
 
 - Never commit secrets, tokens or credentials.
 - Never put untrusted input (URL parameters, settings, team names) into HTML without escaping (`escapeHtml` in `src/ui/ui.ts`).
-- Keep the Content-Security-Policy in `netlify.toml` strict.
+- Keep the Content-Security-Policy in `hosting/headers.json` strict.
+- The project stays independent of any hosting platform: no hosting-provider configuration, accounts or deploy hooks in this repository (see `docs/development/hosting.md`). `npm run check:repo` rejects platform deploy configuration.
 - Workflows:
   - least-privilege `permissions`;
   - actions pinned to full commit SHAs;

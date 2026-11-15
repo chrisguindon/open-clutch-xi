@@ -10,8 +10,10 @@
 
 /**
  * The game's identity, in one place. Nothing else in the code should spell out the name:
- * the UI, the stadium boards, file names of exports and the HTML metadata (through vite.config.ts) all
- * read it from here. Renaming the game means editing this file, `package.json`, the logo assets and the
+ * the UI, the stadium boards, file names of exports and the default HTML metadata (through vite.config.ts
+ * and src/siteMeta.ts) all read it from here. Where a particular site is hosted is not part of the brand:
+ * hosts set it with the SITE_URL build variable or by replacing the page's metadata block.
+ * Renaming the game means editing this file, `package.json`, the logo assets and the
  * docs — not hunting through the source.
  *
  * Deliberately **not** derived from the brand: saved-data keys (src/game/storage.ts) and achievement ids.
@@ -31,8 +33,6 @@ export const BRAND = {
   tagline: 'Free 3D football in your browser',
   /** One-sentence description for metadata and link previews. */
   description: 'A free, open-source 3D football game for the browser. Pick a national team and play — no download, no account.',
-  /** The site where the game is played. */
-  website: 'https://fc.chrisguindon.com/',
   maintainer: 'Christopher Guindon',
   maintainerUrl: 'https://www.chrisguindon.com/about/',
   contact: 'info@chrisguindon.com',

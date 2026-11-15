@@ -88,26 +88,13 @@ Covered by `tests/progress.test.ts` (round trip, every rejection case, both rese
 
 A backend is **not** justified today. Every planned feature (tournaments, statistics, achievements, export and import) works locally. A server would add cost, a privacy policy, data-protection duties, abuse handling and an availability dependency to a free educational game. It would also break the "no third-party requests" promise. The options below are recorded so a future decision starts from facts.
 
-The game is hosted on Netlify (see [deployment](../development/deployment.md)). As checked in November 2026 against Netlify's pricing page and documentation, which change often:
-
-- **Plans are credit-based.**
-  - Free: 300 credits a month, a hard limit, with no automatic top-up.
-  - Personal: $9 a month for 1,000 credits.
-  - Pro: $20 a month for 3,000 credits.
-- **Metered usage:**
-  - production deploys: 15 credits each;
-  - bandwidth: 20 credits per GB;
-  - web requests: 2 credits per 10,000;
-  - Functions compute: 10 credits per GB-hour.
-
-  A static game with many players therefore spends credits on bandwidth and deploys even without a backend. Watch this as the game grows (the build already keeps assets small and cacheable).
-- **Netlify Functions** (serverless) and **Netlify Blobs** (key-value storage, marked beta) are available on the Free plan. Blobs are eventually consistent by default (updates can take up to about 60 seconds to propagate), with strong consistency available per store or per read.
+The project doesn't choose a hosting platform (see [hosting](../development/hosting.md)): it ships static files, and anything server-side would tie it to one provider's functions and storage. Static hosting usually charges for bandwidth and builds even without a backend, which is one more reason the build keeps assets small and cacheable.
 
 What a server could one day offer, and what it would require:
 
 | Feature | Would need | Notes |
 |---|---|---|
-| Cloud sync between devices | Accounts or a sync code, Functions and Blobs, a privacy policy | Export and import cover this manually first |
+| Cloud sync between devices | Accounts or a sync code, server functions and storage, a privacy policy | Export and import cover this manually first |
 | Global leaderboards | Server-side validation (scores from a browser are trivially forged), moderation | Conflicts with "no pressure" design for children; not recommended |
 | Shared community challenges | A static JSON file in the site is enough | Needs no backend at all |
 

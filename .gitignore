@@ -4,6 +4,8 @@ dist
 coverage
 .vite
 .netlify
+# The maintainer's private deployment project, staged locally (its own Git repository; never part of this one)
+.local/deployments/
 
 # Logs and test artefacts
 *.log

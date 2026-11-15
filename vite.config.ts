@@ -11,25 +11,26 @@
 import { defineConfig } from 'vite';
 import { readFileSync } from 'node:fs';
 import { BRAND } from './src/brand.ts';
+import { replaceSiteMeta } from './src/siteMeta.ts';
 
 // The source repository URL comes from package.json (set once with scripts/set-repo-url.mjs). Until it is
 // set, the About screen simply doesn't show a source link.
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string; repository?: { url?: string } };
 const repoUrl = (pkg.repository?.url ?? '').replace(/^git\+/, '').replace(/\.git$/, '');
 
-// Fills the %BRAND_*% placeholders in index.html from src/brand.ts, so the page title and link-preview
-// metadata follow the one brand definition. Values are HTML-escaped (they end up in attributes).
+// Fills the %BRAND_*% placeholders in index.html from src/brand.ts, and the site-metadata block (title,
+// description, link previews) from the brand plus the optional SITE_URL build variable. Without SITE_URL
+// (as in released builds) no absolute URLs are written, so the page suits any host. Values are escaped.
 const escapeAttr = (v: string) => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const BRAND_TOKENS: Record<string, string> = {
   BRAND_NAME: BRAND.name,
-  BRAND_DESCRIPTION: BRAND.description,
-  BRAND_WEBSITE: BRAND.website,
   BRAND_MAINTAINER: BRAND.maintainer,
 };
+const siteMeta = { title: BRAND.name, description: BRAND.description, siteUrl: process.env.SITE_URL ?? '', socialImage: 'social-card.jpg' };
 const brandHtml = {
   name: 'brand-html',
   transformIndexHtml: (html: string) =>
-    html.replace(/%(BRAND_[A-Z_]+)%/g, (m: string, key: string) => {
+    replaceSiteMeta(html, siteMeta).replace(/%(BRAND_[A-Z_]+)%/g, (m: string, key: string) => {
       if (!(key in BRAND_TOKENS)) throw new Error(`index.html uses unknown placeholder ${m}`);
       return escapeAttr(BRAND_TOKENS[key]);
     }),
@@ -44,7 +45,7 @@ export default defineConfig({
   build: {
     target: 'es2022',
     // Hashed bundles go to /static (cached immutably); /assets holds the game's own models, audio,
-    // textures and flags (stable names, revalidated) — see netlify.toml.
+    // textures and flags (stable names, revalidated) — see hosting/headers.json.
     assetsDir: 'static',
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
