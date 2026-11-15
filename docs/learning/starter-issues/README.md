@@ -1,6 +1,6 @@
 # Starter issues
 
-A small, reviewed set of beginner-friendly tasks, ready to be created as GitHub issues (see [GITHUB_SETUP.md § 9](../../governance/github-setup.md#9-starter-issues)). Each file is the issue body: the first line is the title, and the `Labels:` line lists its labels.
+A small, reviewed set of beginner-friendly tasks, ready to be created as GitHub issues (see [GitHub setup § 9](../../development/github-setup.md#9-starter-issues)). Each file is the issue body: the first line is the title, and the `Labels:` line lists its labels.
 
 | # | Task | Area |
 |---|---|---|
@@ -10,5 +10,7 @@ A small, reviewed set of beginner-friendly tasks, ready to be created as GitHub 
 | 04 | [Test: restart long balls never aim into touch](04-test-restart-clearance.md) | testing, AI |
 | 05 | [Test: how the AI values positions on the pitch](05-test-position-value.md) | testing, AI |
 | 06 | [Troubleshooting section in the learning guide](06-docs-troubleshooting.md) | documentation |
+| 07 | [XI Nations Cup: return to the cup after "Change team"](07-cup-change-team.md) | UI, gameplay |
+| 08 | [Records: list past XI Nations Cups](08-records-past-cups.md) | UI |
 
 Before creating more, check the task is genuinely small, well understood, and has a clear way to test it.

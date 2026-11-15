@@ -39,7 +39,7 @@ These can't be set from repository files:
 - **Copilot coding agent.** Requires a Copilot plan that includes it. Enable it for the repository in the account or repository settings. Availability and pricing are set by GitHub: check the current GitHub documentation.
 - **Workflow approval for agent pull requests.** Keep GitHub's default, where a maintainer approves before workflows run on pull requests opened by Copilot.
 - **Copilot firewall.** Keep the default (restricted internet access). The setup steps only need npm.
-- **Branch ruleset.** Pull requests are required, CI must pass, and nothing merges automatically (see [github-setup.md](../governance/github-setup.md)).
+- **Branch ruleset.** Pull requests are required, CI must pass, and nothing merges automatically (see [github-setup.md](github-setup.md)).
 
 ## Security and cost controls
 

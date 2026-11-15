@@ -1,220 +1,136 @@
 # Open Clutch XI
 
-**A free, open-source 3D football game that runs entirely in your browser**, by [Christopher Guindon](https://www.chrisguindon.com/about/).
+**A free, open-source 3D football game for the browser, built with TypeScript, Three.js and a lot of AI assistance. Play it, read it, find what's wrong with it, and help make it better.**
 
-### ▶ [Play now at fc.chrisguindon.com](https://fc.chrisguindon.com)
+![The Open Clutch XI main menu, with the stadium and players behind it](public/social-card.jpg)
 
-No download, no account, no tracking. Pick a national team and play against the computer with a keyboard, mouse, controller or touch screen.
+Source code: https://github.com/chrisguindon/open-clutch-xi · Licence: [EPL-2.0](LICENSE) · Status: in development, working towards a first release (0.1.0)
 
-Open Clutch XI started as a fun experiment in AI-assisted development with my nephews, who love football games. It's built with TypeScript and Three.js, and it's **open source under the [Eclipse Public License 2.0](LICENSE)**. It is a personal project, not an Eclipse Foundation project.
+## What is Open Clutch XI?
 
-- **Teams:** pick from **54 national teams**, as women's, men's or mixed squads.
-- **Formats:** 3v3, 5v5 or 11v11 against a tactical AI.
-- **Other modes:** a penalty shootout, a practice pitch and an interactive tutorial.
-- **Records:** your statistics, recent matches and ten achievements, saved **only in your browser**, with export, import and reset in *Settings → Saved data*.
-- **Devices:** keyboard, keyboard & mouse, controller or touch. The game has no backend, no accounts and no tracking. Its players, animations, turf textures and recorded sounds are **CC0** (public-domain) assets, and everything else is generated in code. See [docs/governance/third-party-assets.md](docs/governance/third-party-assets.md) for the full inventory.
+A football game you play against the computer, in any modern browser, with no download, no account and no tracking:
+- pick one of 54 national teams, as a women's, men's or mixed squad;
+- play 3v3, 5v5 or 11v11;
+- try the **XI Nations Cup**, a fictional tournament with groups, knockouts and a trophy;
+- or take a penalty shootout, practise, or follow the tutorial.
 
-```bash
-npm ci
-npm run dev        # http://localhost:5173
-npm run build      # static production build in dist/
-npm run preview    # serve the production build
-npm test           # unit + simulation tests (vitest)
-```
+It works with a keyboard, keyboard and mouse, a controller or a touch screen.
 
-Requires Node 22+ (24 recommended, see `mise.toml`) and a browser with **WebGL2** (current Chrome, Edge, Firefox or Safari).
+It is also a codebase you can learn from. It's a complete game, small enough to read: a deterministic football simulation, physics with spin and bounce, utility-based AI, skeletal animation, a rules engine based on the Laws of the Game, and plenty of tests.
 
-## Learn, fork and contribute
+## Why this project exists
 
-Open Clutch XI is also a learning project. It's a complete game that's small enough to read, and it's a good place to learn TypeScript, Three.js, game physics, game AI and testing, or to try out AI-assisted development.
+Open Clutch XI started as a weekend experiment to show my nephews what you can build with AI-assisted software development. They love football games, so we set out to make our own. The name came from one of them: *open* for open source, *clutch* for the big moments, *XI* for the starting eleven.
 
-- **[docs/learning/README.md](docs/learning/README.md):** a guided tour of the code and hands-on exercises.
-- **[CONTRIBUTING.md](CONTRIBUTING.md):** how to set up, make a change and open a pull request. Issues labelled [`good first issue`](https://github.com/chrisguindon/open-clutch-xi/labels/good%20first%20issue) are a friendly start.
-- **[Discussions](https://github.com/chrisguindon/open-clutch-xi/discussions):** questions (*Q&A*, *Learning*), ideas, and *Show and Tell*. Forked it and built a new skill move? Share a video!
-- **Community health:**
-  - [Code of Conduct](CODE_OF_CONDUCT.md)
-  - [Security policy](SECURITY.md)
-  - [Governance](GOVERNANCE.md)
-  - [Changelog](CHANGELOG.md)
-  - [Releasing](docs/development/releasing.md)
-  - [AGENTS.md](AGENTS.md), with guidelines for AI-assisted work
+It grew into a real game, and a practical way to explore football, 3D graphics, TypeScript and open-source collaboration. It's a personal project by [Christopher Guindon](https://www.chrisguindon.com/about/). It's not a commercial product, and not an Eclipse Foundation project.
 
----
+## Built with AI assistance: what that means here
+
+**Most of the code in this repository was written with AI coding assistants**, guided, reviewed, tested and committed by a person. We say so openly because it matters for how you read the code.
+
+AI-assisted development can be very productive. It still needs a human to review the code, test it, debug it, make architectural judgements, and check security and licences. Expect to find:
+- bugs and incomplete features;
+- odd design decisions, or code an experienced developer would write differently;
+- assumptions that turn out to be wrong;
+- animations that don't look quite natural yet;
+- places that badly need refactoring.
+
+Not every problem is the AI's fault (people make mistakes too), and not everything here is wrong. But nothing in this repository is correct *because* an AI wrote it. Treat the code as you would any code from a new colleague: read it, question it, test it.
+
+**That's an invitation.** Spotting what's wrong in a working codebase, explaining why, and fixing it carefully is one of the most valuable skills in software development, and this project is a friendly place to practise it. The [known issues](docs/development/known-issues.md) and [playtesting guide](docs/development/playtesting.md) list what we already know about. How the project uses AI responsibly is described in [AI-assisted workflow](docs/development/ai-assisted-workflow.md) and [ADR 0008](docs/architecture/decisions/0008-ai-assisted-contributions.md).
 
 ## Features
 
-**Modes**
-- **Quick Match.** 3v3, 5v5 or 11v11 against the AI, with Beginner, Easy, Medium or Hard difficulty and 2–8 minute matches. Pick from 54 national teams, with night, dusk or day kick-offs.
-- **Practice.** Free play with two passing partners and a keeper. Press `R` to reset the ball. No clock.
-- **Penalty Shootout.** Best of five, then sudden death. Aim with a reticle and hold to charge power. When the CPU shoots, you are the keeper and pick your dive.
-- **Interactive tutorial.** Offered on first launch and also available from *How to Play*. It watches your real inputs and advances step by step.
+- **Football:** ball physics with spin (shots curl and dip), dribbling with real touches rather than a ball glued to the foot, passes, through balls, crosses, headers, shots, chips, tackles, skill moves and stamina.
+- **Rules:** Standard rules for 11v11 (offside, fouls, cards, advantage, walls, every restart), and faster Arcade rules for 3v3 and 5v5. See the [rules matrix](docs/gameplay/FOOTBALL_RULES.md) for where the game simplifies the Laws.
+- **AI:** team roles, utility scoring for every decision (shown live with **F3**), and four difficulty levels that change how the computer thinks, never how fast it runs.
+- **XI Nations Cup:** Short (16 teams) or Classic (32), saved between matches. See [XI Nations Cup](docs/gameplay/tournament.md).
+- **Presentation:** rigged and animated players, day, dusk and night lighting, a crowd of thousands, referees, replays and match statistics.
+- **Records:** statistics, recent matches and achievements, kept only in your browser, with export and import.
+- **Accessibility:** remappable keyboard, mouse and controller buttons, touch controls, decisions shown in words, reduced motion, and graphics that adapt to your device.
 
-**Football**
-- Ball physics: gravity, quadratic drag and the **Magnus effect**, so shots curl and topspin makes them dip. Bounces transfer spin, the ball rolls with resistance, rebounds off the posts and crossbar, and gets caught by a deformable net.
-- Dribbling is physical, not glued: the ball rolls between touches taken on the stepping foot. Jogging keeps it close, and sprinting knocks it ahead, which is faster but easier to steal. The first touch on a received pass depends on the incoming speed.
-- Ground passes, driven passes, through balls, lobs and crosses, headers, power shots, curling finesse shots and chips.
-- Standing and sliding tackles. A slide that clips the player before the ball is a foul, which means a free kick, or a penalty inside the box.
-- Skill moves: feint-and-burst, drag-back and a step-over that can wrong-foot nearby defenders.
-- **Laws of the Game.**
-  - 11v11 uses **Standard** rules: offside, fouls with yellow and red cards, advantage, walls, and assistant referees.
-  - 3v3 and 5v5 use faster **Arcade** rules.
-  - Every restart (kick-off, throw-in, corner, goal kick, free kick, penalty) follows the Laws: no carrying the ball at a throw-in, opponents keep their distance, no second touch.
-  - See the [rules matrix](docs/gameplay/FOOTBALL_RULES.md).
-- **Referees** follow play and signal every decision. Decisions are also shown in words and announced to screen readers.
-- A match clock, stamina and match statistics.
-- Pass-receive assistance and assisted player switching (optional).
+The full list is in [features in detail](docs/gameplay/features.md). Controls are in [controls](docs/gameplay/controls.md); in short, **WASD** moves, **Shift** sprints, **Space** passes, **J** shoots, and **Esc** pauses.
 
-**AI**
-- A team "brain" assigns a role to every player each tick: carrier, loose-ball chaser, presser, cover, marker, supporter, runner or shape-holder.
-- The ball carrier uses **utility scoring** across shooting (an xG-like shot-quality model that picks the best aim point), passes, through balls, crosses, dribble directions and clearances.
-- Off the ball, players find open space with clear passing lanes, make timed runs in behind, and keep a ball-relative formation shape that shifts between attack and defence.
-- Defenders press goal-side, man-mark the most dangerous opponents, cover, intercept passes they can reach first, and time their tackles.
-- **Goalkeepers** narrow the angle, react to shots after a human-like delay, push off into dives that extend over time, catch or parry, sweep loose balls, smother 1v1s and distribute.
-- **Difficulty** changes reaction time, decision noise, pass and shot accuracy, pressing intensity, interception awareness and keeper reactions. It never changes speed or physics. Both teams use the same formation. See [AI and difficulty](docs/gameplay/ai-and-difficulty.md).
-- **Celebrations** are chosen from the match situation (a late winner, a consolation goal, an own goal), vary from goal to goal, and can always be skipped.
+## Play locally
 
-**Presentation**
-- **Rigged footballers.** They are built on a CC0 base body with three LODs, five hair styles, faces and per-player variation in height, build and skin tint. Kits are drawn by shader in six shirt designs, with trims, back names and numbers, chest numbers, crests, socks and boots.
-- **Animation.** Recorded clips are blended by speed and synced to the simulation's gait phase: idle, walk, jog, sprint, slide, stumble, fall and get-up, throw, celebrations. Procedural layers on top handle kicks and passes from the correct foot, tackles, headers, keeper reach, dives, catches and strafing.
-- **Lighting environments** for day, dusk and night:
-  - a PMREM environment map for reflections
-  - a physically based sky for day and dusk
-  - floodlight towers with a shadow-casting key and three fill lights
-  - multi-directional player shadows under floodlights
-  - light shafts through haze
-  - exponential fog
-  - per-environment colour grading and vignette
-- **Pitch.** CC0 photo-scanned turf detail with anti-tiling. Mowing stripes whose brightness changes with the viewing direction, cross-mowing, wear in the goalmouths and centre, and floodlight falloff.
-- **Stadium.** Tiered stands with aisles and tunnel entrances, roof ribs, team-coloured fascia and waving roof flags. Also **thousands of instanced billboard fans**, scrolling LED boards, floodlight pylons, dugouts, corner flags and goals with rippling nets.
-- Three gameplay cameras (Broadcast, Dynamic, Tactical) plus cinematic cameras for intros, celebrations, replays and penalties.
-  - The Broadcast camera zooms dynamically with how spread out the play is.
-  - Low cameras push out of player bodies and rise when a player would hide the ball.
-- **Broadcast presentation.**
-  - A pre-match line-up dolly with starting XI cards.
-  - Replays are letterboxed, with a stinger wipe and a clean HUD. Confetti and fireworks are cleared so they never hang over a replay.
-- Goal celebrations with confetti and fireworks, the crowd jumping, a roar, a slow-motion **instant replay**, ball trails on power shots and a subtle FOV kick.
-- **Audio.** CC0 recordings provide the stadium ambience, goal roar, cheer, groan, "ooh", applause, referee whistles and ball strikes.
-  - Dynamic mix: crowd excitement opens a filter and raises the ambience bed, and whistles and roars duck the crowd.
-  - Kicks are panned to where the ball is on screen, and the home crowd groans when you concede.
-  - Every sound has a synthesised Web Audio fallback.
-- A premium HUD: scoreboard and clock, stamina, a power meter, a minimap, a pass-target ring, context hints and penalty trackers. There are also pause, settings and full-time statistics screens.
-
-**Settings & accessibility.**
-- **Graphics:** **Auto** (the default: the game measures your device and keeps adjusting resolution, effects and frame rate) or a fixed preset (Low, Medium, High, Ultra with GTAO ambient occlusion).
-- **Game:** camera choice, time of day, separate volume controls, assisted switching, replays on or off, minimap, controller vibration and **reduce motion**.
-- **Controls:** fully **configurable keyboard, mouse and controller buttons**, plus touch button size and a left-handed touch layout.
-
-Settings persist in `localStorage`. Menus are keyboard- and gamepad-navigable.
-
-## Controls
-
-On first launch the game asks **"How would you like to play?"**:
-- **Keyboard only**
-- **Keyboard & mouse**
-- **Controller.** This option is enabled once one is connected.
-
-You can skip the question. It's asked only once, and you can change your answer any time in *Settings → Controls*. Touch-only devices get touch controls automatically. Whatever you choose, every device keeps working.
-
-Everything can be rebound under *Settings → Controls*: keys, mouse buttons and controller buttons. Conflicting bindings swap rather than leave an action without one. Keys are matched by physical position, so WASD stays put on AZERTY and QWERTZ keyboards, and labels show what's printed on your keyboard where the browser exposes it.
-
-| Keyboard | Attacking | Defending | Controller (Xbox / PlayStation) |
-|---|---|---|---|
-| `WASD` / arrows | Move | Move | Left stick |
-| `Shift` | Sprint | Sprint | RT / R2 |
-| `Space` | Pass | Standing tackle | A / ✕ pass · hold to jockey |
-| `J` | Shoot | Slide tackle | B / ○ shoot · tackle |
-| `K` | Through ball | Switch player | Y / △ through ball |
-| `L` | Lob / cross | Jockey (hold) | X / □ lob · slide tackle |
-| `E` | Skill move | — | RB / R1 |
-| `Q` | Switch player | Switch player | LB / L1 |
-| `C` · `Esc` | Camera · Pause | | View · Start |
-
-**Keyboard & mouse:**
-- **Move:** `WASD`. **Sprint:** `Shift`.
-- **Left click:** shoot / slide tackle.
-- **Right click:** pass / standing tackle.
-- **Middle click or `Q`:** through ball / switch player. The middle button is never the only way to do something.
-- **`Space`:** lob / cross / jockey.
-- **`E`:** switch player. **`F`:** skill move.
-
-Mouse buttons only act on the pitch, never on menus, and the right-click menu is suppressed there. *Aim with the mouse* is optional.
-
-**Control style** (*Settings → Controls*):
-- **Simple** (the default): passes and shots fire the moment you press, with assisted power.
-- **Advanced:** hold Shoot (and Pass, if Passing is set to Charged) to charge power.
-
-**Returning players** keep their saved keys. If they never changed the old defaults, the menu offers the new layout once.
-
-**Touch:** a floating joystick on the left (push it to the edge to sprint) and three contextual buttons on the right.
-
-## How it plays
-
-- **Dribbling is real.** The ball rolls between touches, and each touch is taken with the foot that's stepping forward. Jogging keeps it close, sprinting knocks it ahead, and standing still near an opponent shields it.
-- **Defending is about timing.** Jockey, wait for the ball to leave the attacker's feet, then tackle. Tackling through a shielding player rarely works, and clumsy challenges from behind can be fouls.
-- **Momentum.** Players carve wider turns at full sprint and plant before sharp cuts. They walk, jog and sprint naturally, and backpedal or side-step when facing the play.
-- **Flow.** Restarts are quick, goal celebrations are short and skippable, and replays play only for standout goals by default (*Settings → Game → Goal replays*).
-
-## Testing
+You need [Node.js](https://nodejs.org) 22 or later (24 recommended) and a browser with WebGL2.
 
 ```bash
-npm test                 # unit, simulation and scenario tests: physics, contact, rules, flow, replays, AI decisions, controls, settings migration, adaptive quality, perf, camera
-npm run ci               # everything CI runs: format, lint, types, tests, build and the repository checks below
-npm run lint             # ESLint (first time: npm run lint:setup) · npm run format applies Prettier
-npm run check:licenses   # licence headers, dependency licence allow-list, asset inventory, third-party notices
-npm run check:repo       # repository hygiene: secrets, private paths, profiling exports, generated files
-npm run check:docs       # Markdown links and anchors, required community files
-npm run check:github     # issue forms, workflows (pinned, least privilege), Dependabot, labels
-npm run check:controls   # real-browser: control chooser, mouse buttons, rebinding by click, emulated controller remap
-npm run check:adaptive   # real-browser: adaptive quality on an emulated slow and fast device
-npm run check:rules      # real-browser: restarts (no carrying the ball at a throw-in), celebration, kick-off
-npm run sbom             # CycloneDX software bill of materials → release/
-npm run release:check    # full, reproducible release validation (commits/tags nothing)
-npm run report:ai        # AI decision audit (irrational-decision rates) → test-results/ai-audit.log
-npm run test:browser     # headless Chromium smoke test (needs Chromium; see below)
-npm run metrics          # gameplay metrics report vs tests/fixtures/metrics-baseline.json (~10 min)
-npm run bench            # simulation CPU / GC benchmark
-npm run capture:review   # full screenshot review → screenshots/review-after/
-npm run capture:perf     # render stats (draw calls, triangles, shader programs) + screenshots
-npm run capture:anim     # close-up animation frame sequences
-npm run capture:replay   # long-range goal replay frames (+ checks confetti is cleared during replays)
-npm run capture:lighting # night / dusk / day × broadcast / dynamic / tactical / close-up matrix
-npm run capture:player   # one footballer through every animation state
-npm run bench:headless   # in-game benchmark in headless Chromium (software GL: CPU breakdown only)
-npm run bench:cpu        # deterministic CPU micro-benchmark of the production build (npm run build first)
-npm run check:mobile     # phone emulation: touch joystick/buttons, no scroll/zoom (not a real-device test)
-npm run check:fluidity   # real-browser loop/interpolation check under jittered frame timing
-npm run check:audio      # loads every audio sample, plays each sound, then repeats with files blocked (fallback)
-npm run build:assets     # rebuild public/assets/*.glb / *.webp from asset-src/ (CC0 sources, see docs/governance/third-party-assets.md)
-npm run build:audio      # rebuild public/assets/audio/*.mp3 (needs ffmpeg)
+git clone https://github.com/chrisguindon/open-clutch-xi.git
+cd open-clutch-xi
+npm ci
+npm run dev        # then open http://localhost:5173
 ```
 
-**In the game:**
-- **F3** (or `?diag`) opens the diagnostics overlay: frame times, input latency, adaptive quality and the AI's latest decision with its reasons.
-- `?bench` runs the benchmark.
-- `?lab` opens the movement lab.
-- `?fps` shows a frame-rate counter.
+Other useful commands:
 
-More detail:
-- [Testing](docs/development/testing.md): test layers, browser checks, why statistics need many seeds.
-- [Performance](docs/development/performance.md): frame pacing, adaptive quality, budgets, profiling tools.
-- [Playtesting guide](docs/development/playtesting.md): what needs human eyes.
-- [Documentation index](docs/README.md).
+```bash
+npm test           # unit, simulation and scenario tests
+npm run build      # a static production build in dist/ that any web server can host
+npm run lint:setup # once, before your first `npm run lint` or `npm run ci`
+npm run ci         # everything the automated checks run on a pull request
+```
 
-## Hosting
+The game is a static web app with no backend, and you don't need any account to build, test or run it. To host it yourself, see [hosting](docs/development/hosting.md).
 
-Open Clutch XI is a static web app that any static host can serve, including from a subdirectory; the project doesn't depend on a hosting platform, and contributors need no hosting account. `npm run build` produces `dist/` with relative asset paths: hashed bundles go in `static/`, and the game's own files go in `assets/`. Releases also provide a ready-to-host, checksummed web archive (`npm run release:package`). See [hosting](docs/development/hosting.md) for the recommended security headers and how to set your own site's title and link previews. The maintainer's own copy at https://fc.chrisguindon.com is deployed separately, from approved releases only. There are no API keys or external services. The only runtime requests are for the game's own files in `assets/`: models, animations, turf and audio, about 3.5 MB in total. If any of them fails to load, the game falls back to procedural players, grass or sound.
+## Learn from the code
 
-## Licence & assets
+You don't need to understand the whole codebase to learn from it or contribute to it. Good places to start:
+- [**The learning guides**](docs/learning/README.md): a code tour that follows one shot from key press to saved achievement, then guides to the game loop, physics, AI, rules, rendering, saving data, and releases and hosting.
+- **The exercises** ([exercises](docs/learning/exercises.md)): beginner to advanced, each with the files to read and how to test your change.
+- [**Learning open source with Open Clutch XI**](docs/learning/open-source.md): how to find a bug, write a useful issue, make a branch and open your first pull request, using this game as the example.
+- Press **F3** in a match to see the AI's latest decision and why it made it, then find that code in `src/sim/ai/teamBrain.ts`.
 
-Open Clutch XI is licensed under the **Eclipse Public License 2.0**: see [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md). Source files carry the Eclipse-style EPL-2.0 header with an `SPDX-License-Identifier: EPL-2.0` line. No Secondary Licenses are declared. This is a personal project. It is not affiliated with, endorsed by or governed by the Eclipse Foundation; EPL-2.0 is simply the licence chosen for it.
+## Contributing
 
-This repository contains no personal branding: sites that host the game can add their own through `site-config.json` (see [hosting](docs/development/hosting.md)).
+You're welcome here if you:
+- love football and can tell when a pass, a run or a celebration looks wrong;
+- enjoy games and want to see how one works inside;
+- want to learn TypeScript, Three.js, Git or GitHub;
+- are curious about AI-assisted development, or want to practise reviewing AI-written code;
+- want to open your first issue or pull request;
+- want to make games more accessible.
 
-All code, procedural art, synthesised audio and sponsor names are original. National teams use flags and national colours only, with no crests, official kits or player likenesses; player names are generated.
+Things football fans can help with:
+- more natural player movement and celebrations;
+- better passing, shooting and goalkeeping;
+- smarter AI;
+- rules the game gets wrong;
+- the XI Nations Cup;
+- anything that makes it feel more like football.
+
+Professional-level realism isn't the goal. Experiments are welcome.
+
+You can write your contribution by hand or with AI tools. Both are equally welcome. Either way, you should understand it, test it and be able to explain it. [CONTRIBUTING.md](CONTRIBUTING.md) explains everything step by step. Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+### Report a bug
+
+1. Check the [existing issues](https://github.com/chrisguindon/open-clutch-xi/issues) to see whether someone has already reported it.
+2. If not, open a new issue with the **Bug report** form. Say what happened, what you expected, and how to make it happen again. Add your browser, your device and a screenshot if you can.
+
+You don't need to know the cause. A clear description is a real contribution. Security problems are different: please report them privately (see [SECURITY.md](SECURITY.md)).
+
+### Submit a pull request
+
+1. Pick an issue (`good first issue` is a friendly start) or a small improvement, and say in the issue that you're working on it.
+2. Fork the repository and create a branch, for example `fix/keeper-dive-direction`.
+3. Make one focused change, and add or update a test where you can.
+4. Run `npm run ci`.
+5. Open a pull request with a title like `fix(ai): stop clearances towards our own goal`, and explain what you changed and how you tested it.
+6. Discuss the review feedback and update your branch. Every pull request is reviewed by a person.
+
+## Licence and credits
+
+Open Clutch XI is open source under the **[Eclipse Public License 2.0](LICENSE)**. It's a personal project by Christopher Guindon. It is not affiliated with or endorsed by the Eclipse Foundation; EPL-2.0 is simply the licence chosen. [NOTICE.md](NOTICE.md) is the legal notice: copyright, the licence, and every third-party licence text.
 
 Third-party content:
-- CC0: Quaternius, ambientCG and Freesound contributors
-- flags: flag-icons (MIT)
-- font: Inter (SIL OFL)
+- 3D characters and animations by **Quaternius** (CC0);
+- turf textures from **ambientCG** (CC0);
+- recorded sounds from **Freesound** contributors (CC0);
+- flags from **flag-icons** (MIT);
+- the **Inter** typeface (SIL OFL);
+- the **three.js** library (MIT).
 
-All of it is listed with sources and processing steps in [docs/governance/third-party-assets.md](docs/governance/third-party-assets.md). [NOTICE.md](NOTICE.md) is the canonical legal notice, with every licence text. It ships with the game as `NOTICE.txt`, linked from the About screen. The only runtime code dependency is [three.js](https://threejs.org) (MIT). See the [architecture overview](docs/architecture/README.md) for technical details and design decisions, and [GOVERNANCE.md](GOVERNANCE.md) for how the project is run.
+Each is listed with its source in [third-party assets](docs/governance/third-party-assets.md). Teams, kits, player names and sponsors are generic or fictional: no official crests, kits or likenesses.
+
+More: [documentation index](docs/README.md) · [architecture](docs/architecture/README.md) · [governance](GOVERNANCE.md) · [security](SECURITY.md) · [changelog](CHANGELOG.md).

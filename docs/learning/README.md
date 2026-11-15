@@ -80,6 +80,7 @@ Each guide explains one idea with the real code, then points to exercises.
 | [The game loop](game-loop.md) | Fixed timestep, interpolation, determinism |
 | [Ball and player physics](physics.md) | Gravity, drag, the Magnus force, bounces, rolling, player movement |
 | [3D rendering with Three.js](threejs.md) | Scenes, skinned characters, instancing, adaptive quality |
+| [Learning open source with Open Clutch XI](open-source.md) | Reading a repository, writing a useful issue, branches, your first pull request, code review, reviewing AI-written code critically |
 | [Releases and hosting](releases-and-hosting.md) | Versioned, checksummed, reproducible releases; customising a site without rebuilding; security headers |
 | [Football AI](football-ai.md) | Situation analysis, roles, utility scoring, fair difficulty |
 | [Football rules in code](football-rules.md) | Offside, fouls and cards, the restart stage machine |

@@ -51,4 +51,4 @@ Out of scope:
   - CodeQL analysis and dependency review in `.github/workflows/security.yml`
   - Dependabot updates
   - `npm audit` in CI
-- **Repository hygiene:** `npm run check:repo` checks for committed secrets, private paths and personal profiling data. Maintainers are asked to also enable GitHub secret scanning with push protection (see [docs/governance/github-setup.md](docs/governance/github-setup.md)).
+- **Repository hygiene:** `npm run check:repo` checks for committed secrets, private paths and personal profiling data. Maintainers are asked to also enable GitHub secret scanning with push protection (see [docs/development/github-setup.md](docs/development/github-setup.md)).

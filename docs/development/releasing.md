@@ -54,7 +54,7 @@ git log --oneline -20
 Also check:
 - `CHANGELOG.md`: move the *Unreleased* items under `## [0.1.0] - YYYY-MM-DD` and add the compare links.
 - `docs/releases/v0.1.0.md`: update the notes, testing status and known limitations.
-- The publication checklist in [github-setup.md](../governance/github-setup.md#11-publication-checklist): code of conduct contact set, repository URL set.
+- The publication checklist in [github-setup.md](github-setup.md#11-publication-checklist): code of conduct contact set, repository URL set.
 
 **3. Create the release commit** (Conventional Commit; only when authorised, with no AI co-author trailers):
 

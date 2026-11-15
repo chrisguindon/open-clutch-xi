@@ -28,7 +28,7 @@ These guide decisions and reviews:
 
 - **Hosting.** The project doesn't deploy anything. It produces versioned releases with a static web archive that anyone can host (see [docs/development/hosting.md](docs/development/hosting.md)). Changes to `main` and pull requests never update a live website: the maintainer's own site at https://fc.chrisguindon.com is managed separately and moves to a new release only when the maintainer decides.
 - **Releases.** Occasional, versioned snapshots (Semantic Versioning, `vX.Y.Z` tags, [CHANGELOG.md](CHANGELOG.md)), created by hand by a maintainer. See [docs/development/releasing.md](docs/development/releasing.md).
-- **Planning.** Work is tracked with labels, a simple project board and milestones for meaningful releases (see [docs/governance/github-setup.md](docs/governance/github-setup.md)).
+- **Planning.** Work is tracked with labels, a simple project board and milestones for meaningful releases (see [docs/development/github-setup.md](docs/development/github-setup.md)).
 - **Current priorities, in order:**
   1. bugs that stop people playing;
   2. accessibility;

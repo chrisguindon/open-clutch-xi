@@ -7,6 +7,8 @@ body:
     attributes:
       value: |
         Thanks for taking the time to report a bug! Short reports are welcome — fill in what you can.
+        You don't need to know what causes the problem: describing what you saw is the useful part.
+        First time? Check the [existing issues](../issues?q=is%3Aissue) in case it's already reported.
 
         **Privacy:** do not include passwords, access tokens, private files, personal profiling results or other sensitive information.
         **Security problems** (anything that could be exploited) should be reported privately — see [SECURITY.md](../blob/main/SECURITY.md).
@@ -21,6 +23,7 @@ body:
     id: steps
     attributes:
       label: Steps to reproduce
+      description: What did you do just before it happened? Numbered steps help others see it too.
       placeholder: |
         1. Quick Match, 5v5
         2. Win the ball near the touchline
@@ -30,25 +33,30 @@ body:
   - type: textarea
     id: expected
     attributes:
-      label: Expected behaviour
+      label: What did you expect to happen?
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: Actual behaviour
+      label: What happened instead?
     validations:
       required: true
+  - type: dropdown
+    id: reproducible
+    attributes:
+      label: Does it happen every time?
+      options: [Every time, Sometimes, Only once so far, Not sure]
   - type: dropdown
     id: mode
     attributes:
       label: Game mode
-      options: [Quick Match, Penalty shootout, Practice, Tutorial, Menus / settings, Other]
+      options: [Quick Match, XI Nations Cup, Penalty shootout, Practice, Tutorial, Menus / settings, Other]
   - type: dropdown
     id: difficulty
     attributes:
       label: Difficulty
-      options: [Easy, Medium, Hard, Not relevant]
+      options: [Beginner, Easy, Medium, Hard, Not relevant]
   - type: dropdown
     id: input
     attributes:
@@ -57,14 +65,20 @@ body:
   - type: input
     id: browser
     attributes:
-      label: Browser and operating system (optional)
-      description: Only if it seems relevant. Hardware details are optional too.
+      label: Browser, operating system and device
+      description: For example "Firefox 140 on Windows 11, laptop" or "Safari on an iPhone". Hardware details are optional.
       placeholder: Firefox 140 on Windows 11
   - type: textarea
     id: media
     attributes:
       label: Screenshots or recordings (optional)
       description: Drag files here. Please check they contain nothing private.
+  - type: textarea
+    id: errors
+    attributes:
+      label: Error messages (optional)
+      description: If you can, press F12, open the Console tab and copy any red lines here.
+      render: text
   - type: textarea
     id: diagnostics
     attributes:

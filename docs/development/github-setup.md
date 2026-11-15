@@ -14,30 +14,76 @@ Some things live in tracked files; others only exist as GitHub settings and have
 | Community health files (README, CONTRIBUTING, …) | Private vulnerability reporting, secret scanning, Dependabot alerts |
 | | Projects board and milestones |
 
-## 1. Create the repository and set the URL
+## 0. The two repositories, locally
 
-1. Create a **public** repository, for example `open-clutch-xi`, **without** a generated README or licence; the repository already has them. Then push `main`.
-2. Point every link at it:
+| | Public game | Private deployment |
+|---|---|---|
+| GitHub repository | `chrisguindon/open-clutch-xi` | `chrisguindon/fc.chrisguindon.com` |
+| SSH remote | `git@github.com:chrisguindon/open-clutch-xi.git` | `git@github.com:chrisguindon/fc.chrisguindon.com.git` |
+| Web URL | https://github.com/chrisguindon/open-clutch-xi | https://github.com/chrisguindon/fc.chrisguindon.com |
+| Local folder | the checkout itself (`open-clutch-xi/`) | `open-clutch-xi/.local/deployments/fc.chrisguindon.com/` (ignored by the public repository; can be moved to a sibling folder) |
+| Branch to push | `main` (the only branch) | `main` (the only branch) |
+| First commit (to check you have the right history) | `ee9c18b` "chore: establish initial Open Clutch XI project baseline" | `f0c0162` "chore(deployment): initialise Open Clutch XI deployment project" |
+| Visibility | **private** at first, public when you decide | private |
 
-   ```bash
-   node scripts/set-repo-url.mjs https://github.com/<owner>/open-clutch-xi
-   git commit -am "chore: set repository URL" && git push
-   ```
+The public history was cleaned once before the first push (personal assets and deployment configuration removed from every commit). Push **only `main`**: no tags exist, and old pre-cleanup objects must never be pushed (backups live only in the ignored `.local/backups/`).
 
-   This updates `package.json` (so the game's About screen and menu link to the source), the README, the changelog and the issue-chooser links. CI fails while the placeholder is still there.
-
-## 2. Repository metadata
-
-Set these in the repository's **About** panel (the gear icon), or with the CLI:
+Before pushing, confirm each repository's state:
 
 ```bash
-gh repo edit \
-  --description "A free, open-source 3D football game for the browser — TypeScript + Three.js. Play against the computer, learn, fork and contribute." \
-  --homepage "https://fc.chrisguindon.com" \
-  --add-topic football,soccer,browser-game,threejs,typescript,webgl,open-source,game-development,ai-assisted-development,learning
+git status --short          # empty
+git branch -a               # only main
+git tag                     # empty
+git remote -v               # empty until you add origin
+git log --oneline | tail -1 # the first commit above
+git log -1 --format=fuller  # your name as author and committer
 ```
 
-GitHub detects the licence (EPL-2.0) from `LICENSE`. GitHub Pages isn't used, and no hosting service is connected to this repository: pull requests and pushes never deploy a website. Releases attach the static web archive and checksums (see [releasing](../development/releasing.md)).
+## 1. Create the repositories and push
+
+Create both on GitHub **without** a README, licence or .gitignore (the repositories already have them).
+
+**Public game** (create it as *private* first):
+
+```bash
+cd open-clutch-xi
+git remote add origin git@github.com:chrisguindon/open-clutch-xi.git
+git push -u origin main
+```
+
+**Private deployment:**
+
+```bash
+cd open-clutch-xi/.local/deployments/fc.chrisguindon.com
+git remote add origin git@github.com:chrisguindon/fc.chrisguindon.com.git
+git push -u origin main
+```
+
+Don't use `git push --all` or `--mirror`, and don't push tags. The repository URL is already set in `package.json`, the README, NOTICE and the issue-chooser links, so the game's About screen links to the source. (If it ever changes: `node scripts/set-repo-url.mjs <new URL>`.)
+
+Don't connect the public repository to Netlify or any hosting service. Only the private deployment repository may be linked to the Netlify site, as its `docs/OPERATIONS.md` describes, and deploys happen only when you approve them.
+
+## 2. Repository metadata (About)
+
+**Public game.** Set these in the **About** panel (gear icon), or run `gh repo edit` inside the repository:
+
+- **Description** (GitHub allows up to 350 characters):
+  > An open-source 3D football game for the browser, built with TypeScript, Three.js and AI assistance. Play it, learn from it, spot bugs and contribute.
+- **Website:** leave it empty until the maintainer's site serves a release, then `https://fc.chrisguindon.com`. (Alternative: the repository's README.)
+- **Topics** (lowercase, letters, digits and hyphens; at most 20):
+  `football` `soccer` `browser-game` `threejs` `typescript` `webgl` `game-development` `open-source` `ai-assisted-development` `learning` `beginner-friendly`
+
+  `game` is omitted: `browser-game` and `game-development` are more specific. `beginner-friendly` is used instead of `beginners`, because it's the established topic name.
+
+```bash
+gh repo edit chrisguindon/open-clutch-xi \
+  --description "An open-source 3D football game for the browser, built with TypeScript, Three.js and AI assistance. Play it, learn from it, spot bugs and contribute." \
+  --add-topic football,soccer,browser-game,threejs,typescript,webgl,game-development,open-source,ai-assisted-development,learning,beginner-friendly
+```
+
+GitHub detects the licence (EPL-2.0) from `LICENSE`. GitHub Pages isn't used. Releases attach the static web archive and checksums (see [releasing](releasing.md)).
+
+**Private deployment.** Description: "Deployment of approved Open Clutch XI releases at fc.chrisguindon.com." No topics, website or Discussions needed. Keep Actions off unless you add a workflow.
 
 ## 3. General settings
 
@@ -80,10 +126,10 @@ The recommended rules suit a one-maintainer project: they protect against accide
 To import it after the first CI run (status checks can only be required once GitHub has seen them):
 
 ```bash
-gh api -X POST repos/<owner>/open-clutch-xi/rulesets --input .github/rulesets/default-branch.json
+gh api -X POST repos/chrisguindon/open-clutch-xi/rulesets --input .github/rulesets/default-branch.json
 ```
 
-Or create it by hand under **Settings → Rules → Rulesets**. Rulesets need a public repository, or a paid plan for private ones.
+Or create it by hand under **Settings → Rules → Rulesets**. Rulesets (and secret scanning push protection) need a public repository or a paid plan, so while the repository is private on a free plan, do this when you make it public.
 
 ## 6. Labels
 
@@ -96,8 +142,8 @@ Create them once: `node scripts/sync-labels.mjs --apply`. This creates or update
 | **Contribution** | `good first issue` | Small and well described, with files, acceptance criteria and test steps. Use it only when it's genuinely suitable for a newcomer. |
 | | `help wanted` | You'd welcome a contribution. |
 | | `mentorship available` | Someone has offered to guide a contributor. |
-| **Priority** | `priority:critical`, `priority:high`, `priority:medium`, `priority:low` | Set during triage. The levels match the severity scale in `docs/ISSUES.md`. |
-| **Planning** | `plan:requested`, `plan:approved` | Opt-in AI-assisted or human planning before coding. See [AI-assisted workflow](../development/ai-assisted-workflow.md). Maintainers only. |
+| **Priority** | `priority:critical`, `priority:high`, `priority:medium`, `priority:low` | Set during triage. |
+| **Planning** | `plan:requested`, `plan:approved` | Opt-in AI-assisted or human planning before coding. See [AI-assisted workflow](ai-assisted-workflow.md). Maintainers only. |
 | **Status** | `status:needs-triage` | Added automatically by issue forms. Remove it once the issue has been triaged. |
 | | `status:needs-info` | Waiting for the reporter. |
 | | `status:ready` | Agreed, and described well enough to start. |
@@ -131,7 +177,7 @@ Delete "Polls" if you won't use it. A form only applies when its file name match
 
 Keep it light:
 - **Board.** One GitHub Project ("Open Clutch XI"), board view, with columns **Backlog → Ready → In progress → In review → Done**. Use the built-in workflows only ("item closed → Done", "pull request merged → Done"), no custom automation.
-- **Milestones** are for meaningful releases, for example `0.2 — Controls & accessibility polish`. They carry no dates unless a real one exists. See [RELEASING.md](../development/releasing.md).
+- **Milestones** are for meaningful releases, for example `0.2 — Controls & accessibility polish`. They carry no dates unless a real one exists. See [releasing](releasing.md).
 - **Priorities, in order:**
   1. bugs that stop people playing;
   2. accessibility barriers;
@@ -156,7 +202,7 @@ Check them on GitHub afterwards, and keep the list small: a few good first issue
 
 ## 10. Copilot (optional)
 
-The repository is prepared for the GitHub Copilot coding agent: `AGENTS.md`, `.github/copilot-instructions.md`, three custom agents in `.github/agents/`, and `copilot-setup-steps.yml`. Enabling it, and the approval and firewall settings, are manual. See [AI-assisted workflow](../development/ai-assisted-workflow.md#manual-configuration-github-settings).
+The repository is prepared for the GitHub Copilot coding agent: `AGENTS.md`, `.github/copilot-instructions.md`, three custom agents in `.github/agents/`, and `copilot-setup-steps.yml`. Enabling it, and the approval and firewall settings, are manual. See [AI-assisted workflow](ai-assisted-workflow.md#manual-configuration-github-settings).
 
 ## 10b. What can only be verified on GitHub
 
@@ -168,12 +214,28 @@ These were validated locally, but can only be confirmed once the repository exis
 
 ## 11. Publication checklist
 
-- [ ] The Code of Conduct contact is set (info@chrisguindon.com).
-- [ ] Repository created, `main` pushed, `node scripts/set-repo-url.mjs …` run and committed
-- [ ] Description, website and topics set (section 2)
-- [ ] Squash-only merging and Actions permissions (section 3)
-- [ ] Private vulnerability reporting, secret scanning with push protection, and Dependabot alerts (section 4)
-- [ ] First CI run is green on GitHub, then the ruleset is imported (section 5)
-- [ ] Labels created (section 6), Discussions enabled with categories (section 7)
-- [ ] Project board and first milestone (section 8), starter issues created (section 9)
-- [ ] No hosting integration (deploy app or webhook) is installed on the repository; the maintainer's site is deployed from its own repository, from a chosen release
+Before making `open-clutch-xi` public. Items marked **open** were not resolved when this guide was written.
+
+**Legal**
+- [ ] Third-party assets reviewed against [third-party assets](../governance/third-party-assets.md) (automated checks confirm the inventory, not legal clearance).
+
+**History and content**
+- [x] Public history cleaned of personal assets and deployment configuration; gitleaks and content scans clean (see the cleanup notes kept privately).
+- [ ] Your own final look through the history and files: `git log --stat`, the README, docs and screenshots.
+- [ ] No personal assets in `public/` (the creator portrait and website panel live in the private deployment).
+
+**Community**
+- [ ] README, CONTRIBUTING, issue forms and starter issues read through by a person.
+- [ ] Code of Conduct contact set (info@chrisguindon.com).
+
+**GitHub**
+- [ ] Both repositories created and `main` pushed (section 1); About, website and topics set (section 2).
+- [ ] Squash-only merging and read-only Actions permissions (section 3).
+- [ ] Private vulnerability reporting, secret scanning with push protection, Dependabot alerts (section 4).
+- [ ] First CI run green on GitHub, then the ruleset imported (section 5).
+- [ ] Labels created (section 6), Discussions enabled (section 7), board and first milestone (section 8), starter issues created (section 9).
+
+**Releases and hosting**
+- [ ] No hosting integration (deploy app, webhook) installed on the public repository.
+- [ ] v0.1.0 release candidate reviewed; tag and GitHub Release created only when you decide ([releasing](releasing.md)).
+- [ ] The private deployment pins the published release's URL and SHA-256, and passes `npm run verify`.

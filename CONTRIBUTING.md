@@ -9,6 +9,8 @@ Thanks for your interest! Open Clutch XI is a free 3D football game for the brow
 
 Please read the [Code of Conduct](CODE_OF_CONDUCT.md). Report security problems privately, as described in [SECURITY.md](SECURITY.md).
 
+**Most of this codebase was written with AI assistance** (see the [README](README.md#built-with-ai-assistance-what-that-means-here)). If something looks wrong or odd, it may well be. Questioning it is welcome, and so is a careful fix. You don't need to understand the whole project to contribute: one file, one bug or one paragraph of docs is enough. New to open source? [Learning open source with Open Clutch XI](docs/learning/open-source.md) walks through a first contribution.
+
 ## Ways to help (no code needed for many of them)
 
 - **Play and give feedback.** Use the *Gameplay feedback* issue form for AI opponents, passing, shooting, penalties and balance.
@@ -42,6 +44,23 @@ Useful in-game tools:
 
 Benchmark and diagnostics exports describe your computer. Keep them local, and don't attach them to public issues unless a maintainer asks.
 
+## Finding something to work on
+
+- Issues labelled **`good first issue`** are small, well understood and have a clear way to test them. The [starter issues](docs/learning/starter-issues/README.md) are where they come from.
+- **`help wanted`** marks bigger tasks where help is welcome.
+- Found a bug yourself? Check the existing issues first, then report it (below) before fixing it, so others know.
+- Comment on the issue to say you're working on it. If you stop, say so: that's completely fine.
+
+## Reporting a bug
+
+Use the **Bug report** form. You don't need to know the cause. Tell us:
+- what happened, and what you expected instead;
+- the steps to make it happen again, and whether it happens every time;
+- your browser, operating system and device (desktop, phone, controller…);
+- the game mode (Quick Match, XI Nations Cup, tutorial…), format and difficulty;
+- any error messages: press F12 and look in the *Console* tab, then copy the red lines;
+- a screenshot or short recording, if it helps.
+
 ## Making a change
 
 1. **Pick or open an issue.** For anything bigger than a small fix, comment first so we can agree on the approach and nobody duplicates work.
@@ -63,6 +82,35 @@ Benchmark and diagnostics exports describe your computer. Keep them local, and d
 6. **Update docs.** Docs are organised by subject in [docs/](docs/README.md). Update the page that describes the behaviour you changed. For football rules that's [the rules matrix](docs/gameplay/FOOTBALL_RULES.md); significant architecture choices get a short [ADR](docs/architecture/decisions/README.md). Add a line under *Unreleased* in [CHANGELOG.md](CHANGELOG.md) for anything players would notice.
 7. **Open a pull request.** The template guides you. Describe how you verified the change. If something could only be checked in emulation (touch, controllers, slow devices), say so.
 
+### Your first pull request, step by step
+
+```bash
+# once: fork the repository on GitHub, then
+git clone https://github.com/<your-name>/open-clutch-xi.git
+cd open-clutch-xi
+npm ci && npm run lint:setup
+
+# for each change
+git switch -c fix/keeper-dive-direction        # a branch named after the change
+# … edit, then check …
+npm run ci
+git add -A
+git commit -m "fix(ai): make the keeper dive towards the shot"
+git push -u origin fix/keeper-dive-direction
+```
+
+GitHub then offers to **open a pull request**. Fill in the template: what you changed, why, and how you tested it. Review is a conversation. Reviewers may ask questions or suggest changes. Push more commits to the same branch to update the pull request.
+
+### What reviewers look for
+
+- The change does one thing, and the description says what and why.
+- It works: tests cover it where practical, and `npm run ci` passes.
+- You understand it and can explain it, whoever or whatever typed it.
+- It fits the project: readable code with comments that explain *why*, deterministic simulation, no new tracking, dependencies or unlicensed assets.
+- Player-visible changes have a line in the changelog, and behaviour changes update the docs.
+
+Reviews are friendly and specific. If a review comment is unclear, ask.
+
 ### Commit messages and pull-request titles
 
 We use [Conventional Commits](https://www.conventionalcommits.org/) and **squash-merge** pull requests, so your **PR title becomes the commit on `main`**. CI checks the title. Your individual commits can be informal.
@@ -80,9 +128,9 @@ test(ai): cover restart long balls staying in play
 - **Scopes** are optional, for example `ai`, `physics`, `controls`, `graphics`, `ui`, `a11y`, `perf`, `docs`, `ci`, `deps`.
 - Breaking changes (for example to saved settings) get a `!`: `feat(settings)!: …`.
 
-To check your own commit messages locally (optional): `git config core.hooksPath .githooks`. The check also rejects automatic AI attribution (AI co-author trailers, "generated with …" signatures, AI-tool session links): commit under your own name, as the person responsible for the change. Using AI tools is fine (see below); human co-authors are welcome.
+In short: a **type** (what kind of change), an optional **scope** (which part of the game), then a short summary of what the change does.
 
-Please **don't add `Co-authored-by` trailers for AI tools** or "generated with …" signatures. You're the author, and you're responsible for the change.
+To check your own commit messages locally (optional): `git config core.hooksPath .githooks`. Commit under your own name, as the person responsible for the change: the check rejects automatic AI attribution (`Co-authored-by` trailers for AI tools, "generated with …" signatures, AI-tool session links). Using AI tools is fine (see below), and human co-authors are welcome.
 
 ### Code style
 
@@ -103,12 +151,17 @@ Please **don't add `Co-authored-by` trailers for AI tools** or "generated with �
    */
   ```
 
-## AI-assisted contributions
+## Contributing with AI tools
 
-They're welcome. Many people learn this way, and the project started as an AI-assisted experiment. The rules are the same as for any contribution:
-- **You remain responsible** for what you submit. Review it, run it, and make sure you understand it well enough to explain it and to address review comments.
-- You don't need to share your prompts.
-- Make sure the result is something you have the right to contribute under the EPL-2.0. Don't submit generated code or assets that copy other projects or copyrighted material.
+Contributions written by hand and with AI tools are equally welcome, and nobody has to use AI. If you do:
+- **Understand it.** Read every line the tool proposes, and make sure you could explain it in review.
+- **Review it critically.** AI tools are confident even when wrong: check the logic, the edge cases and that it fits the existing code.
+- **Run it.** Play the change in the browser and run the tests (`npm run ci`). Add a test when the tool didn't.
+- **Check licences.** Don't submit generated code or assets that copy other projects or copyrighted material.
+- **Keep secrets out.** Never paste tokens, keys or private data into a tool or a pull request.
+- **Take extra care with security-sensitive code**: anything that handles imported files, saved data, URLs or HTML.
+- **Explain the change** in your pull request in your own words. You don't need to share your prompts.
+- **You're responsible** for what you submit, as with any contribution.
 
 Agents and coding assistants working in this repository should follow [AGENTS.md](AGENTS.md).
 

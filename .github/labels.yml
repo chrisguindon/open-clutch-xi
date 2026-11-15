@@ -6,7 +6,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 
-# The repository's label taxonomy (documented in docs/governance/github-setup.md).
+# The repository's label taxonomy (documented in docs/development/github-setup.md).
 # Maintainers apply it with: node scripts/sync-labels.mjs --apply   (needs the GitHub CLI, `gh auth login`)
 # Contributors never need to run this.
 

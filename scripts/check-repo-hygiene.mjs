@@ -56,7 +56,8 @@ const SECRETS = [
 ];
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 // Public project contact; addresses that appear inside third-party licence notices; generic placeholders.
-const EMAIL_OK = new Set(['info@chrisguindon.com', 'arseny.kapoulkine@gmail.com', 'noreply@github.com']);
+// (git@github.com is GitHub's SSH host in remote URLs, not a person's address.)
+const EMAIL_OK = new Set(['info@chrisguindon.com', 'arseny.kapoulkine@gmail.com', 'noreply@github.com', 'git@github.com']);
 const EMAIL_OK_FILES = /^(LICENSE|CODE_OF_CONDUCT\.md|NOTICE\.md|public\/NOTICE\.txt|public\/assets\/flags\/LICENSE-flag-icons\.txt)$/;
 // The commit-message checker and its tests must contain example trailers, signatures and the AI vendor's
 // no-reply address in order to reject them. Exempt exactly those two files, nothing else.

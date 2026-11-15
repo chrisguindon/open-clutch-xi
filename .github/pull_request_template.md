@@ -1,5 +1,6 @@
 <!--
 Thanks for contributing! Keep what's relevant and delete the rest.
+First pull request? Welcome: fill in what you can, and ask in a comment if anything is unclear.
 The PR title becomes the commit message on main (we squash-merge), so it must follow
 Conventional Commits, e.g. "fix(ai): stop clearances towards our own goal". See CONTRIBUTING.md.
 -->

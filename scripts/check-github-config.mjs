@@ -15,7 +15,7 @@
 // - workflows: explicit permissions, actions pinned to full commit SHAs, no `${{ github.event… }}`
 //   expressions inside `run:` scripts (script injection)
 // - the repository URL placeholder has been replaced once the code runs on GitHub
-// (Full workflow semantics are checked locally with actionlint; see docs/governance/github-setup.md.)
+// (Full workflow semantics are checked locally with actionlint; see docs/development/github-setup.md.)
 //   node scripts/check-github-config.mjs
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
