@@ -41,6 +41,15 @@ export function playerLabelMode(layout: { touchControls: boolean; width: number;
 }
 
 /**
+ * The game time when a brief name cue began. During the pre-match intro the initial cue waits until
+ * the gameplay camera takes over; later player changes start a fresh cue immediately.
+ */
+export function playerLabelCueTime(previousName: string | null, currentName: string | null, changedAt: number, now: number, introActive: boolean): number {
+  if (!currentName || introActive) return changedAt;
+  return currentName !== previousName || changedAt === -Infinity ? now : changedAt;
+}
+
+/**
  * The name's opacity, from 0 (hidden) to 1, given the mode and how long ago the controlled player
  * changed. With reduced motion a brief name simply disappears at the end instead of fading.
  */

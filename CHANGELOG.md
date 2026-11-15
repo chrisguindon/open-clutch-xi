@@ -13,7 +13,7 @@ Add entries under **Unreleased** as part of your pull request. The maintainer mo
 ## [Unreleased]
 
 ### Fixed
-- **Player names no longer hide the action on phones.** On touch screens and small windows, your player's name now appears over the pitch only briefly when you switch players, then fades. The ring at your player's feet and the player card in the corner show who you control. Desktop keeps the name above your player.
+- **Player names no longer hide the action on phones.** On touch screens and small windows, your player's name now appears over the pitch briefly after the pre-match intro and when you switch players, then fades. The ring at your player's feet and the player card in the corner show who you control. Desktop keeps the name above your player.
 - **The player card is readable on phones** (it was shrunk to 70%), and the scoreboard, player card and minimap keep clear of notches and rounded corners in landscape.
 
 ## [0.1.0] - 2026-11-15
