@@ -20,7 +20,7 @@
 - **Procedural layers** (`Footballer`, `src/render/characters/footballer.ts`) aim bone chains at targets in model space:
   - kick and pass wind-up, strike and follow-through, from the foot the simulation chose (contact timing is shared through `KICK_TIMING`);
   - tackles and headers;
-  - keeper stance, reach towards the ball, and dive roll;
+  - keeper stance (knees bent, weight forward, hands low and in front with elbows bent, fading into a reach when the ball comes close), reach towards the ball, and dive roll;
   - strafing;
   - gestures.
 

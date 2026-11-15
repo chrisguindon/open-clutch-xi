@@ -178,6 +178,8 @@ export class Footballer implements PlayerVisual {
   private skipAccum = 0;
   private time = Math.random() * 10;
   private roll = 0;
+  /** Blend weight of the goalkeeper's ready stance (0–1, smoothed). */
+  private gkSet = 0;
   /** Smoothed body lean (radians) from {@link bodyLean}. */
   private lean: Lean = { pitch: 0, roll: 0 };
   private materials: THREE.Material[] = [];
@@ -500,10 +502,12 @@ export class Footballer implements PlayerVisual {
           this.clearLocoTargets();
           this.setTarget('Idle_No_Loop', 1);
         } else if (s.isGK && s.anim === Anim.GkReady && s.speed < 2.5 && !s.hasBall) {
-          // Goalkeeper set position: blend towards a crouched stance.
+          // Goalkeeper set position: knees bent, weight forward. Mostly the crouch clip when still, less
+          // while shuffling across the goal so the steps stay visible. (Weights are normalised, so the
+          // old 0.4 left the keeper standing almost straight-legged.)
           const a = this.actions.get('Crouch_Idle_Loop')!;
           a.time = (this.time * 0.5) % a.getClip().duration;
-          this.setTarget('Crouch_Idle_Loop', 0.4);
+          this.setTarget('Crouch_Idle_Loop', s.speed < 0.8 ? 0.85 : 0.55);
         }
       }
     }
@@ -710,6 +714,17 @@ export class Footballer implements PlayerVisual {
       vB.x -= 0.08;
       this.aim('upperarm_r', 'lowerarm_r', vB, w);
       this.aim('lowerarm_r', 'hand_r', vB, w * 0.8);
+    }
+
+    // Goalkeeper ready stance: hands low and in front, palms towards play, elbows bent and slightly out,
+    // so the keeper can go either way. Fades in and out (no snapping when the ball arrives and the hands
+    // switch to reaching for it above).
+    const setTarget = s.isGK && s.anim === Anim.GkReady && !s.reach && !diving && !s.hasBall && s.speed < 2.5 ? 1 : 0;
+    this.gkSet += (setTarget - this.gkSet) * (1 - Math.exp(-dt * 8));
+    if (this.gkSet > 0.01) {
+      const w = 0.8 * this.gkSet;
+      this.armPose('l', { hand: [0.42, -0.5, 0.72], elbow: [0.7, -1, 0] }, w);
+      this.armPose('r', { hand: [0.42, -0.5, 0.72], elbow: [0.7, -1, 0] }, w);
     }
 
     this.applyGesture(s);

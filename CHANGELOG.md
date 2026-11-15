@@ -44,6 +44,7 @@ The first public release is planned as **0.1.0 (public beta)**. It includes ever
 - **Project:** EPL-2.0 licence, contribution guide, code of conduct, security policy, governance, GitHub issue forms, CI quality gates, Dependabot, and a learning guide.
 
 ### Changed
+- **Goalkeepers look ready.** In the set position they bend their knees and hold their hands low and in front, elbows bent, instead of standing straight-legged with their arms out to the sides.
 - **The project no longer depends on a hosting platform.** `netlify.toml` is gone. The recommended security headers, caching and MIME types are now a platform-neutral policy (`hosting/headers.json`), tested in CI and applied by `npm run check:prod`. Merging to `main` deploys nothing, and contributors need no hosting account. The maintainer's own site is deployed separately, from approved releases (see [hosting](docs/development/hosting.md)).
 - **Releases include a ready-to-host web archive.** `npm run release:package` builds a reproducible `open-clutch-xi-v<version>-web.tar.gz`, with its licence, notices, header policy and a manifest of file checksums, plus a source archive and `SHA256SUMS`. `release:check` verifies the archive is byte-for-byte reproducible.
 - **Site metadata is host-neutral.** Released builds no longer hard-code a canonical URL. The title, description and link-preview tags sit in one marked block that a host can replace without rebuilding, or fill at build time with `SITE_URL` (`src/siteMeta.ts`).
