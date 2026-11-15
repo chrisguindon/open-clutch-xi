@@ -19,6 +19,12 @@ On first launch the game asks **"How would you like to play?"**: keyboard only, 
 
 At restarts the taker can't move. The movement stick turns them to aim instead.
 
+## Who am I controlling?
+
+The player you control has a ring at their feet, and the player card in the corner of the HUD shows their name, role and stamina.
+
+On a big screen with a mouse or keyboard, their name also stays above them. On touch screens and small windows (shorter side under 500 px) it appears only briefly, for 1.6 s when you switch players or play restarts, then fades. On a phone a player is only about a dozen pixels wide, while a name is about a hundred: a permanent name hid the players further up the pitch and repeated the card. The rule is in `src/ui/playerLabel.ts`, and `npm run check:mobile-hud` checks it in phone, tablet and desktop layouts.
+
 ## Customisation
 - **Keyboard** and **keyboard & mouse** are separate layouts. Keys are bound by physical position, so WASD stays put on AZERTY and QWERTZ keyboards.
 - **Mouse buttons** (`Mouse0`–`Mouse4`) bind like keys and act only on the pitch, never on menus. The right-click menu and middle-click autoscroll are suppressed there. The middle button is never the only way to do something.
