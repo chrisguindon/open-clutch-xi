@@ -15,11 +15,11 @@
 //   - hosting-platform deploy configuration (netlify.toml and similar) and private .local/ files
 //   - private filesystem paths (home directories) and secrets (tokens, private keys)
 //   - email addresses other than the project's public contacts and licence-notice authors
-//   - AI-vendor signatures or co-author trailers in files or commit messages
+//   - AI-vendor signatures or co-author trailers written into files (in commit messages they are only reported)
 //   node scripts/check-repo-hygiene.mjs
 import { execFileSync } from 'node:child_process';
 import { readFileSync, statSync } from 'node:fs';
-import { checkMessage } from './check-commit-message.mjs';
+import { checkMessage, messageWarnings } from './check-commit-message.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
 const git = (...a) => execFileSync('git', a, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
@@ -94,8 +94,9 @@ for (const f of files) {
   });
 }
 
-// Commit history: messages follow Conventional Commits (warning only: early history may predate the rule),
-// and never carry automatic AI attribution: co-author trailers, signatures or session links (error).
+// Commit history: messages follow Conventional Commits, and automatic AI attribution (co-author trailers,
+// signatures or session links that tools such as GitHub Copilot add on their own) is reported. Both are
+// warnings only: early history may predate the rules, and AI tools add trailers by themselves.
 let commits = [];
 try {
   commits = git('log', '--format=%H%x1f%B%x1e')
@@ -106,16 +107,19 @@ try {
   /* no commits yet */
 }
 let nonConventional = 0;
+const aiTrailers = [];
 for (const c of commits) {
   const [sha, msg] = c.split('\x1f');
-  const p = checkMessage(msg ?? '');
-  if (p.some((x) => x.includes('AI-vendor')))
-    problems.push(`commit ${sha.slice(0, 8)} has automatic AI-vendor attribution (co-author trailer, signature or session link)`);
-  else if (p.length) nonConventional++;
+  if (checkMessage(msg ?? '').length) nonConventional++;
+  if (messageWarnings(msg ?? '').length) aiTrailers.push(sha.slice(0, 8));
 }
 
 console.log(`checked ${files.length} files and ${commits.length} commits`);
 if (nonConventional) console.warn(`! ${nonConventional} commit message(s) don't follow Conventional Commits (squash-merge titles are checked in CI)`);
+if (aiTrailers.length)
+  console.warn(
+    `! ${aiTrailers.length} commit(s) carry automatic AI attribution (allowed; can be removed when squash-merging): ${aiTrailers.slice(0, 5).join(', ')}${aiTrailers.length > 5 ? ', …' : ''}`,
+  );
 if (problems.length) {
   console.error(problems.map((p) => `✗ ${p}`).join('\n'));
   process.exit(1);
