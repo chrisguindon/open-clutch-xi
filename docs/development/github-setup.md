@@ -23,7 +23,7 @@ Some things live in tracked files; others only exist as GitHub settings and have
 | Web URL | https://github.com/chrisguindon/open-clutch-xi | https://github.com/chrisguindon/fc.chrisguindon.com |
 | Local folder | the checkout itself (`open-clutch-xi/`) | `open-clutch-xi/.local/deployments/fc.chrisguindon.com/` (ignored by the public repository; can be moved to a sibling folder) |
 | Branch to push | `main` (the only branch) | `main` (the only branch) |
-| First commit (to check you have the right history) | `ee9c18b` "chore: establish initial Open Clutch XI project baseline" | `f0c0162` "chore(deployment): initialise Open Clutch XI deployment project" |
+| First commit (to check you have the right history) | `cc2bd50` "chore: establish initial Open Clutch XI project baseline" | `f0c0162` "chore(deployment): initialise Open Clutch XI deployment project" |
 | Visibility | **private** at first, public when you decide | private |
 
 The public history was cleaned once before the first push (personal assets and deployment configuration removed from every commit). Push **only `main`**: no tags exist, and old pre-cleanup objects must never be pushed (backups live only in the ignored `.local/backups/`).
