@@ -56,6 +56,22 @@ You can also add or replace site-level files next to `index.html`, such as your 
 
 Don't change gameplay code to customise a site. Saved games, settings and records are stored in the browser per origin, under keys that never depend on the brand or the site, so moving to a new domain starts players afresh on that domain, while upgrading the game on the same domain keeps their data (see [persistence](../architecture/persistence.md)).
 
+## Your own extras: `site-config.json`
+
+A site can add a few touches of its own, again without rebuilding, by placing `site-config.json` next to `index.html`:
+
+```json
+{
+  "boardPanels": [{ "text": "example", "accentText": ".org", "bg": "#0b1530", "fg": "#f1f5f9", "accent": "#60a5fa" }],
+  "creatorPortrait": { "src": "assets/site/portrait.jpg", "alt": "The site's creator", "note": "The portrait is not covered by the open-source licence." }
+}
+```
+
+- `boardPanels`: up to three extra panels on the stadium's advertising boards (up to 24 characters each, colours as `#rrggbb`). `accentText` is drawn in the accent colour with an underline.
+- `creatorPortrait`: an image under `assets/` (jpg, png or webp) shown on the About screen instead of the creator's initials, with its alt text and an optional note (for example its licence).
+
+The file is optional and untrusted: the game validates it strictly (`src/game/siteConfig.ts`) and ignores anything malformed, or a missing file that comes back as the page itself. Serve it as `application/json`. It can't change gameplay, rules or saved data. Only show panels and images you have the right to use.
+
 ## Checklist after publishing
 
 - The menu loads and flags show in **Teams & options**.

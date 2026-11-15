@@ -90,7 +90,8 @@ for (const f of files) {
 }
 
 const readme = readFileSync(join(root, 'README.md'), 'utf8');
-if (!readme.includes('https://fc.chrisguindon.com')) problems.push('README.md should link to the playable game (https://fc.chrisguindon.com)');
+if (!readme.includes('https://github.com/chrisguindon/open-clutch-xi'))
+  problems.push('README.md should link to the source repository (https://github.com/chrisguindon/open-clutch-xi)');
 if (existsSync(join(root, 'CLAUDE.md')) && !readFileSync(join(root, 'CLAUDE.md'), 'utf8').includes('AGENTS.md'))
   problems.push('CLAUDE.md should refer to AGENTS.md (single source of agent instructions)');
 

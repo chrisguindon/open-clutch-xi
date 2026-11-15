@@ -15,7 +15,7 @@ Please read the [Code of Conduct](CODE_OF_CONDUCT.md). Report security problems 
 - **Report bugs** and **accessibility barriers**. Each has its own issue form.
 - **Improve docs and learning material.** If something confused you, it will confuse others too. Use the *Documentation or learning* form.
 - **Answer questions** in Discussions, or **share what you built** in *Show and Tell*: a fork, a new skill move, an experiment.
-- **Write code:** start with an issue labelled [`good first issue`](https://github.com/OWNER/open-clutch-xi/labels/good%20first%20issue).
+- **Write code:** start with an issue labelled [`good first issue`](https://github.com/chrisguindon/open-clutch-xi/labels/good%20first%20issue).
 
 **Issues vs Discussions.**
 - *Issues* track actionable work: a bug to fix, an agreed improvement, a doc to write.
@@ -123,7 +123,7 @@ Open Clutch XI is licensed under the [Eclipse Public License 2.0](LICENSE). By s
 - recordings of real chants
 - anything you don't have the rights to
 
-The creator portrait on the About screen is **not** EPL-licensed, so don't reuse it in forks.
+Personal branding belongs to the sites that host the game, not to this repository: there's no creator portrait or personal sponsor here (a site can add its own through `site-config.json`, see [hosting](docs/development/hosting.md)).
 
 ## Project principles
 

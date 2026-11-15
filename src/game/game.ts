@@ -42,6 +42,8 @@ import { Tutorial } from './tutorial';
 import { advance, champion, createTournament, nextPlayerFixture, playerFinish, recordResult, type CupFormat } from './tournament/cup';
 import { loadCupRecord, saveCupRecord, withHistory, type CupRecord } from './tournament/record';
 import { fixtureLabel } from '../ui/cupScreen';
+import { emptySiteConfig, loadSiteConfig, type SiteConfig } from './siteConfig';
+import { setSiteBoardPanels } from '../render/textures';
 
 type State = 'loading' | 'menu' | 'playing' | 'paused' | 'fulltime';
 
@@ -90,6 +92,8 @@ export class Game implements UIHost {
   private lastMatchOptions: MatchOptions | null = null;
   /** Teams for the next launch when they don't come from the settings (a cup match). */
   private launchTeams: [TeamIdentity, TeamIdentity] | null = null;
+  /** Optional presentation extras from the hosting site's `site-config.json` (src/game/siteConfig.ts). */
+  siteConfig: SiteConfig = emptySiteConfig();
   /** The XI Nations Cup record (src/game/tournament/). */
   cup: CupRecord = loadCupRecord();
   /**
@@ -187,6 +191,8 @@ export class Game implements UIHost {
       });
       this.input.onUI((c) => this.onUICommand(c));
       this.ui.setLoading(0.2, 'Loading players…');
+      // The site's optional presentation extras, fetched alongside the assets (never blocks for long).
+      const siteConfig = loadSiteConfig(import.meta.env?.BASE_URL ?? './');
       try {
         this.characters = await loadCharacterAssets((f) => this.ui.setLoading(0.2 + f * 0.2, 'Loading players…'));
       } catch (err) {
@@ -199,6 +205,8 @@ export class Game implements UIHost {
       } catch (err) {
         console.warn('Turf textures unavailable, using procedural grass:', err);
       }
+      this.siteConfig = await siteConfig;
+      setSiteBoardPanels(this.siteConfig.boardPanels);
       this.ui.setLoading(0.45, 'Building the stadium…');
       await nextFrame();
       this.buildMatch(

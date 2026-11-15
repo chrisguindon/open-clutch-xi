@@ -29,8 +29,8 @@ Requires Node 22+ (24 recommended, see `mise.toml`) and a browser with **WebGL2*
 Open Clutch XI is also a learning project. It's a complete game that's small enough to read, and it's a good place to learn TypeScript, Three.js, game physics, game AI and testing, or to try out AI-assisted development.
 
 - **[docs/learning/README.md](docs/learning/README.md):** a guided tour of the code and hands-on exercises.
-- **[CONTRIBUTING.md](CONTRIBUTING.md):** how to set up, make a change and open a pull request. Issues labelled [`good first issue`](https://github.com/OWNER/open-clutch-xi/labels/good%20first%20issue) are a friendly start.
-- **[Discussions](https://github.com/OWNER/open-clutch-xi/discussions):** questions (*Q&A*, *Learning*), ideas, and *Show and Tell*. Forked it and built a new skill move? Share a video!
+- **[CONTRIBUTING.md](CONTRIBUTING.md):** how to set up, make a change and open a pull request. Issues labelled [`good first issue`](https://github.com/chrisguindon/open-clutch-xi/labels/good%20first%20issue) are a friendly start.
+- **[Discussions](https://github.com/chrisguindon/open-clutch-xi/discussions):** questions (*Q&A*, *Learning*), ideas, and *Show and Tell*. Forked it and built a new skill move? Share a video!
 - **Community health:**
   - [Code of Conduct](CODE_OF_CONDUCT.md)
   - [Security policy](SECURITY.md)
@@ -208,7 +208,7 @@ Open Clutch XI is a static web app that any static host can serve, including fro
 
 Open Clutch XI is licensed under the **Eclipse Public License 2.0**: see [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md). Source files carry the Eclipse-style EPL-2.0 header with an `SPDX-License-Identifier: EPL-2.0` line. No Secondary Licenses are declared. This is a personal project. It is not affiliated with, endorsed by or governed by the Eclipse Foundation; EPL-2.0 is simply the licence chosen for it.
 
-The creator portrait shown on the About screen (`public/assets/credits/portrait.jpg`) is **not** covered by the EPL-2.0. All rights are reserved by its owner, so don't reuse it in forks.
+This repository contains no personal branding: sites that host the game can add their own through `site-config.json` (see [hosting](docs/development/hosting.md)).
 
 All code, procedural art, synthesised audio and sponsor names are original. National teams use flags and national colours only, with no crests, official kits or player likenesses; player names are generated.
 

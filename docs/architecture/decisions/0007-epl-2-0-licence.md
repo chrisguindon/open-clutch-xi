@@ -12,7 +12,7 @@ Open Clutch XI is a personal, educational open-source project. It isn't an Eclip
 - Code is licensed under the **Eclipse Public License 2.0**. Every source file has an SPDX header. No Secondary Licenses are declared.
 - `NOTICE.md` is the canonical legal notice, including third-party attributions.
 - Shipped assets must be redistributable (CC0 preferred) and listed in the asset inventory.
-- The creator portrait is excluded from the licence.
+- The creator portrait is excluded from the licence. (*Update, November 2026:* the portrait has since moved out of this repository into the maintainer's own deployment, and is supplied to that site through `site-config.json`.)
 
 ## Rationale
 

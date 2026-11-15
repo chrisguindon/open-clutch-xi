@@ -54,13 +54,12 @@ Recordings of real club chants and songs were deliberately not used, even where 
 
 **Synthesised fallback.** Every sound also has a procedural Web Audio version in `src/audio/audio.ts`. It is used automatically if a file fails to load, and always for touches, bounces, posts, nets, tackles and UI clicks. To check it, run `node scripts/audio-check.mjs`: it plays everything with the files available, then again with the file requests blocked.
 
-## Flags, font and creator portrait
+## Flags and font
 
 | Shipped file | Source | Licence | Notes |
 |---|---|---|---|
 | `public/assets/flags/*.svg` (54 files) | **flag-icons** 7.6.0, https://github.com/lipis/flag-icons | MIT (`public/assets/flags/LICENSE-flag-icons.txt`) | 4×3 SVG flags of the 54 national teams, copied unchanged from the package (byte-identical to its `flags/4x3/` files). National flags themselves are public symbols. No federation crests are used. |
 | Inter font (`dist/static/inter-*.woff2`) | **@fontsource-variable/inter**, https://rsms.me/inter/ | SIL Open Font License 1.1 | Self-hosted, so there is no request to Google Fonts. It matches the typeface of chrisguindon.com. |
-| `public/assets/credits/portrait.jpg` | Supplied by Christopher Guindon (`portrait.png`) | Owner's own image | Square face-centred crop, 247×247, JPEG q84 (11 KB). The original is kept in `asset-src/credits/` (git-ignored, not deployed). Shown only on the About screen, as a 150 px circle. An initials badge is shown if the file is missing. |
 | `public/favicon.svg`, `apple-touch-icon.png`, `social-card.jpg` | Made for this project (the social card is a screenshot of the game's menu) | Original | |
 
 **National teams.** The game includes 54 teams: every team of the 2022 and 2026 men's world championships (2026 is the latest completed edition), presented neutrally as "National Teams". Kits are generic designs in national colours.
@@ -68,7 +67,9 @@ Recordings of real club chants and songs were deliberately not used, even where 
 - Player names are generated from a neutral list.
 - No federation crests, sponsor marks, official kit replicas or real players are used.
 
-**Stadium advertising.** One LED panel out of nine shows **chrisguindon.com** in the site's own colours. The other sponsors are fictional.
+**Stadium advertising.** Every sponsor on the LED boards is fictional, apart from the game's own name. A site hosting the game may add up to three panels of its own through `site-config.json`, and is responsible for having the right to show them.
+
+**Creator portrait.** None is included. The About screen shows the creator's initials unless the hosting site supplies a portrait through `site-config.json`; the maintainer's own site does, from its separate deployment repository.
 
 ## Code libraries (runtime)
 

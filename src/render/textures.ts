@@ -200,7 +200,17 @@ export function netTexture(): THREE.CanvasTexture {
   return t;
 }
 
-const SPONSORS: Array<{ text: string; bg: string; fg: string; brand?: boolean }> = [
+/** A board panel: plain text, or a two-tone wordmark when `accentText` is set (see src/game/siteConfig.ts). */
+interface Panel {
+  text: string;
+  bg: string;
+  fg: string;
+  accentText?: string;
+  accent?: string;
+}
+
+/** Fictional sponsors (and the game's own name) on the stadium's LED boards. */
+const SPONSORS: Panel[] = [
   { text: 'NOVA COLA', bg: '#b91c1c', fg: '#ffffff' },
   { text: 'PIXELWORKS', bg: '#111827', fg: '#22d3ee' },
   { text: 'ORBIT AIR', bg: '#1e3a8a', fg: '#fde047' },
@@ -208,17 +218,23 @@ const SPONSORS: Array<{ text: string; bg: string; fg: string; brand?: boolean }>
   { text: 'LUMEN ENERGY', bg: '#f59e0b', fg: '#111827' },
   { text: BRAND.boardText, bg: '#0b1020', fg: '#ffffff' },
   { text: 'TERRA BOOTS', bg: '#7c3aed', fg: '#ffffff' },
-  // The creator's site, in its own colours (one panel of nine; drawn specially below).
-  { text: 'chrisguindon.com', bg: '#0b1530', fg: '#f1f5f9', brand: true },
+  { text: 'HARBOUR RAIL', bg: '#0b1530', fg: '#e2e8f0' },
   { text: 'QUICKSHIP', bg: '#e11d48', fg: '#fff1f2' },
 ];
 
-/** Long LED advertising strip with fictional sponsors. */
+/** Extra panels from the site's `site-config.json`, if any (set once at start-up, before stadiums are built). */
+let sitePanels: readonly Panel[] = [];
+export function setSiteBoardPanels(panels: readonly Panel[]): void {
+  sitePanels = panels;
+}
+
+/** Long LED advertising strip with fictional sponsors, plus any panels the site adds. */
 export function adBoardTexture(): THREE.CanvasTexture {
   const panelW = 512,
     H = 64;
-  const [c, ctx] = canvas(panelW * SPONSORS.length, H);
-  SPONSORS.forEach((s, i) => {
+  const panels = sitePanels.length ? [...SPONSORS.slice(0, 4), ...sitePanels, ...SPONSORS.slice(4)] : SPONSORS;
+  const [c, ctx] = canvas(panelW * panels.length, H);
+  panels.forEach((s, i) => {
     const x = i * panelW;
     const g = ctx.createLinearGradient(x, 0, x, H);
     g.addColorStop(0, s.bg);
@@ -227,21 +243,19 @@ export function adBoardTexture(): THREE.CanvasTexture {
     ctx.fillRect(x, 0, panelW, H);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    if (s.brand) {
-      // chrisguindon.com: clean lowercase wordmark — name in white, ".com" in the site's blue, accent rule.
+    if (s.accentText) {
+      // Two-tone wordmark: the text, then the accent part in the accent colour, with an accent rule below.
       ctx.font = '800 36px "Inter Variable", Inter, "Segoe UI", Helvetica, Arial, sans-serif';
-      const name = 'chrisguindon',
-        dot = '.com';
-      const wName = ctx.measureText(name).width,
-        wDot = ctx.measureText(dot).width;
-      const x0 = x + panelW / 2 - (wName + wDot) / 2;
+      const accent = s.accent ?? '#60a5fa';
+      const wName = ctx.measureText(s.text).width,
+        wAcc = ctx.measureText(s.accentText).width;
+      const x0 = x + panelW / 2 - (wName + wAcc) / 2;
       ctx.textAlign = 'left';
       ctx.fillStyle = s.fg;
-      ctx.fillText(name, x0, H / 2 + 1);
-      ctx.fillStyle = '#60a5fa';
-      ctx.fillText(dot, x0 + wName, H / 2 + 1);
-      ctx.fillStyle = '#2563eb';
-      ctx.fillRect(x0, H - 12, wName + wDot, 3);
+      ctx.fillText(s.text, x0, H / 2 + 1);
+      ctx.fillStyle = accent;
+      ctx.fillText(s.accentText, x0 + wName, H / 2 + 1);
+      ctx.fillRect(x0, H - 12, wName + wAcc, 3);
     } else {
       ctx.fillStyle = s.fg;
       ctx.font = 'italic 900 40px "Segoe UI", Helvetica, Arial, sans-serif';

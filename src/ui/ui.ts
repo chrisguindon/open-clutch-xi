@@ -13,6 +13,7 @@ import { SQUAD_LABELS, SquadMix } from '../render/characters/squad';
 import { ACHIEVEMENTS } from '../game/achievements';
 import type { PlayerProgress } from '../game/progress';
 import type { CupRecord } from '../game/tournament/record';
+import type { SiteConfig } from '../game/siteConfig';
 import { champion, nextPlayerFixture, type CupFormat } from '../game/tournament/cup';
 import { cupFinishedHtml, cupHubHtml, cupSetupHtml, fixtureLabel } from './cupScreen';
 import { MAX_IMPORT_BYTES, applySaveFile, exportSaveData, readSaveFile, resetAllData, resetProgress, type SaveFile } from '../game/saveData';
@@ -65,6 +66,8 @@ export interface UIHost {
   readonly progress: PlayerProgress;
   /** Saved data was imported or reset: reload so every part of the game starts from it. */
   reloadSavedData(): void;
+  /** Presentation extras from the hosting site (creator portrait), if it provides any. */
+  readonly siteConfig: SiteConfig;
   /** The XI Nations Cup record (the cup in progress and past cups). */
   readonly cup: CupRecord;
   /** Start a new cup with the player's chosen team and match settings. */
@@ -414,35 +417,47 @@ export class UI {
 
   /** About / credits: the project story, attribution, licences. */
   private showAbout(): void {
-    const portrait = (import.meta.env?.BASE_URL ?? './') + 'assets/credits/portrait.jpg';
+    const base = import.meta.env?.BASE_URL ?? './';
+    // A creator portrait appears only when the hosting site provides one (site-config.json); the game
+    // itself shows the creator's initials.
+    const portrait = this.host.siteConfig.creatorPortrait;
+    const initials = BRAND.maintainer
+      .split(/\s+/)
+      .map((w) => w[0])
+      .join('')
+      .slice(0, 3);
+    const picture = portrait
+      ? `<img src="${escapeHtml(base + portrait.src)}" alt="${escapeHtml(portrait.alt)}">`
+      : `<div class="portrait-fallback" role="img" aria-label="${escapeHtml(BRAND.maintainer)}">${escapeHtml(initials)}</div>`;
     this.mount(
       'about',
       el(`<div class="screen dim about"><div class="panel about-panel">
       <h2>About ${escapeHtml(BRAND.name)}</h2>
       <div class="about-grid">
-        <div class="portrait"><img src="${portrait}" alt="Christopher Guindon"></div>
+        <div class="portrait">${picture}</div>
         <div>
           <p>${escapeHtml(BRAND.name)} started as a weekend experiment in AI-assisted software development: my nephews were visiting, they love football games, so we set out to build our own — in the browser, free for anyone to play. The name grew from one of my nephews\u2019 ideas: <em>open</em> for open source, <em>clutch</em> for the big moments, and <em>XI</em> for football\u2019s starting eleven.</p>
-          <p>It's a small showcase of what modern web technology (TypeScript, Three.js, WebGL) and AI-assisted development can do together.</p>
-          <p class="byline-big">Created by <a href="https://www.chrisguindon.com/about/" target="_blank" rel="noopener noreferrer">Christopher Guindon</a> · <a href="https://www.chrisguindon.com/" target="_blank" rel="noopener noreferrer">chrisguindon.com</a>${sourceLink(' · ')}</p>
+          <p>Most of its code was written with AI assistance and reviewed by a person, so you may well find bugs or odd choices: they're an invitation to explore, report and improve.</p>
+          <p class="byline-big">Created by <a href="${escapeHtml(BRAND.maintainerUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(BRAND.maintainer)}</a>${sourceLink(' · ')}</p>
         </div>
       </div>
       <details class="credits"><summary>Credits &amp; licences</summary>
         <p>3D characters &amp; animations: Quaternius (CC0). Turf textures: ambientCG (CC0). Crowd and match sounds: Freesound contributors (CC0). Flags: flag-icons (MIT). Font: Inter (SIL OFL). Engine: three.js (MIT). Teams, kits, names and sponsors are generic or fictional — no official crests, kits or player likenesses.</p>
-        <p>${escapeHtml(BRAND.name)} is open source under the <a href="https://www.eclipse.org/legal/epl-2.0/" target="_blank" rel="noopener noreferrer">Eclipse Public License 2.0</a> — a personal project, not affiliated with the Eclipse Foundation. <a href="${import.meta.env?.BASE_URL ?? './'}NOTICE.txt" target="_blank" rel="noopener">Licences and notices</a>. ${typeof __REPO_URL__ === 'string' && __REPO_URL__ ? `<a href="${__REPO_URL__}" target="_blank" rel="noopener noreferrer">Source code on GitHub</a> — contributions welcome.` : ''} The creator portrait is not covered by the open-source licence.</p>
+        <p>${escapeHtml(BRAND.name)} is open source under the <a href="https://www.eclipse.org/legal/epl-2.0/" target="_blank" rel="noopener noreferrer">Eclipse Public License 2.0</a> — a personal project, not affiliated with the Eclipse Foundation. <a href="${base}NOTICE.txt" target="_blank" rel="noopener">Licences and notices</a>. ${typeof __REPO_URL__ === 'string' && __REPO_URL__ ? `<a href="${__REPO_URL__}" target="_blank" rel="noopener noreferrer">Source code on GitHub</a> — contributions welcome.` : ''}${portrait?.note ? ` ${escapeHtml(portrait.note)}` : ''}</p>
         <p class="version">Version ${typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev'}</p>
       </details>
       <div class="row end" style="margin-top:16px"><button class="btn primary" data-action="back">Back</button></div>
     </div></div>`),
     );
-    // Portrait: the supplied photo if present (public/assets/credits/portrait.jpg), else initials.
-    // (Listener, not an inline onerror attribute — the site's Content-Security-Policy forbids inline handlers.)
-    const img = this.screens.get('about')!.querySelector<HTMLImageElement>('.portrait img')!;
-    img.addEventListener('error', () => {
+    // A portrait that fails to load falls back to the initials. (Listener, not an inline onerror
+    // attribute: the Content-Security-Policy forbids inline handlers.)
+    const img = this.screens.get('about')!.querySelector<HTMLImageElement>('.portrait img');
+    img?.addEventListener('error', () => {
       const d = document.createElement('div');
       d.className = 'portrait-fallback';
-      d.textContent = 'CG';
-      d.setAttribute('aria-label', 'Christopher Guindon');
+      d.textContent = initials;
+      d.setAttribute('role', 'img');
+      d.setAttribute('aria-label', BRAND.maintainer);
       img.replaceWith(d);
     });
     this.setScreen('about');

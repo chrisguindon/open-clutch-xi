@@ -33,6 +33,6 @@ Automated checks can't establish provenance. Before a release, the maintainer sh
 
 1. **AI-assisted code.** Generating it was consistent with the tools' terms. The maintainer reviewed it, and is satisfied it doesn't reproduce third-party code.
 2. **Assets.** The CC0 assets (Quaternius, ambientCG, Freesound) were obtained from the stated free tiers and pages. Their licence files are kept locally in `asset-src/`.
-3. **Portrait.** The creator portrait is the maintainer's own image and stays excluded from the EPL.
+3. **Portrait.** The creator portrait is the maintainer's own image. It is not in this repository (it lives in the maintainer's separate deployment) and is not covered by the EPL.
 
 None of this repository's documentation claims legal approval or formal Eclipse compliance.

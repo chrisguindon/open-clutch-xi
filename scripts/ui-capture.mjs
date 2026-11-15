@@ -9,7 +9,7 @@
  */
 
 // UI screenshots: menu (incl. new-controls offer), team selection, about, controls, match with the
-// chrisguindon.com board, penalties (shooter + keeper cues), full time, phone layouts.
+// advertising boards, penalties (shooter + keeper cues), full time, phone layouts.
 //   node scripts/ui-capture.mjs → screenshots/ui/*.png
 import { createServer } from 'vite';
 import puppeteer, { KnownDevices } from 'puppeteer-core';

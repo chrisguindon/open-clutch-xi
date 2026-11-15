@@ -8,8 +8,8 @@ This is the canonical legal notice for Open Clutch XI. A plain-text copy is serv
 
 Open Clutch XI is an independent, personal open-source project by Christopher Guindon.
 
-- **Website (playable game):** https://fc.chrisguindon.com
-- **Source repository:** https://github.com/OWNER/open-clutch-xi
+- **Maintainer's own hosted copy:** https://fc.chrisguindon.com (a separate deployment of released versions, not part of this repository)
+- **Source repository:** https://github.com/chrisguindon/open-clutch-xi
 - **Maintainer contact:** info@chrisguindon.com
 
 Open Clutch XI is **not** an Eclipse Foundation project. It is not affiliated with, endorsed by or governed by the Eclipse Foundation, and has had no Eclipse Foundation review or IP approval. It uses the Eclipse Public License 2.0 and voluntarily follows some practices from the Eclipse Project Handbook (see `docs/governance/OPEN_SOURCE_PRACTICES.md`).
@@ -28,7 +28,7 @@ SPDX-License-Identifier: EPL-2.0
 
 No Secondary Licenses (Exhibit A of the EPL-2.0) are declared.
 
-**Exception: the creator portrait** (`public/assets/credits/portrait.jpg`) is not licensed under the EPL-2.0. All rights are reserved by its owner. Forks must not reuse it.
+**The creator portrait** shown on the maintainer's own site is not part of this repository and is not licensed under the EPL-2.0: all rights are reserved by its owner. It is supplied by that site's deployment, through the optional `site-config.json` (see `docs/development/hosting.md`).
 
 ## Third-party content
 

@@ -46,6 +46,7 @@ The first public release is planned as **0.1.0 (public beta)**. It includes ever
 - **Project:** EPL-2.0 licence, contribution guide, code of conduct, security policy, governance, GitHub issue forms, CI quality gates, Dependabot, and a learning guide.
 
 ### Changed
+- **No personal branding in the game itself.** The creator portrait and the creator's website panel on the stadium boards have moved to the maintainer's own deployment. The About screen shows the creator's initials, the boards show a fictional sponsor instead, and any site can add up to three board panels and a portrait of its own with an optional `site-config.json`, without rebuilding.
 - **Goalkeepers look ready.** In the set position they bend their knees and hold their hands low and in front, elbows bent, instead of standing straight-legged with their arms out to the sides.
 - **The project no longer depends on a hosting platform.** `netlify.toml` is gone. The recommended security headers, caching and MIME types are now a platform-neutral policy (`hosting/headers.json`), tested in CI and applied by `npm run check:prod`. Merging to `main` deploys nothing, and contributors need no hosting account. The maintainer's own site is deployed separately, from approved releases (see [hosting](docs/development/hosting.md)).
 - **Releases include a ready-to-host web archive.** `npm run release:package` builds a reproducible `open-clutch-xi-v<version>-web.tar.gz`, with its licence, notices, header policy and a manifest of file checksums, plus a source archive and `SHA256SUMS`. `release:check` verifies the archive is byte-for-byte reproducible.
@@ -84,4 +85,4 @@ The first public release is planned as **0.1.0 (public beta)**. It includes ever
 - Mouse buttons couldn't be rebound.
 - On small landscape phones, the menu logo was cut off and the full-time buttons were off-screen. Screens now scroll when they don't fit, and the full-time buttons stay visible. (Checked in phone emulation only.)
 
-[Unreleased]: https://github.com/OWNER/open-clutch-xi/commits/main
+[Unreleased]: https://github.com/chrisguindon/open-clutch-xi/commits/main

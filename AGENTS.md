@@ -170,7 +170,7 @@ Agents should make that review easy: explain non-obvious decisions, and list any
 - Don't copy code from elsewhere unless its licence is compatible, and record it in `NOTICE.md`. Notices are regenerated with `node scripts/check-licenses.mjs --write`.
 - Assets must be redistributable. CC0 is preferred. List each one in `docs/governance/third-party-assets.md` with its source, author and licence.
 - No real club or federation crests, official kits, sponsor marks, real players' names or likenesses, or recordings of real chants.
-- The creator portrait is not EPL-licensed. Don't reuse it.
+- No personal branding in this repository (portraits, personal sponsors or site-specific assets): hosting sites add their own through `site-config.json` (`src/game/siteConfig.ts`).
 
 ## Privacy
 
