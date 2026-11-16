@@ -1,7 +1,7 @@
 {
   "name": "open-clutch-xi",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Open Clutch XI: a free, open-source 3D football game for the browser, played against the computer. Built with Three.js and TypeScript.",
   "license": "EPL-2.0",
   "author": "Christopher Guindon",
