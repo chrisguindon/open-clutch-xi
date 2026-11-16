@@ -151,7 +151,7 @@ test(ai): cover restart long balls staying in play
 
 In short: a **type** (what kind of change), an optional **scope** (which part of the game), then a short summary of what the change does.
 
-To check your own commit messages locally (optional): `git config core.hooksPath .githooks`. Commit under your own name, as the person responsible for the change: the check rejects automatic AI attribution (`Co-authored-by` trailers for AI tools, "generated with …" signatures, AI-tool session links). Using AI tools is fine (see below), and human co-authors are welcome.
+To check your own commit messages locally (optional): `git config core.hooksPath .githooks`. Commit under your own name, as the person responsible for the change. If your AI tool adds a `Co-authored-by` trailer or a "generated with …" line, that's fine: the checks only print a warning. Using AI tools is fine (see below), and human co-authors are welcome.
 
 ### Code style
 

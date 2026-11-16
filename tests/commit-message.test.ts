@@ -9,11 +9,11 @@
  */
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error: plain ES module script without type declarations
-import { aiAttribution, checkMessage } from '../scripts/check-commit-message.mjs';
+import { aiAttribution, checkMessage, messageWarnings } from '../scripts/check-commit-message.mjs';
 
 const msg = (body: string) => `fix(ai): stop clearances towards our own goal\n\n${body}`;
 
-describe('commit messages: automatic AI attribution is rejected', () => {
+describe('commit messages: automatic AI attribution is reported, never fatal', () => {
   it.each([
     ['Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>'],
     ['Co-authored-by: GitHub Copilot <copilot@github.com>'],
@@ -22,9 +22,18 @@ describe('commit messages: automatic AI attribution is rejected', () => {
     ['Generated with ChatGPT'],
     ['https://claude.ai/code/session_01AbCdEf'],
     ['Claude-Session: https://claude.ai/code/session_01AbCdEf'],
-  ])('rejects %s', (trailer) => {
+  ])('reports %s as a warning, and the message still passes', (trailer) => {
+    // Tools such as GitHub Copilot (coding agent, Autofix) add these themselves; blocking them made the
+    // tools hard to use, so they are only noted.
     expect(aiAttribution(msg(trailer)).length).toBeGreaterThan(0);
-    expect(checkMessage(msg(trailer)).some((p: string) => p.includes('AI-vendor'))).toBe(true);
+    expect(messageWarnings(msg(trailer)).length).toBeGreaterThan(0);
+    expect(checkMessage(msg(trailer))).toEqual([]);
+  });
+
+  it('passes the trailer GitHub Copilot Autofix adds', () => {
+    const autofix = msg('Co-authored-by: Copilot Autofix powered by AI <62310815+github-advanced-security[bot]@users.noreply.github.com>');
+    expect(messageWarnings(autofix)).toHaveLength(1);
+    expect(checkMessage(autofix)).toEqual([]);
   });
 
   it.each([
@@ -32,8 +41,9 @@ describe('commit messages: automatic AI attribution is rejected', () => {
     ['We drafted these tests with Claude and reviewed every line by hand.'],
     ['Copyright (c) 2024 Some Author. Licensed under the MIT licence.'],
     ['See https://claude.com/claude-code for the tool we use (docs only).'],
-  ])('allows %s', (body) => {
+  ])('allows %s without a warning', (body) => {
     expect(checkMessage(msg(body))).toEqual([]);
+    expect(messageWarnings(msg(body))).toEqual([]);
   });
 
   it('still enforces the Conventional Commit header', () => {

@@ -64,6 +64,7 @@
     "sbom": "node scripts/generate-sbom.mjs",
     "release:check": "node scripts/release-check.mjs",
     "release:package": "node scripts/package-web.mjs",
+    "release:notes": "node scripts/release-notes.mjs",
     "release": "node scripts/release.mjs",
     "report:attack": "node scripts/run-with-env.mjs ATTACK=1 vitest run tests/tools/attack-report.test.ts"
   },
@@ -75,16 +76,16 @@
     "@gltf-transform/core": "4.5.1",
     "@gltf-transform/extensions": "4.5.1",
     "@gltf-transform/functions": "4.5.1",
-    "@puppeteer/browsers": "3.2.6",
-    "@types/node": "24.19.2",
+    "@puppeteer/browsers": "3.2.7",
+    "@types/node": "26.6.6",
     "@types/three": "0.187.0",
     "meshoptimizer": "1.3.0",
     "prettier": "3.10.1",
-    "puppeteer-core": "25.16.0",
+    "puppeteer-core": "25.17.0",
     "sharp": "0.35.5",
     "typescript": "7.0.2",
-    "vite": "8.3.5",
-    "vitest": "4.1.12",
+    "vite": "8.3.8",
+    "vitest": "5.1.0",
     "yaml": "2.9.1"
   }
 }

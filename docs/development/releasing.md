@@ -53,7 +53,7 @@ make release-publish VERSION=0.2.0     # step 2
 | Step | What it does |
 |---|---|
 | `release-prepare` | Checks the repository (on `main`, clean, in sync with GitHub, tag free, notes exist, a browser available). Prepares the release files **in a temporary copy**: the version in `package.json` and `package-lock.json`, *Unreleased* moved under `[0.2.0] - <today>` with compare links, and the final release notes. Runs the full release check on that copy. Only if it passes does it write those exact files into your working tree and commit `chore(release): 0.2.0` on `release/v0.2.0`. Then it **asks**, pushes and opens a pull request. If anything fails, your working tree is unchanged and no branch is created. |
-| `release-publish` | Checks `main` is the merged release (version, dated changelog section, final notes). **Asks**, then creates and pushes the annotated tag `v0.2.0`. Builds the artefacts from the tag and verifies them (checksums, and a manifest naming the tagged, clean commit). Creates a **draft** GitHub release with the web archive, source archive, `SHA256SUMS` and SBOM. **Asks** whether to publish it now. Prints the `release.json` lines for sites that host the game. |
+| `release-publish` | Checks `main` is the merged release (version, dated changelog section, final notes). **Asks**, then creates and pushes the annotated tag `v0.2.0`. Builds the artefacts from the tag and verifies them (checksums, and a manifest naming the tagged, clean commit). Builds the published release notes, with links pointing at the tag, and checks every link (see [Release notes on GitHub](#release-notes-on-github)). Creates a **draft** GitHub release with those notes and the web archive, source archive, `SHA256SUMS` and SBOM. **Asks** whether to publish it now. Prints the `release.json` lines for sites that host the game. |
 
 **Options:**
 - `DRY_RUN=1` runs everything a real `release-prepare` runs, including the full release check on the prepared files, then stops before writing, committing, pushing or opening the pull request. A passing dry run means the real run will pass validation. What it can't prove: that GitHub accepts the push and the pull request (it checks that you're logged in, and warns if not), and that nothing changes on `main` or in your environment between the two runs. For `release-publish`, a dry run checks the preconditions and lists the steps; the build and upload only happen for real.
@@ -94,7 +94,7 @@ Also check:
 - `docs/releases/v0.1.0.md`: update the notes, testing status and known limitations.
 - The publication checklist in [github-setup.md](github-setup.md#11-publication-checklist): code of conduct contact set, repository URL set.
 
-**3. Create the release commit** (Conventional Commit; only when authorised, with no AI co-author trailers):
+**3. Create the release commit** (Conventional Commit; only when authorised):
 
 ```bash
 # Only if the version changes (0.1.0 is already set):
@@ -154,6 +154,29 @@ Review the draft on GitHub. "Generate release notes" there groups merged pull re
 - `package-lock.json` pins every dependency, and `npm ci` installs exactly those versions. Node 24 is pinned in `mise.toml` and CI.
 - The web archive is byte-reproducible (see *Release artefacts*).
 - The SBOM (`npm run sbom`) uses the commit time (or `SOURCE_DATE_EPOCH`), so the same commit gives the same file.
+
+## Release notes on GitHub
+
+The notes are kept in the repository as `docs/releases/v<version>.md`, with ordinary relative links such as `../../README.md`. Those links work when you read the file in the repository. On the GitHub release page they don't: the page lives at `…/releases/tag/v<version>`, so `../../README.md` resolves to `github.com/<owner>/README.md`, which doesn't exist.
+
+So the notes GitHub shows are a generated copy whose relative links point to the same files **at the release tag**, for example `https://github.com/chrisguindon/open-clutch-xi/blob/v0.1.0/README.md`. They never point at `main`, which moves on after the release.
+
+```bash
+npm run release:notes -- 0.2.0          # → release/release-notes-v0.2.0.md, every link checked
+npm run release:notes -- 0.2.0 --check  # check only
+```
+
+- With the tag present, the notes and every link target are read **from the tag**, exactly what the release contains. Before tagging, they're read from the working tree, while the links still point at the tag-to-be.
+- A link fails if its file or `#heading` is missing at the tag, if it leaves the repository, or if it's a GitHub link to `main` or another version instead of the release tag.
+- `make release-publish` builds this copy and stops, before creating the GitHub release, if any link is broken. `npm run release:check` runs the same check. Keep relative links in `docs/releases/`; never hand-write `blob/main` links there.
+
+**Correcting the notes of a published release** changes only the text: the tag, the files and their checksums stay as they are.
+
+```bash
+npm run release:notes -- 0.1.0          # built from the tag v0.1.0
+gh release view v0.1.0 --json body -q .body > /tmp/current-notes.md && diff /tmp/current-notes.md release/release-notes-v0.1.0.md
+gh release edit v0.1.0 --notes-file release/release-notes-v0.1.0.md
+```
 
 ## After a release
 
