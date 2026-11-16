@@ -12,6 +12,8 @@ Add entries under **Unreleased** as part of your pull request. The maintainer mo
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-16
+
 ### Fixed
 - **Links in the GitHub release notes.** Published notes now link to the documents at the release's tag. Relative links like `../../README.md` led nowhere on the release page. Every link is checked before a release is published.
 - **Player names no longer hide the action on phones.** On touch screens and small windows, your player's name now appears over the pitch briefly after the pre-match intro and when you switch players, then fades. The ring at your player's feet and the player card in the corner show who you control. Desktop keeps the name above your player.
@@ -95,5 +97,6 @@ The first public release is planned as **0.1.0 (public beta)**. It includes ever
 - Mouse buttons couldn't be rebound.
 - On small landscape phones, the menu logo was cut off and the full-time buttons were off-screen. Screens now scroll when they don't fit, and the full-time buttons stay visible. (Checked in phone emulation only.)
 
-[Unreleased]: https://github.com/chrisguindon/open-clutch-xi/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/chrisguindon/open-clutch-xi/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/chrisguindon/open-clutch-xi/releases/tag/v0.1.1
 [0.1.0]: https://github.com/chrisguindon/open-clutch-xi/releases/tag/v0.1.0
