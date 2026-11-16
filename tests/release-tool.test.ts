@@ -96,10 +96,6 @@ describe.skipIf(process.platform === 'win32')('release tool end to end (local co
         join(work, 'CHANGELOG.md'),
         `# Changelog\n\n## [Unreleased]\n\n### Added\n\n- Something new.\n\n[Unreleased]: https://github.com/chrisguindon/open-clutch-xi/commits/main\n`,
       );
-      writeFileSync(
-        join(work, 'docs/releases/v9.9.9.md'),
-        '# Open Clutch XI 9.9.9: draft release notes\n\n> **Draft.** Not released yet.\n\nThe notes. See the [README](../../README.md) and [known issues](../development/known-issues.md#presentation).\n',
-      );
       run('git', ['init', '-q', '-b', 'main']);
       run('git', ['config', 'user.name', 'Release Test']);
       run('git', ['config', 'user.email', 'release-test@localhost']);
@@ -109,6 +105,14 @@ describe.skipIf(process.platform === 'win32')('release tool end to end (local co
       run('git', ['init', '-q', '--bare', bare], tmp);
       run('git', ['remote', 'add', 'origin', bare]);
       run('git', ['push', '-q', '-u', 'origin', 'main']);
+      // The release notes are written but not committed: prepare accepts them as the one uncommitted file
+      // and puts them in the release commit, so a release needs a single pull request.
+      const notesFile = 'docs/releases/v9.9.9.md';
+      writeFileSync(
+        join(work, notesFile),
+        '# Open Clutch XI 9.9.9: draft release notes\n\n> **Draft.** Not released yet.\n\nThe notes. See the [README](../../README.md) and [known issues](../development/known-issues.md#presentation).\n',
+      );
+      const onlyNotes = `?? ${notesFile}\n`;
       // A fake gh: records its arguments, is "logged in", and remembers created releases.
       execFileSync('mkdir', ['-p', bin]);
       writeFileSync(
@@ -127,14 +131,21 @@ describe.skipIf(process.platform === 'win32')('release tool end to end (local co
       });
       expect(noBrowser.status).not.toBe(0);
       expect(noBrowser.stderr).toMatch(/No Chrome|browsers:install/);
-      expect(run('git', ['status', '--porcelain'])).toBe('');
+      expect(run('git', ['status', '--porcelain', '--untracked-files=all'])).toBe(onlyNotes);
       expect(run('git', ['branch', '--list', 'release/*'])).toBe('');
+
+      // Any other uncommitted change is still refused, before anything is changed.
+      writeFileSync(join(work, 'stray.txt'), 'not part of the release\n');
+      const dirty = release('prepare', '9.9.9', '--dry-run', '--skip-check');
+      expect(dirty.status).not.toBe(0);
+      expect(dirty.stderr).toMatch(/working tree must be clean[\s\S]*stray\.txt/);
+      rmSync(join(work, 'stray.txt'));
 
       // A dry run prepares and reports, but writes, commits and pushes nothing.
       const dry = release('prepare', '9.9.9', '--dry-run', '--skip-check');
       expect(dry.status, dry.stderr + dry.stdout).toBe(0);
       expect(dry.stdout).toMatch(/would write CHANGELOG\.md/);
-      expect(run('git', ['status', '--porcelain'])).toBe('');
+      expect(run('git', ['status', '--porcelain', '--untracked-files=all'])).toBe(onlyNotes);
       expect(run('git', ['branch', '--list', 'release/*'])).toBe('');
       expect(existsSync(ghLog) ? readFileSync(ghLog, 'utf8') : '').not.toMatch(/pr create/);
 
@@ -143,7 +154,9 @@ describe.skipIf(process.platform === 'win32')('release tool end to end (local co
       expect(prep.status, prep.stderr + prep.stdout).toBe(0);
       expect(JSON.parse(readFileSync(join(work, 'package.json'), 'utf8')).version).toBe('9.9.9');
       expect(readFileSync(join(work, 'CHANGELOG.md'), 'utf8')).toMatch(/^## \[9\.9\.9\] - \d{4}-\d{2}-\d{2}$/m);
-      expect(isDraftNotes(readFileSync(join(work, 'docs/releases/v9.9.9.md'), 'utf8'))).toBe(false);
+      expect(isDraftNotes(readFileSync(join(work, notesFile), 'utf8'))).toBe(false);
+      expect(run('git', ['status', '--porcelain', '--untracked-files=all'])).toBe('');
+      expect(run('git', ['show', '--name-only', '--format=', 'release/v9.9.9'])).toContain(notesFile);
       expect(run('git', ['branch', '--list', 'release/v9.9.9'], bare)).toContain('release/v9.9.9');
       expect(readFileSync(ghLog, 'utf8')).toMatch(/pr create .*--title chore\(release\): 9\.9\.9/);
 

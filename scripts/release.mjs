@@ -14,9 +14,10 @@
 //   node scripts/release.mjs prepare 0.2.0    (make release-prepare VERSION=0.2.0)
 //   node scripts/release.mjs publish 0.2.0    (make release-publish VERSION=0.2.0)
 //
-// prepare: checks the repository (and that a browser is available for the browser checks); prepares the
-//   release files in a temporary copy (version, the changelog's Unreleased section moved under the new
-//   version, final docs/releases/v<version>.md) and runs the full release check on that copy. Only if it
+// prepare: checks the repository (clean, except that the new release notes may be uncommitted, and a
+//   browser is available for the browser checks); prepares the release files in a temporary copy
+//   (version, the changelog's Unreleased section moved under the new version, final
+//   docs/releases/v<version>.md) and runs the full release check on that copy. Only if it
 //   passes does it write those exact files into the working tree, commit on a release/v<version>
 //   branch, push it and open a pull request ("chore(release): <version>"). A failure changes nothing.
 //   A dry run does everything up to and including the release check, then stops before writing.
@@ -89,8 +90,12 @@ function requireVersion() {
   if (!version || !parseVersion(version)) fail(`usage: node scripts/release.mjs ${command} <version>   (an exact version such as 0.2.0)`);
 }
 
-/** Common preconditions: tools, the right branch, a clean tree in sync with origin, a free tag. */
-function preflight({ wantVersionAtLeast = true, resumeTagAtHead = false } = {}) {
+/**
+ * Common preconditions: tools, the right branch, a clean tree in sync with origin, a free tag.
+ * `allowUncommitted` lists files that may be new or changed (prepare: the release notes, which go into
+ * the release commit, so writing them doesn't need a pull request of its own).
+ */
+function preflight({ wantVersionAtLeast = true, resumeTagAtHead = false, allowUncommitted = [] } = {}) {
   step('Checking the repository');
   if (!sh('gh', ['--version'], { allowFail: true }).ok) fail('the GitHub CLI (gh) is needed: https://cli.github.com/');
   if (!sh('gh', ['auth', 'status'], { allowFail: true }).ok) {
@@ -102,7 +107,15 @@ function preflight({ wantVersionAtLeast = true, resumeTagAtHead = false } = {}) 
     fail('this repository has no "origin" remote (see docs/development/github-setup.md)');
   const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
   if (branch !== 'main') fail(`switch to main first (you're on ${branch})`);
-  if (git('status', '--porcelain')) fail('commit or stash your changes first: the working tree must be clean');
+  const uncommitted = git('status', '--porcelain', '--untracked-files=all')
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => line.slice(3))
+    .filter((f) => !allowUncommitted.includes(f));
+  if (uncommitted.length)
+    fail(
+      `commit or stash your changes first: the working tree must be clean${allowUncommitted.length ? ` (only ${allowUncommitted.join(', ')} may be uncommitted)` : ''}\n  ${uncommitted.join('\n  ')}`,
+    );
   sh('git', ['fetch', '--quiet', '--tags', 'origin']);
   const [behind, ahead] = git('rev-list', '--left-right', '--count', 'origin/main...HEAD').split(/\s+/).map(Number);
   if (behind > 0) fail(`main is ${behind} commit(s) behind origin/main${ahead ? ` and ${ahead} ahead` : ''}: pull first`);
@@ -156,9 +169,11 @@ function prepareCopy(date) {
 
 async function prepare() {
   requireVersion();
-  preflight();
-  const notesPath = join(root, 'docs', 'releases', `v${version}.md`);
-  if (!existsSync(notesPath)) fail(`write the release notes first: docs/releases/v${version}.md (copy an earlier one)`);
+  // The release notes may be written just before preparing, without committing them: they go into the
+  // release commit with the version and changelog, so a release needs only one pull request.
+  const notesRel = `docs/releases/v${version}.md`;
+  preflight({ allowUncommitted: [notesRel] });
+  if (!existsSync(join(root, notesRel))) fail(`write the release notes first: ${notesRel} (copy an earlier one; no need to commit it)`);
   const branch = `release/v${version}`;
   if (sh('git', ['rev-parse', '-q', '--verify', `refs/heads/${branch}`], { allowFail: true }).ok) fail(`branch ${branch} already exists`);
   if (!skipCheck && !locateChrome()) fail(`${NO_BROWSER_HELP}\n  Nothing was changed.`);
@@ -313,7 +328,7 @@ function status() {
   console.log(`Unreleased changelog entries: ${entries}`);
   console.log(`Remote: ${sh('git', ['remote', 'get-url', 'origin'], { allowFail: true }).out || 'none (add origin first)'}`);
   console.log(
-    `\nTo release, write docs/releases/v<version>.md, then:\n  make release-prepare VERSION=<version>   (opens a pull request)\n  make release-publish VERSION=<version>   (after merging it)\nAdd DRY_RUN=1 to either to see every step without changing anything.`,
+    `\nTo release, write docs/releases/v<version>.md (no need to commit it), then:\n  make release-prepare VERSION=<version>   (opens a pull request)\n  make release-publish VERSION=<version>   (after merging it)\nAdd DRY_RUN=1 to either to see every step without changing anything.`,
   );
 }
 
