@@ -39,7 +39,7 @@ The release tool (`scripts/release.mjs`) automates the checklist below. It fits 
 - `gh auth login` once (the [GitHub CLI](https://cli.github.com/));
 - a browser for the browser checks: `npm run browsers:install` once (see [testing](testing.md));
 - on an up-to-date, clean `main`;
-- with the release notes written in `docs/releases/v<version>.md` (copy the previous ones; a "Draft" notice at the top is removed for you);
+- with the release notes written in `docs/releases/v<version>.md` (copy the previous ones; a "Draft" notice at the top is removed for you). They don't need committing or a pull request of their own: they're the one file that may be uncommitted, and they go into the release pull request;
 - with the changes listed under *Unreleased* in `CHANGELOG.md`.
 
 ```bash
@@ -52,7 +52,7 @@ make release-publish VERSION=0.2.0     # step 2
 
 | Step | What it does |
 |---|---|
-| `release-prepare` | Checks the repository (on `main`, clean, in sync with GitHub, tag free, notes exist, a browser available). Prepares the release files **in a temporary copy**: the version in `package.json` and `package-lock.json`, *Unreleased* moved under `[0.2.0] - <today>` with compare links, and the final release notes. Runs the full release check on that copy. Only if it passes does it write those exact files into your working tree and commit `chore(release): 0.2.0` on `release/v0.2.0`. Then it **asks**, pushes and opens a pull request. If anything fails, your working tree is unchanged and no branch is created. |
+| `release-prepare` | Checks the repository (on `main`, clean apart from the new release notes, in sync with GitHub, tag free, notes exist, a browser available). Prepares the release files **in a temporary copy**: the version in `package.json` and `package-lock.json`, *Unreleased* moved under `[0.2.0] - <today>` with compare links, and the final release notes. Runs the full release check on that copy. Only if it passes does it write those exact files into your working tree and commit `chore(release): 0.2.0` on `release/v0.2.0`, together with the release notes. Then it **asks**, pushes and opens a pull request. If anything fails, your working tree is unchanged and no branch is created. |
 | `release-publish` | Checks `main` is the merged release (version, dated changelog section, final notes). **Asks**, then creates and pushes the annotated tag `v0.2.0`. Builds the artefacts from the tag and verifies them (checksums, and a manifest naming the tagged, clean commit). Builds the published release notes, with links pointing at the tag, and checks every link (see [Release notes on GitHub](#release-notes-on-github)). Creates a **draft** GitHub release with those notes and the web archive, source archive, `SHA256SUMS` and SBOM. **Asks** whether to publish it now. Prints the `release.json` lines for sites that host the game. |
 
 **Options:**
